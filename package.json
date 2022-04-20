@@ -1,7 +1,9 @@
 {
-  "name": "Berean Reader's Bible PWA",
-  "version": "1.0.0",
-  "scripts": {
-    "compile": "node compile.js"   
-  }
+	"comment0": "https://github.com/npm/npm/issues/6860#issuecomment-65899962",
+	"comment1": "Capital letters and spaces aren't allowed in package names.",
+	"name": "berean-readers-bible-pwa",
+	"version": "1.0.0",
+	"scripts": {
+		"compile": "node compile.js"
+	}
 }
