@@ -1,0 +1,26 @@
+<html>
+
+<head>
+	<title>Berean Readers Bible</title>
+</head>
+
+<body>
+</body>
+
+<script src="books.js"></script>
+
+<script>
+	books.forEach(function (book) {
+		var bookDiv = document.createElement("div");
+		bookDiv.innerHTML = "<div style='font-weight:bold'>" + book.name + "</div>";
+		var chapterLinks = "<div>"
+		for (let i = 1; i <= book.chapters; i++) {
+			chapterLinks += "<a href='chapters/" + book.slug + "-" + i + ".html'>" + i + "</a> ";
+		}
+		chapterLinks += "</div>"
+		bookDiv.innerHTML += chapterLinks;
+		document.body.appendChild(bookDiv);
+	});
+</script>
+
+</html>

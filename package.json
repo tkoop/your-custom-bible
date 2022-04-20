@@ -1,0 +1,7 @@
+{
+  "name": "Berean Reader's Bible PWA",
+  "version": "1.0.0",
+  "scripts": {
+    "compile": "node compile.js"   
+  }
+}
