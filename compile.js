@@ -40,6 +40,18 @@ function parseHTML(html) {
 
 		console.log(chapterCount + ", " + pos + ", " + book + ":" + chapter)
 
+		chapterHTML = chapterHTML.replace(/.*#eeeeee.*\n/g, "")
+		chapterHTML = chapterHTML.replace(/.*:\/\/biblehub\.com.*\n/g, "")
+		chapterHTML = chapterHTML.replace(/.*\[Online\].*\n/g, "")
+		chapterHTML = chapterHTML.replace(/ color="#001320"/g, "")
+
+		chapterHTML = `<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"><html><head>
+			<meta name="encoding" content="utf-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1">
+			<title>`+ book + ' ' + chapter + ` - Berean Reader's Bible</title>
+			<link rel="stylesheet" href="../style.css" />
+		</head><body>` + chapterHTML + `</body></html>`
+
 		fs.writeFile("public/chapters/" + slug + "-" + chapter + ".html", chapterHTML, (err) => {
 			if (err) console.log(err);
 			console.log("Successfully wrote public/chapters/" + slug + "-" + chapter + ".html");
