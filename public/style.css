@@ -8,6 +8,27 @@ body {
 	font-size: 16px;
 	color: #333;
 	background-color: #fffef8;
+	margin: 0px;
+	padding: 0px;
+}
+
+#header {
+	background-color: #f8f8f8;
+	border-bottom: 1px solid #ccc;
+	text-align: center;
+	height: 34px;
+	padding-top: 9px;
+}
+
+#body {
+	padding: 8px;
+	height: calc(100vh - 34px);
+	overflow: auto;
+}
+
+#header h2 {
+	margin: 0px;
+	padding: 0px;
 }
 
 a {

@@ -21,5 +21,10 @@ You don't actually have to do this either, because this has also been done for y
 
 ## To Use It
 
-Point your web browser to the /public directory.
+Run this to get a simple web server going:
+```
+npm run serve
+```
+
+Then point your web browser to http://localhost:8000, which will serve out the /public directory.
 
