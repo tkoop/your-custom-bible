@@ -12,6 +12,14 @@ body {
 	padding: 0px;
 }
 
+#menuIcon {
+	position: absolute;
+	float: left;
+	margin-left: 8px;
+	cursor: pointer;
+	display: none
+}
+
 #header {
 	background-color: #f8f8f8;
 	border-bottom: 1px solid #ccc;
