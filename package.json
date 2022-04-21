@@ -4,6 +4,10 @@
 	"name": "berean-readers-bible-pwa",
 	"version": "1.0.0",
 	"scripts": {
-		"compile": "node compile.js"
+		"compile": "node compile.js",
+		"serve": "node node_modules/simplehttpserver/cli.js public"
+	},
+	"dependencies": {
+		"simplehttpserver": "^0.3.0"
 	}
 }
