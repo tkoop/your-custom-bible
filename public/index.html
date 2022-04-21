@@ -17,8 +17,8 @@
 <script>
 	books.forEach(function (book) {
 		var bookDiv = document.createElement("div");
-		bookDiv.innerHTML = "<div style='font-weight:bold'>" + book.name + "</div>";
-		var chapterLinks = "<div>"
+		bookDiv.innerHTML = "<div class='index-book'>" + book.name + "</div>";
+		var chapterLinks = "<div class='index-chapters'>"
 		for (let i = 1; i <= book.chapters; i++) {
 			chapterLinks += "<a href='chapters/" + book.slug + "-" + i + ".html'>" + i + "</a> ";
 		}
