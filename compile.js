@@ -44,6 +44,7 @@ function parseHTML(html) {
 		chapterHTML = chapterHTML.replace(/.*:\/\/biblehub\.com.*\n/g, "")
 		chapterHTML = chapterHTML.replace(/.*\[Online\].*\n/g, "")
 		chapterHTML = chapterHTML.replace(/ color="#001320"/g, "")
+		chapterHTML = chapterHTML.replaceAll('face="Tahoma, serif"', "")
 
 		fs.writeFile("public/chapters/" + slug + "-" + chapter + ".html", chapterHTML, (err) => {
 			if (err) console.log(err);
