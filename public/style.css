@@ -22,7 +22,7 @@ body {
 
 #body {
 	padding: 8px;
-	height: calc(100vh - 34px);
+	height: calc(100vh - 66px);
 	overflow: auto;
 }
 
