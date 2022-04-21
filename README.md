@@ -21,7 +21,12 @@ You don't actually have to do this either, because this has also been done for y
 
 ## To Use It
 
-Run this to get a simple web server going:
+The first time, you'll need to run this. (It installs the simple server.)
+```
+npm ci
+```
+
+After that, run this to get a simple web server going:
 ```
 npm run serve
 ```
