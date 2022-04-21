@@ -10,13 +10,12 @@
 
 <body>
 	<div id="header">
-		<svg id="menuIcon" onclick="showIndex()"
-			xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="24" height="24"
-			viewBox="0 0 24 24">
+		<svg id="menuIcon" onclick="indexClicked()" xmlns="http://www.w3.org/2000/svg"
+			xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="24" height="24" viewBox="0 0 24 24">
 			<path d="M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z" />
 		</svg>
 
-		<h2 onclick="showIndex()" style="cursor:pointer">Berean Reader's Bible</h2>
+		<h2 onclick="indexClicked()" style="cursor:pointer">Berean Reader's Bible</h2>
 	</div>
 	<div id="body">
 		<div id="index"></div>
@@ -27,6 +26,19 @@
 <script src="books.js"></script>
 
 <script>
+	window.addEventListener('popstate', (event) => {
+		if (event.state == null || event.state == "index") {
+			showIndex()
+		} else {
+			loadURL(event.state)
+		}
+	})
+
+	function indexClicked() {
+		history.pushState('index', '')
+		showIndex()
+	}
+
 	function showIndex() {
 		document.getElementById("index").style.display = "block"
 		document.getElementById("chapter").style.display = "none"
@@ -34,9 +46,14 @@
 	}
 
 	function loadChapter(element) {
-		document.getElementById("index").style.display = "none"
 		var url = element.href
-		fetch(element.href).then(function (response) {
+		history.pushState(url, '')
+		loadURL(url)
+	}
+
+	function loadURL(url) {
+		document.getElementById("index").style.display = "none"
+		fetch(url).then(function (response) {
 			return response.text()
 		}).then(function (text) {
 			var chapter = document.getElementById("chapter")
