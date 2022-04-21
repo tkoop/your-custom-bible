@@ -5,26 +5,49 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Berean Reader's Bible</title>
 	<link rel="stylesheet" href="style.css" />
-	<link rel="icon" type="image/png" href="logo_32.png"/>
+	<link rel="icon" type="image/png" href="logo_32.png" />
 </head>
 
 <body>
-	<h2>Berean Reader's Bible</h2>
+	<div id="header">
+		<h2 onclick="showIndex()">Berean Reader's Bible</h2>
+	</div>
+	<div id="body">
+		<div id="index"></div>
+		<div id="chapter"></div>
+	</div>
 </body>
 
 <script src="books.js"></script>
 
 <script>
+	function showIndex() {
+		document.getElementById("index").style.display = "block"
+		document.getElementById("chapter").style.display = "none"
+	}
+
+	function loadChapter(element) {
+		document.getElementById("index").style.display = "none"
+		var url = element.href
+		fetch(element.href).then(function (response) {
+			return response.text()
+		}).then(function (text) {
+			var chapter = document.getElementById("chapter")
+			chapter.innerHTML = text
+			chapter.style.display = "block"
+		})
+	}
+
 	books.forEach(function (book) {
 		var bookDiv = document.createElement("div");
 		bookDiv.innerHTML = "<div class='index-book'>" + book.name + "</div>";
 		var chapterLinks = "<div class='index-chapters'>"
 		for (let i = 1; i <= book.chapters; i++) {
-			chapterLinks += "<a href='chapters/" + book.slug + "-" + i + ".html'>" + i + "</a> ";
+			chapterLinks += "<a href='chapters/" + book.slug + "-" + i + ".html' onclick='loadChapter(this); return false'>" + i + "</a> ";
 		}
 		chapterLinks += "</div>"
 		bookDiv.innerHTML += chapterLinks;
-		document.body.appendChild(bookDiv);
+		document.getElementById("index").appendChild(bookDiv);
 	});
 
 </script>
