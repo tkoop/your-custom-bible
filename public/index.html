@@ -70,16 +70,34 @@
 		showPage("history")
 
 		let html = "<h2>History</h2>"
+		let previousDate = null
+		let dateString = null
 
 		if (browseHistory.length == 0) {
 			html += "<p style='font-style:italic'>No history</p>"
 		} else {
 			for (let i = browseHistory.length - 1; i >= 0; i--) {
-				html += "<p>" + createLink(browseHistory[i].name, browseHistory[i].slug, browseHistory[i].chapter, true) + "</p>"
+				if (browseHistory[i].date != previousDate) {
+					if (html.substr(html.length - 2) == ', ') {
+						html = html.substr(0, html.length - 2)
+					}
+					previousDate = browseHistory[i].date
+					dateString = new Date(Date.parse(browseHistory[i].date)).toLocaleDateString('en-CA', {
+						month: 'short', // this order has nothing to do with the output
+						day: 'numeric',
+						year: 'numeric'
+					})
+					html += "</p><h3>" + dateString + "</h3><p>"
+				}
+				html += createLink(browseHistory[i].name, browseHistory[i].slug, browseHistory[i].chapter, true) + ", "
 			}
+		}
+		if (html.substr(html.length - 2) == ', ') {
+			html = html.substr(0, html.length - 2)
 		}
 
 		document.getElementById("history").innerHTML = html
+		window.scrollTo(0, 0)
 	}
 
 	function indexClicked() {
@@ -91,6 +109,7 @@
 		document.querySelectorAll(".page").forEach(e => e.style.display = "none")
 		document.getElementById(page).style.display = "block"
 		document.getElementById("menuIcon").style.display = (page == "index" ? "none" : "block")
+		window.scrollTo(0, 0)
 	}
 
 	function loadChapter(element) {
@@ -107,7 +126,8 @@
 		browseHistory.push({
 			name: book,
 			slug: slug,
-			chapter: chapter
+			chapter: chapter,
+			date: ((new Date()) + '').substr(0, 10)
 		})
 		localStorage.browseHistory = JSON.stringify(browseHistory)
 		currentBookIndex = slugToIndex(slug)
@@ -162,9 +182,9 @@
 
 	function createLink(name, slug, chapter, includeBook) {
 		if (includeBook) {
-			return `<a href='#' data-slug='${slug}' data-book='${name}' data-chapter='${chapter}' onclick='loadChapter(this); return false'>${name} ${chapter}</a> `
+			return `<a href='#' style='white-space:nowrap' data-slug='${slug}' data-book='${name}' data-chapter='${chapter}' onclick='loadChapter(this); return false'>${name} ${chapter}</a>`
 		} else {
-			return `<a href='#' data-slug='${slug}' data-book='${name}' data-chapter='${chapter}' onclick='loadChapter(this); return false'>${chapter}</a> `
+			return `<a href='#' data-slug='${slug}' data-book='${name}' data-chapter='${chapter}' onclick='loadChapter(this); return false'>${chapter}</a>`
 		}
 	}
 
@@ -201,7 +221,7 @@
 			navigator.serviceWorker.register('./serviceWorker.js', {
 				scope: "./"
 			}).then(function (registration) {
-				console.log('ServiceWorker registrato con successo, scope: ', registration.scope);
+				console.log('ServiceWorker registered successfully, scope: ', registration.scope);
 			}, function (err) {
 				console.log('ServiceWorker registration failed: ', err);
 			});
