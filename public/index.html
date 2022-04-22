@@ -3,9 +3,12 @@
 <head>
 	<meta name="encoding" content="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="theme-color" content="#000">
 	<title>Berean Reader's Bible</title>
 	<link rel="stylesheet" href="style.css" />
-	<link rel="icon" type="image/png" href="logo_32.png" />
+	<link rel="icon" type="image/png" href="image/logo_32.png" />
+	<link rel="apple-touch-icon" href="image/logo_192.png">
+	<link rel="manifest" href="manifest.json">
 </head>
 
 <body>
@@ -109,6 +112,7 @@
 		localStorage.browseHistory = JSON.stringify(browseHistory)
 		currentBookIndex = slugToIndex(slug)
 		currentChapter = chapter
+		window.scrollTo(0, 0)
 	}
 
 	function moveChapter(delta) {
@@ -186,6 +190,23 @@
 		loadURL(url)
 		currentChapter = history.chapter
 		currentBookIndex = slugToIndex(history.slug)
+	}
+
+</script>
+
+<script>
+	// https://github.com/SirFaenor/pwa-skeleton
+	if ('serviceWorker' in navigator) {
+		window.addEventListener('load', function () {
+			navigator.serviceWorker.register('./serviceWorker.js', {
+				scope: "./"
+			}).then(function (registration) {
+				console.log('ServiceWorker registrato con successo, scope: ', registration.scope);
+			}, function (err) {
+				console.log('ServiceWorker registration failed: ', err);
+			});
+			window.IS_STANDALONE = window.matchMedia('(display-mode: standalone)').matches;
+		});
 	}
 
 </script>
