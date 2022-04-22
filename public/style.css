@@ -14,10 +14,21 @@ body {
 
 #menuIcon {
 	position: absolute;
-	float: left;
+	left: 0px;
 	margin-left: 8px;
 	cursor: pointer;
-	display: none
+	display: none;
+}
+
+.page {
+	display: none;
+}
+
+#historyIcon {
+	position: absolute;
+	right: 0px;
+	margin-right: 8px;
+	cursor: pointer;
 }
 
 #header {
