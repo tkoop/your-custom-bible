@@ -33,7 +33,9 @@
 <script src="books.js"></script>
 
 <script>
-	var browseHistory = [];
+	var browseHistory = []
+	var currentBookIndex = 0
+	var currentChapter = 1	// one based
 
 	if (localStorage.browseHistory != undefined) {
 		browseHistory = JSON.parse(localStorage.browseHistory)
@@ -50,6 +52,15 @@
 			loadURL(event.state)
 		}
 	})
+
+	function slugToIndex(slug) {
+		for (var i = 0; i < books.length; i++) {
+			if (books[i].slug == slug) {
+				return i
+			}
+		}
+		return 0
+	}
 
 	function historyClicked() {
 		history.pushState('history', '')
@@ -84,12 +95,39 @@
 		var book = element.dataset.book
 		var slug = element.dataset.slug
 		var chapter = element.dataset.chapter
+		loadThisChapter(book, slug, chapter)
+	}
 
+	function loadThisChapter(book, slug, chapter) {
 		var url = "/chapters/" + slug + "-" + chapter + ".html"
 		history.pushState(url, '')
 		loadURL(url)
 		browseHistory.push({ name: book, slug: slug, chapter: chapter })
 		localStorage.browseHistory = JSON.stringify(browseHistory)
+		currentBookIndex = slugToIndex(slug)
+		currentChapter = chapter
+	}
+
+	function moveChapter(delta) {
+		currentChapter = parseInt(currentChapter) + parseInt(delta)
+		if (currentChapter < 1) {
+			currentBookIndex--
+			if (currentBookIndex < 0) {
+				// went left from Genesis
+				currentBookIndex = books.length - 1
+			}
+			currentChapter = books[currentBookIndex].chapters
+		}
+		if (currentChapter > books[currentBookIndex].chapters) {
+			currentBookIndex++
+			if (currentBookIndex >= books.length) {
+				// went right from Revelation
+				currentBookIndex = 0
+			}
+			currentChapter = 1
+		}
+
+		loadThisChapter(books[currentBookIndex].name, books[currentBookIndex].slug, currentChapter)
 	}
 
 	function loadURL(url) {
@@ -98,8 +136,21 @@
 			return response.text()
 		}).then(function (text) {
 			var chapter = document.getElementById("chapter")
-			chapter.innerHTML = text
+			chapter.innerHTML = addArrows(text)
 		})
+	}
+
+	function addArrows(html) {
+		var arrows = `<div style="position:relative; top:-8px">
+			<svg onclick="moveChapter(-1)" style="color:#b9b9b9; cursor:pointer; float:left; width:34px;height:34px" viewBox="0 0 24 24">
+				<path fill="currentColor" d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" />
+			</svg>
+			<svg onclick="moveChapter(1)" style="color:#b9b9b9; cursor:pointer; float:right; width:34px;height:34px" viewBox="0 0 24 24">
+				<path fill="currentColor" d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" />
+			</svg>
+		</div>`
+
+		return arrows + html + arrows
 	}
 
 	function createLink(name, slug, chapter, includeBook) {
@@ -127,6 +178,8 @@
 
 		var url = "/chapters/" + history.slug + "-" + history.chapter + ".html"
 		loadURL(url)
+		currentChapter = history.chapter
+		currentBookIndex = slugToIndex(history.slug)
 	}
 
 </script>
