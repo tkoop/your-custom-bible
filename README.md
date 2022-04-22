@@ -33,3 +33,7 @@ npm run serve
 
 Then point your web browser to http://localhost:8000, which will serve out the /public directory.
 
+## License
+
++ The code is licensed under the MIT license (see `LICENSE`).
++ For the content license, see https://berean.bible/licensing.htm
