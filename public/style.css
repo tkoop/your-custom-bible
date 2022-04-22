@@ -39,6 +39,7 @@ body {
 	padding-top: 9px;
 	position: fixed;
 	width: 100%;
+	z-index: 100;
 }
 
 #body {
@@ -70,10 +71,26 @@ div.index-chapters a {
 	margin-right: 1px;
 }
 
+hr {
+	border: none;
+	border-top: 1px solid #333;
+}
+
+address {
+	margin-top: 1rem;
+	margin-bottom: 1rem;
+	text-align: right;
+}
+
 @media (prefers-color-scheme: dark) {
 	body {
 		background-color: #333;
 		color: #fff;
+	}
+
+	#header {
+		background-color: #111111;
+		border-bottom: 1px solid rgb(37, 37, 37);
 	}
 
 	a {
@@ -82,5 +99,13 @@ div.index-chapters a {
 
 	a:visited {
 		color: #8f0;
+	}
+
+	#menuIcon path {
+		fill: #fff;
+	}
+
+	hr {
+		border-top: 1px solid #ccc;
 	}
 }

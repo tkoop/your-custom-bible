@@ -35,7 +35,7 @@
 <script>
 	var browseHistory = []
 	var currentBookIndex = 0
-	var currentChapter = 1	// one based
+	var currentChapter = 1 // one based
 
 	if (localStorage.browseHistory != undefined) {
 		browseHistory = JSON.parse(localStorage.browseHistory)
@@ -90,7 +90,6 @@
 		document.getElementById("menuIcon").style.display = (page == "index" ? "none" : "block")
 	}
 
-
 	function loadChapter(element) {
 		var book = element.dataset.book
 		var slug = element.dataset.slug
@@ -99,10 +98,14 @@
 	}
 
 	function loadThisChapter(book, slug, chapter) {
-		var url = "/chapters/" + slug + "-" + chapter + ".html"
+		var url = "./chapters/" + slug + "-" + chapter + ".html"
 		history.pushState(url, '')
 		loadURL(url)
-		browseHistory.push({ name: book, slug: slug, chapter: chapter })
+		browseHistory.push({
+			name: book,
+			slug: slug,
+			chapter: chapter
+		})
 		localStorage.browseHistory = JSON.stringify(browseHistory)
 		currentBookIndex = slugToIndex(slug)
 		currentChapter = chapter
@@ -173,10 +176,13 @@
 		document.getElementById("index").appendChild(bookDiv);
 	});
 
+	document.getElementById("index").innerHTML +=
+		'<hr><address>GitHub: <a href="https://github.com/tkoop/berean-readers-bible-pwa">tkoop/berean-readers-bible-pwa</address>';
+
 	if (browseHistory.length > 0) {
 		let history = browseHistory[browseHistory.length - 1]
 
-		var url = "/chapters/" + history.slug + "-" + history.chapter + ".html"
+		var url = "./chapters/" + history.slug + "-" + history.chapter + ".html"
 		loadURL(url)
 		currentChapter = history.chapter
 		currentBookIndex = slugToIndex(history.slug)
