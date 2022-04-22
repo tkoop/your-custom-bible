@@ -1,6 +1,7 @@
 console.log("compiling...")
 
 var fs = require("fs")
+require('./polyfills.js')
 
 doIt()
 
