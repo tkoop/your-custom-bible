@@ -15,52 +15,99 @@
 			<path d="M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z" />
 		</svg>
 
+		<svg id="historyIcon" onclick="historyClicked()" style="width:24px;height:24px" viewBox="0 0 24 24">
+			<path fill="currentColor"
+				d="M13.5,8H12V13L16.28,15.54L17,14.33L13.5,12.25V8M13,3A9,9 0 0,0 4,12H1L4.96,16.03L9,12H6A7,7 0 0,1 13,5A7,7 0 0,1 20,12A7,7 0 0,1 13,19C11.07,19 9.32,18.21 8.06,16.94L6.64,18.36C8.27,20 10.5,21 13,21A9,9 0 0,0 22,12A9,9 0 0,0 13,3" />
+		</svg>
+
 		<h2 onclick="indexClicked()" style="cursor:pointer">Berean Reader's Bible</h2>
+
 	</div>
 	<div id="body">
-		<div id="index"></div>
-		<div id="chapter"></div>
+		<div id="index" class="page" style="display:block"></div>
+		<div id="history" class="page">History page</div>
+		<div id="chapter" class="page"></div>
 	</div>
 </body>
 
 <script src="books.js"></script>
 
 <script>
+	var browseHistory = [];
+
+	if (localStorage.browseHistory != undefined) {
+		browseHistory = JSON.parse(localStorage.browseHistory)
+	}
+
+	console.log(localStorage.browseHistory)
+
 	window.addEventListener('popstate', (event) => {
 		if (event.state == null || event.state == "index") {
-			showIndex()
+			showPage("index")
+		} else if (event.state == "history") {
+			showPage("history")
 		} else {
 			loadURL(event.state)
 		}
 	})
 
+	function historyClicked() {
+		history.pushState('history', '')
+		showPage("history")
+
+		let html = "<h2>History</h2>"
+
+		if (browseHistory.length == 0) {
+			html += "<p style='font-style:italic'>No history</p>"
+		} else {
+			for (let i = browseHistory.length - 1; i >= 0; i--) {
+				html += "<p>" + createLink(browseHistory[i].name, browseHistory[i].slug, browseHistory[i].chapter, true) + "</p>"
+			}
+		}
+
+		document.getElementById("history").innerHTML = html
+	}
+
 	function indexClicked() {
 		history.pushState('index', '')
-		showIndex()
+		showPage("index")
 	}
 
-	function showIndex() {
-		document.getElementById("index").style.display = "block"
-		document.getElementById("chapter").style.display = "none"
-		document.getElementById("menuIcon").style.display = "none"
+	function showPage(page) {
+		document.querySelectorAll(".page").forEach(e => e.style.display = "none")
+		document.getElementById(page).style.display = "block"
+		document.getElementById("menuIcon").style.display = (page == "index" ? "none" : "block")
 	}
+
 
 	function loadChapter(element) {
-		var url = element.href
+		var book = element.dataset.book
+		var slug = element.dataset.slug
+		var chapter = element.dataset.chapter
+
+		var url = "/chapters/" + slug + "-" + chapter + ".html"
 		history.pushState(url, '')
 		loadURL(url)
+		browseHistory.push({ name: book, slug: slug, chapter: chapter })
+		localStorage.browseHistory = JSON.stringify(browseHistory)
 	}
 
 	function loadURL(url) {
-		document.getElementById("index").style.display = "none"
+		showPage("chapter")
 		fetch(url).then(function (response) {
 			return response.text()
 		}).then(function (text) {
 			var chapter = document.getElementById("chapter")
 			chapter.innerHTML = text
-			chapter.style.display = "block"
-			document.getElementById("menuIcon").style.display = "block"
 		})
+	}
+
+	function createLink(name, slug, chapter, includeBook) {
+		if (includeBook) {
+			return `<a href='#' data-slug='${slug}' data-book='${name}' data-chapter='${chapter}' onclick='loadChapter(this); return false'>${name} ${chapter}</a> `
+		} else {
+			return `<a href='#' data-slug='${slug}' data-book='${name}' data-chapter='${chapter}' onclick='loadChapter(this); return false'>${chapter}</a> `
+		}
 	}
 
 	books.forEach(function (book) {
@@ -68,12 +115,19 @@
 		bookDiv.innerHTML = "<div class='index-book'>" + book.name + "</div>";
 		var chapterLinks = "<div class='index-chapters'>"
 		for (let i = 1; i <= book.chapters; i++) {
-			chapterLinks += "<a href='chapters/" + book.slug + "-" + i + ".html' onclick='loadChapter(this); return false'>" + i + "</a> ";
+			chapterLinks += createLink(book.name, book.slug, i) + " "
 		}
 		chapterLinks += "</div>"
 		bookDiv.innerHTML += chapterLinks;
 		document.getElementById("index").appendChild(bookDiv);
 	});
+
+	if (browseHistory.length > 0) {
+		let history = browseHistory[browseHistory.length - 1]
+
+		var url = "/chapters/" + history.slug + "-" + history.chapter + ".html"
+		loadURL(url)
+	}
 
 </script>
 
