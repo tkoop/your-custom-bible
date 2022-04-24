@@ -14,20 +14,28 @@ body {
 
 #menuIcon {
 	position: absolute;
-	left: 0px;
-	margin-left: 8px;
+	right: 0px;
+	margin-right: 8px;
 	cursor: pointer;
-	display: none;
 }
 
 .page {
 	display: none;
 }
 
-#historyIcon {
+#dropdown {
 	position: absolute;
-	right: 0px;
-	margin-right: 8px;
+	top: 9px;
+	right: 9px;
+	background-color: #fffef8;
+	z-index: 1;
+	display: block;
+	box-shadow: 0 0 20px 0px #cbcbcb;
+	display: none;
+}
+
+#dropdown div {
+	padding: 8px 16px;
 	cursor: pointer;
 }
 
