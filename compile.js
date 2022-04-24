@@ -3,8 +3,6 @@ console.log("compiling...")
 var fs = require("fs")
 const { execSync } = require('child_process');
 
-require('./polyfills.js')
-
 doIt()
 
 function doIt() {
@@ -40,11 +38,10 @@ function parseHTML(html) {
 
 	while (nextPos > 0) {
 		let chapterHTML = html.substring(pos, nextPos)
-		let bookChapter = parseTitle(chapterHTML)
-
-		let book = bookChapter[0]
-		let chapter = bookChapter[1]
-		let slug = book.replace(/\s/g, "-").toLowerCase()
+		let parsed = parseTitle(chapterHTML)
+		let book = parsed.book
+		let chapter = parsed.chapter
+		let slug = parsed.slug
 
 		if (books.length > 0 && books[books.length - 1].slug == slug) {
 			// book already exists
@@ -60,16 +57,7 @@ function parseHTML(html) {
 
 		console.log(chapterCount + ", " + pos + ", " + book + ":" + chapter)
 
-		chapterHTML = chapterHTML.replace(/.*#eeeeee.*\n/g, "")
-		chapterHTML = chapterHTML.replace(/.*:\/\/biblehub\.com.*\n/g, "")
-		chapterHTML = chapterHTML.replace(/.*\[Online\].*\n/g, "")
-		chapterHTML = chapterHTML.replace(/ color="#001320"/g, "")
-		chapterHTML = chapterHTML.replaceAll('face="Tahoma, serif"', "")
-
-		fs.writeFile("public/chapters/" + slug + "-" + chapter + ".html", chapterHTML, (err) => {
-			if (err) console.log(err);
-			console.log("Successfully wrote public/chapters/" + slug + "-" + chapter + ".html");
-		});
+		saveChapter(slug, chapter, chapterHTML)
 
 		chapterCount++
 
@@ -77,11 +65,14 @@ function parseHTML(html) {
 		nextPos = getNextChapterStart(html, nextPos + 239)
 	}
 
-	let chapterHTML = html.substring(pos)
-	let bookChapter = parseTitle(chapterHTML)
+	chapterHTML = html.substring(pos, html.indexOf("</body>", pos))
+	let parsed = parseTitle(chapterHTML)
+	let book = parsed.book
+	let chapter = parsed.chapter
+	let slug = parsed.slug
 
-	let book = bookChapter[0]
-	let chapter = bookChapter[1]
+	saveChapter(slug, chapter, chapterHTML)
+	books[books.length - 1].chapters++
 
 	console.log(chapterCount + ", till the end, " + book + ":" + chapter)
 
@@ -93,6 +84,20 @@ function parseHTML(html) {
 	});
 }
 
+function saveChapter(slug, chapter, chapterHTML) {
+	chapterHTML = chapterHTML.replace(/.*#eeeeee.*\n/g, "")
+	chapterHTML = chapterHTML.replace(/.*:\/\/biblehub\.com.*\n/g, "")
+	chapterHTML = chapterHTML.replace(/.*\[Online\].*\n/g, "")
+	chapterHTML = chapterHTML.replace(/ color="#001320"/g, "")
+	chapterHTML = chapterHTML.replace(/face="Tahoma, serif"/g, "")
+
+	fs.writeFile("public/chapters/" + slug + "-" + chapter + ".html", chapterHTML, (err) => {
+		if (err) console.log(err);
+		console.log("Successfully wrote public/chapters/" + slug + "-" + chapter + ".html");
+	});
+
+}
+
 function parseTitle(html) {
 	let fontHTML = '<font color="#001320"><font face="Tahoma, serif"><font size="5" style="font-size: 17pt"><b>'
 	let start = html.indexOf(fontHTML) + fontHTML.length
@@ -100,10 +105,17 @@ function parseTitle(html) {
 	let bookName = html.substring(start, end)
 	let parts = bookName.trim().split(/\s/).map(x => x.trim())
 
+	let book, chapter
+
 	if (parts.length == 3) {
-		return [parts[0] + " " + parts[1], parts[2]]
+		book = parts[0] + " " + parts[1]	// e.g. "1 John"
+		chapter = parts[2]
+	} else {
+		book = parts[0]
+		chapter = parts[1]
 	}
-	return [parts[0], parts[1]]
+
+	return {book, chapter, slug:book.replace(/\s/g, "-").toLowerCase()}
 }
 
 function getNextChapterStart(html, start) {
