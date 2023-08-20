@@ -25,6 +25,10 @@
 				<button style="width:26px; height:26px; text-align:center" onclick="fontSize(1.1, event)">+</button> 
 				<button style="width:26px; height:26px; text-align:center" onclick="fontSize(0.9091, event)">-</button>
 			</div>
+			<div>Mode 
+				<button style="height:26px; text-align:center" onclick="darkMode(true)">Dark</button> 
+				<button style="height:26px; text-align:center" onclick="darkMode(false)">Light</button>
+			</div>
 			<!-- <div onclick="aboutClicked(); hideDropDown()">About</div> -->
 		</div>
 
@@ -44,6 +48,18 @@
 	var browseHistory = []
 	var currentBookIndex = 0
 	var currentChapter = 1 // one based
+
+	function darkMode(dark) {
+		localStorage.mode = dark ? "dark" : "light"
+
+		if (dark) {
+			document.body.classList.add("dark")
+		} else {
+			document.body.classList.remove("dark")
+		}
+	}
+
+	darkMode(localStorage.mode == "dark")
 
 	function fontSize(scale, event) {
 		var size = localStorage.fontSize
@@ -262,5 +278,23 @@
 	}
 
 </script>
+
+<style>
+body.dark {
+	background-color:black;
+	color: #eaeaea;
+}
+body.dark #header {
+	background-color: #686868;
+	color: black;
+}
+body.dark #dropdown {
+	background-color:black;
+	color: #e0e0e0;
+}
+body.dark a {
+	color: #ada3fd;
+}
+</style>
 
 </html>
