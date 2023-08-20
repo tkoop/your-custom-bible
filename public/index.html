@@ -18,9 +18,13 @@
 			<path d="M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z" />
 		</svg>
 
-		<div id="dropdown">
+		<div id="dropdown" style="text-align:left">
 			<div onclick="indexClicked()">Index</div>
 			<div onclick="historyClicked()">History</div>
+			<div>Font Size 
+				<button style="width:26px; height:26px; text-align:center" onclick="fontSize(1.1, event)">+</button> 
+				<button style="width:26px; height:26px; text-align:center" onclick="fontSize(0.9091, event)">-</button>
+			</div>
 			<!-- <div onclick="aboutClicked(); hideDropDown()">About</div> -->
 		</div>
 
@@ -40,6 +44,23 @@
 	var browseHistory = []
 	var currentBookIndex = 0
 	var currentChapter = 1 // one based
+
+	function fontSize(scale, event) {
+		var size = localStorage.fontSize
+		if (size == undefined) size = 16
+		size = parseFloat(size)
+		size = size * scale
+		localStorage.fontSize = size
+		document.getElementById("body").style.fontSize = size + "px"
+
+		if (event) {
+			event.stopImmediatePropagation()
+			event.stopPropagation()
+			event.preventDefault()
+		}
+	}
+
+	fontSize(1)
 
 	if (localStorage.browseHistory != undefined) {
 		browseHistory = JSON.parse(localStorage.browseHistory)

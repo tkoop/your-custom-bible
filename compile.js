@@ -90,6 +90,7 @@ function saveChapter(slug, chapter, chapterHTML) {
 	chapterHTML = chapterHTML.replace(/.*\[Online\].*\n/g, "")
 	chapterHTML = chapterHTML.replace(/ color="#001320"/g, "")
 	chapterHTML = chapterHTML.replace(/face="Tahoma, serif"/g, "")
+	chapterHTML = chapterHTML.replace(/; line-height: 0.51cm/g, "")
 
 	fs.writeFile("public/chapters/" + slug + "-" + chapter + ".html", chapterHTML, (err) => {
 		if (err) console.log(err);
