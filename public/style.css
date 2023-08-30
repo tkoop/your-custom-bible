@@ -41,7 +41,7 @@ body {
 
 #header {
 	background-color: #f8f8f8;
-	border-bottom: 1px solid #ccc;
+	box-shadow: 0 0 13px 0px #ccc;
 	text-align: center;
 	height: 34px;
 	padding-top: 9px;
@@ -88,6 +88,38 @@ address {
 	margin-top: 1rem;
 	margin-bottom: 1rem;
 	text-align: right;
+}
+
+p {
+	margin-top: 0.8em;
+	margin-bottom: 0em;
+}
+
+body, body #header, body #dropdown, body a {
+	transition: color 1s, background-color 1s;
+}
+
+body.dark {
+	background-color:black;
+	color: #eaeaea;
+}
+
+body.dark #header {
+	background-color: #686868;
+	color: black;
+}
+
+body.dark #dropdown {
+	background-color:black;
+	color: #e0e0e0;
+}
+
+body.dark a {
+	color: #ada3fd;
+}
+
+body.dark #header {
+	box-shadow: 0 0 13px 0px #fff;
 }
 
 @media (prefers-color-scheme: dark) {

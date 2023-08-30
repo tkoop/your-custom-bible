@@ -3,10 +3,15 @@ console.log("compiling...")
 var fs = require("fs")
 const { execSync } = require('child_process');
 
-doIt()
+if (process.argv[2] == undefined) {
+	console.log("Please pass in the translation code, such as blb, brb, or bsb")
+} else {
+	var translationCode = process.argv[2]
+	doIt()
+}
 
 function doIt() {
-	fs.readFile("brb.html", function (err, buffer) {
+	fs.readFile(translationCode + ".html", function (err, buffer) {
 		parseHTML(buffer.toString())
 
 		fs.readFile("serviceWorker.js", async function (err, buffer) {
@@ -91,10 +96,18 @@ function saveChapter(slug, chapter, chapterHTML) {
 	chapterHTML = chapterHTML.replace(/ color="#001320"/g, "")
 	chapterHTML = chapterHTML.replace(/face="Tahoma, serif"/g, "")
 	chapterHTML = chapterHTML.replace(/; line-height: 0.51cm/g, "")
+	chapterHTML = chapterHTML.replace(/margin-top: 0.49cm; margin-bottom: 0.49cm/g, "")
 
-	fs.writeFile("public/chapters/" + slug + "-" + chapter + ".html", chapterHTML, (err) => {
+	if (!fs.existsSync("public/chapters")) {
+    fs.mkdirSync("public/chapters")
+	}
+	if (!fs.existsSync("public/chapters/" + translationCode)) {
+    fs.mkdirSync("public/chapters/" + translationCode)
+	}
+
+	fs.writeFile("public/chapters/" + translationCode + "/" + slug + "-" + chapter + ".html", chapterHTML, (err) => {
 		if (err) console.log(err);
-		console.log("Successfully wrote public/chapters/" + slug + "-" + chapter + ".html");
+		console.log("Successfully wrote public/chapters/" + translationCode + "/" + slug + "-" + chapter + ".html");
 	});
 
 }
