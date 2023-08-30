@@ -9,9 +9,9 @@ This project is not associated with the creators of the Berean Readers Bible.
 
 ## To Make It
 
-Download the Berean Readers Bible from https://berean.bible/downloads.htm as a Word document.  (This has already been done for you and lives in the root directory as brb.docx)  Open it with Libre Office and save it as html.  (This also has been done for you and lives in the root directory as brb.html)
+Download the Berean Study Bible from https://berean.bible/downloads.htm as a Word document.  (This has already been done for you and lives in the root directory as bsb.docx)  Open it with Libre Office and save it as html.  (This also has been done for you and lives in the root directory as bsb.html)
 
-Run this command to parse brb.html into individual chapter files that will be put into public/chapters.  This will also create the public/books.js file.
+Run this command to parse bsb.html into individual chapter files that will be put into public/chapters.  This will also create the public/books.js file.
 
 ```
 npm run compile
@@ -36,4 +36,4 @@ Then point your web browser to http://localhost:8000, which will serve out the /
 ## License
 
 + The code is licensed under the MIT license (see `LICENSE`).
-+ For the content license, see https://berean.bible/licensing.htm
++ The Borean Bible is public domain, or see https://berean.bible/licensing.htm

@@ -6,7 +6,7 @@ const { execSync } = require('child_process');
 doIt()
 
 function doIt() {
-	fs.readFile("brb.html", function (err, buffer) {
+	fs.readFile("bsb.html", function (err, buffer) {
 		parseHTML(buffer.toString())
 
 		fs.readFile("serviceWorker.js", async function (err, buffer) {

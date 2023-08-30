@@ -90,6 +90,18 @@ address {
 	text-align: right;
 }
 
+#dropdown button {
+	border: 1px solid white;
+	padding: 7px 13px;
+	background-color: #ababff;
+	border-radius: 8px;
+	border-width: 0px;
+}
+
+#dropdown button.selected {
+	border: 1px solid black;
+}
+
 @media (prefers-color-scheme: dark) {
 	body {
 		background-color: #333;
@@ -115,5 +127,13 @@ address {
 
 	hr {
 		border-top: 1px solid #ccc;
+	}
+
+	#dropdown button {
+		border: 1px solid white;
+	}
+
+	#dropdown button.selected {
+		border: 1px solid black;
 	}
 }
