@@ -21,14 +21,23 @@
 		<div id="dropdown" style="text-align:left">
 			<div onclick="indexClicked()">Index</div>
 			<div onclick="historyClicked()">History</div>
+
 			<div>Font Size 
-				<button style="width:26px; height:26px; text-align:center" onclick="fontSize(1.1, event)">+</button> 
-				<button style="width:26px; height:26px; text-align:center" onclick="fontSize(0.9091, event)">-</button>
+				<button onclick="fontSize(1.1, event)">+</button> 
+				<button onclick="fontSize(0.9091, event)">-</button>
 			</div>
+
 			<div>Mode 
-				<button style="height:26px; text-align:center" onclick="darkMode(true)">Dark</button> 
-				<button style="height:26px; text-align:center" onclick="darkMode(false)">Light</button>
+				<button onclick="darkMode(true)">Dark</button> 
+				<button onclick="darkMode(false)">Light</button>
 			</div>
+
+			<div>
+				<button id="btnVerses" onclick="toggleVerses(event)">Verses</button>
+				<button id="btnFootnotes" onclick="toggleFootnotes(event)">Footnotes</button> 
+				<button id="btnReferences" onclick="toggleReferences(event)">References</button> 
+			</div>
+
 			<!-- <div onclick="aboutClicked(); hideDropDown()">About</div> -->
 		</div>
 
@@ -48,6 +57,38 @@
 	var browseHistory = []
 	var currentBookIndex = 0
 	var currentChapter = 1 // one based
+	var showVerses = false
+	var showFootnotes = false
+	var showReferences = false
+
+	function toggleVerses(event) {
+		event.stopPropagation()
+		showVerses  = !showVerses
+		document.querySelector("#btnVerses").classList.toggle("selected")
+		localStorage.showVerses = "" + showVerses
+	}
+
+	function toggleReferences(event) {
+		event.stopPropagation()
+		showReferences = !showReferences
+		document.querySelector("#btnReferences").classList.toggle("selected")
+		localStorage.showReferences = "" + showReferences
+	}
+
+	function toggleFootnotes(event) {
+		event.stopPropagation()
+		showFootnotes = !showFootnotes
+		document.querySelector("#btnFootnotes").classList.toggle("selected")
+		localStorage.showFootnotes = "" + showFootnotes
+	}
+
+	showVerses = (localStorage?.showVerses ?? "false") == "true"
+	showFootnotes = (localStorage?.showFootnotes ?? "false") == "true"
+	showReferences = (localStorage?.showReferences ?? "false") == "true"
+
+	if (showVerses) document.querySelector("#btnVerses").classList.add("selected")
+	if (showFootnotes) document.querySelector("#btnReferences").classList.add("selected")
+	if (showReferences) document.querySelector("#btnFootnotes").classList.add("selected")
 
 	function darkMode(dark) {
 		localStorage.mode = dark ? "dark" : "light"
