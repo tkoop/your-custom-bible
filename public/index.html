@@ -1,4 +1,4 @@
-<html>
+<!DOCTYPE html><html>
 
 <head>
 	<meta name="encoding" content="utf-8">
@@ -6,8 +6,8 @@
 	<meta name="theme-color" content="#000">
 	<title>Berean Reader's Bible</title>
 	<link rel="stylesheet" href="style.css" />
-	<link rel="icon" type="image/png" href="image/logo_32.png" />
-	<link rel="apple-touch-icon" href="image/logo_192.png">
+	<link rel="icon" type="image/png" href="icons/logo_32.png" />
+	<link rel="apple-touch-icon" href="icons/logo_192.png">
 	<link rel="manifest" href="manifest.json">
 </head>
 
@@ -21,13 +21,19 @@
 		<div id="dropdown" style="text-align:left">
 			<div onclick="indexClicked()">Index</div>
 			<div onclick="historyClicked()">History</div>
-			<div>Font Size 
-				<button onclick="fontSize(1.1, event)">+</button> 
-				<button onclick="fontSize(0.9091, event)">-</button>
+			<div>
+				<div>Font Size</div>
+				<div class="buttonHolder">
+					<button onclick="fontSize(1.1, event); event.stopPropagation()">+</button> 
+					<button onclick="fontSize(0.9091, event); event.stopPropagation()">-</button>
+				</div>
 			</div>
-			<div>Mode 
-				<button onclick="darkMode(true)">Dark</button> 
-				<button onclick="darkMode(false)">Light</button>
+			<div>
+				<div>Mode</div>
+				<div class="buttonHolder">
+					<button onclick="darkMode(true); event.stopPropagation()">Dark</button> 
+					<button onclick="darkMode(false); event.stopPropagation()">Light</button>
+				</div>
 			</div>
 			<!-- <div onclick="aboutClicked(); hideDropDown()">About</div> -->
 		</div>
@@ -263,18 +269,19 @@
 </script>
 
 <script>
-	// https://github.com/SirFaenor/pwa-skeleton
-	if ('serviceWorker' in navigator) {
-		window.addEventListener('load', function () {
-			navigator.serviceWorker.register('./serviceWorker.js', {
-				scope: "./"
-			}).then(function (registration) {
-				console.log('ServiceWorker registered successfully, scope: ', registration.scope);
-			}, function (err) {
-				console.log('ServiceWorker registration failed: ', err);
+	if (window.location.hostname != "localhost") {
+		if ('serviceWorker' in navigator) {
+			window.addEventListener('load', function () {
+				navigator.serviceWorker.register('./serviceWorker.js', {
+					scope: "./"
+				}).then(function (registration) {
+					console.log('ServiceWorker registered successfully, scope: ', registration.scope);
+				}, function (err) {
+					console.log('ServiceWorker registration failed: ', err);
+				});
+				window.IS_STANDALONE = window.matchMedia('(display-mode: standalone)').matches;
 			});
-			window.IS_STANDALONE = window.matchMedia('(display-mode: standalone)').matches;
-		});
+		}
 	}
 
 </script>

@@ -35,10 +35,20 @@ body {
 	padding: 10px 0px;
 }
 
-#dropdown div {
+#dropdown > div {
 	padding: 8px 16px;
 	cursor: pointer;
 	height: 29px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	width: 12em;
+}
+
+#dropdown .buttonHolder {
+	display: flex;
+	justify-content: flex-end;
+	gap: 7px;
 }
 
 #dropdown button {
