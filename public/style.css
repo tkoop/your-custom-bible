@@ -133,6 +133,42 @@ body.dark a {
 	color: #ada3fd;
 }
 
+.hdg {
+	font-weight: bold;
+}
+
+#chapterTitle {
+	font-style: italic;
+}
+
+.reftext {
+	font-size: small;
+	vertical-align: super;
+	margin-right: 2px;
+}
+
+.cross1 {
+	color: #a3a3a3 !important;
+	font-style: italic;
+	font-weight: normal;
+}
+
+.fn {
+	font-size: small;
+	vertical-align: super;
+	margin-right: 2px;
+}
+
+.fnverse {
+	vertical-align: super;
+	font-size: small;
+}
+
+.footnotesbot {
+	color: blue;
+	font-size: small;
+}
+
 @media (prefers-color-scheme: dark) {
 	body {
 		background-color: #333;
