@@ -1,0 +1,284 @@
+.acrostic {
+    color: #520;
+    display: block;
+    font-size: 1em;
+    font-weight: 700;
+    line-height: 24px;
+    text-align: center;
+    text-decoration: none;
+    margin: 1em 0
+    }
+.bsbheading {
+    background-color: #eee;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    color: #001320;
+    display: block;
+    font-size: 1em;
+    font-weight: 400;
+    line-height: 1.2em;
+    margin-bottom: 10px;
+    padding-left: 8px;
+    text-align: left
+    }
+.calibre {
+    display: block;
+    font-size: 1em;
+    line-height: 1.2em;
+    padding-left: 0;
+    padding-right: 0;
+    margin: 0 5pt
+    }
+.calibre1 {
+    display: block;
+    text-align: left
+    }
+.calibre2 {
+    display: block
+    }
+.calibre3 {
+    display: block;
+    margin: 1em 0
+    }
+.calibre4 {
+    font-weight: bold
+    }
+.calibre5 {
+    display: block;
+    text-align: center;
+    margin: 1em 0
+    }
+.calibre6 {
+    font-style: italic
+    }
+.calibre7 {
+    color: #001320;
+    display: block;
+    font-size: 1em;
+    font-weight: 700;
+    line-height: 1.2em;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    padding-top: 13px;
+    text-align: center
+    }
+.calibre8 {
+    display: block;
+    text-align: center
+    }
+.calibre9 {
+    display: block;
+    font-size: 1em;
+    padding-left: 0;
+    padding-right: 0;
+    margin: 0 5pt
+    }
+.calibre10 {
+    display: block;
+    text-align: center;
+    margin: 0;
+    padding: 0
+    }
+.cross {
+    color: #0092f2;
+    display: block;
+    font-style: italic;
+    font-weight: 400;
+    line-height: 1.2em;
+    padding-top: 1px;
+    text-decoration: none;
+    margin: 0 0 1em
+    }
+.cross1 {
+    color: #0092f2;
+    font-style: italic;
+    font-weight: 400;
+    line-height: 1.2em;
+    margin-top: 0;
+    padding-top: 1px;
+    text-decoration: none
+    }
+.fn {
+    color: #0092f2;
+    font-size: 0.58333em;
+    font-style: italic;
+    line-height: 14px;
+    margin-left: 1px;
+    vertical-align: text-top
+    }
+.fnv {
+    font-size: 0.58333em;
+    line-height: 15px;
+    vertical-align: text-top
+    }
+.fnverse {
+    color: #b34700;
+    font-size: 0.58333em;
+    line-height: 1.2em
+    }
+.footnotesbot {
+    color: #0092f2;
+    font-size: 0.58333em;
+    line-height: 1.2em
+    }
+.hdg {
+    display: block;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 1.2em;
+    padding-bottom: 0;
+    text-decoration: none;
+    margin: 1em 0 0
+    }
+.indent {
+    display: block;
+    line-height: 1.2em;
+    text-indent: 0;
+    margin: 0 10px 0 35px
+    }
+.indent1 {
+    display: block;
+    line-height: 1.2em;
+    text-indent: 0;
+    margin: 0 10px
+    }
+.indent1stline {
+    display: block;
+    line-height: 1.2em;
+    text-indent: 0;
+    margin: 1em 10px 0
+    }
+.indent1stlinered {
+    color: #700;
+    display: block;
+    line-height: 1.2em;
+    text-indent: 0;
+    margin: 1em 10px 0
+    }
+.indentred {
+    color: #700;
+    display: block;
+    line-height: 1.2em;
+    text-indent: 0;
+    margin: 0 10px 0 35px
+    }
+.indentred1 {
+    color: #700;
+    display: block;
+    line-height: 1.2em;
+    text-indent: 0;
+    margin: 0 10px
+    }
+.inscrip {
+    display: block;
+    line-height: 1.2em;
+    text-align: center;
+    text-transform: uppercase;
+    margin: 1em 0
+    }
+.inscrip1 {
+    display: block;
+    line-height: 1.2em;
+    text-align: center;
+    text-transform: uppercase
+    }
+.list {
+    display: block;
+    line-height: 1.2em;
+    text-indent: 0;
+    margin: 12px 10px 12px 35px
+    }
+.list1stline {
+    display: block;
+    line-height: 1.2em;
+    text-indent: 0;
+    margin: 12px 10px
+    }
+.pshdg {
+    display: block;
+    font-style: italic;
+    line-height: 1.2em;
+    text-align: center;
+    margin: 1em 0
+    }
+.reftext {
+    color: #b34700;
+    font-size: 0.58333em;
+    font-weight: 700;
+    line-height: 14px;
+    margin-left: 1px;
+    margin-right: 1px;
+    vertical-align: text-top
+    }
+.reg {
+    display: block;
+    line-height: 1.2em
+    }
+.reg1 {
+    display: block;
+    line-height: 1.2em;
+    margin: 1em 0
+    }
+.selah {
+    display: block;
+    font-style: italic;
+    line-height: 1.2em;
+    padding-bottom: 0;
+    padding-top: 0;
+    text-align: right;
+    margin: 0 10px 0 0
+    }
+.subhdg {
+    display: block;
+    font-style: italic;
+    line-height: 1.2em;
+    margin: 1em 0
+    }
+.tab1stline {
+    display: block;
+    line-height: 1.2em;
+    margin: 1em 10px
+    }
+.tab1stlinered {
+    color: #700;
+    display: block;
+    line-height: 1.2em;
+    margin: 1em 10px
+    }
+.thinq {
+    font-size: 0.41667em;
+    line-height: 1.2em
+    }
+.vheading {
+    background-color: #eee;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    color: #001320;
+    display: block;
+    font-size: 1em;
+    font-weight: 700;
+    line-height: 1.2em;
+    padding-left: 8px;
+    text-align: left;
+    margin: 1em 0 10px
+    }
+.pcalibre:link {
+    color: #0092f2;
+    line-height: 1.2em;
+    text-decoration: none
+    }
+.pcalibre1:visited {
+    color: #0092f2;
+    line-height: 1.2em;
+    text-decoration: none
+    }
+.pcalibre3:hover {
+    color: #99D6FF;
+    line-height: 1.2em;
+    text-decoration: none
+    }
+.pcalibre2:active {
+    color: #0092f2;
+    line-height: 1.2em;
+    text-decoration: none
+    }

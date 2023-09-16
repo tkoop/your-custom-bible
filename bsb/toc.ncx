@@ -1,0 +1,411 @@
+<?xml version='1.0' encoding='utf-8'?>
+<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1" xml:lang="eng">
+  <head>
+    <meta name="dtb:uid" content="c273a2d8-9e0e-444f-aa9e-3ebcd1647a5b"/>
+    <meta name="dtb:depth" content="2"/>
+    <meta name="dtb:generator" content="calibre (5.23.0)"/>
+    <meta name="dtb:totalPageCount" content="0"/>
+    <meta name="dtb:maxPageNumber" content="0"/>
+  </head>
+  <docTitle>
+    <text>Holy Bible, Berean Study Bible, BSB</text>
+  </docTitle>
+  <navMap>
+    <navPoint id="toc1" playOrder="1" class="chapter">
+      <navLabel>
+        <text>Genesis</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/1.htm"/>
+    </navPoint>
+    <navPoint id="toc52" playOrder="2" class="chapter">
+      <navLabel>
+        <text>Exodus</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/51.htm"/>
+    </navPoint>
+    <navPoint id="toc93" playOrder="3" class="chapter">
+      <navLabel>
+        <text>Leviticus</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/91.htm"/>
+    </navPoint>
+    <navPoint id="toc121" playOrder="4" class="chapter">
+      <navLabel>
+        <text>Numbers</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/118.htm"/>
+    </navPoint>
+    <navPoint id="toc158" playOrder="5" class="chapter">
+      <navLabel>
+        <text>Deuteronomy</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/154.htm"/>
+    </navPoint>
+    <navPoint id="toc193" playOrder="6" class="chapter">
+      <navLabel>
+        <text>Joshua</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/188.htm"/>
+    </navPoint>
+    <navPoint id="toc218" playOrder="7" class="chapter">
+      <navLabel>
+        <text>Judges</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/212.htm"/>
+    </navPoint>
+    <navPoint id="toc240" playOrder="8" class="chapter">
+      <navLabel>
+        <text>Ruth</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/233.htm"/>
+    </navPoint>
+    <navPoint id="toc245" playOrder="9" class="chapter">
+      <navLabel>
+        <text>1 Samuel</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/237.htm"/>
+    </navPoint>
+    <navPoint id="toc277" playOrder="10" class="chapter">
+      <navLabel>
+        <text>2 Samuel</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/268.htm"/>
+    </navPoint>
+    <navPoint id="toc302" playOrder="11" class="chapter">
+      <navLabel>
+        <text>1 Kings</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/292.htm"/>
+    </navPoint>
+    <navPoint id="toc325" playOrder="12" class="chapter">
+      <navLabel>
+        <text>2 Kings</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/314.htm"/>
+    </navPoint>
+    <navPoint id="toc351" playOrder="13" class="chapter">
+      <navLabel>
+        <text>1 Chronicles</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/339.htm"/>
+    </navPoint>
+    <navPoint id="toc381" playOrder="14" class="chapter">
+      <navLabel>
+        <text>2 Chronicles</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/368.htm"/>
+    </navPoint>
+    <navPoint id="toc418" playOrder="15" class="chapter">
+      <navLabel>
+        <text>Ezra</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/404.htm"/>
+    </navPoint>
+    <navPoint id="toc429" playOrder="16" class="chapter">
+      <navLabel>
+        <text>Nehemiah</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/414.htm"/>
+    </navPoint>
+    <navPoint id="toc443" playOrder="17" class="chapter">
+      <navLabel>
+        <text>Esther</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/427.htm"/>
+    </navPoint>
+    <navPoint id="toc454" playOrder="18" class="chapter">
+      <navLabel>
+        <text>Job</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/437.htm"/>
+    </navPoint>
+    <navPoint id="toc497" playOrder="19" class="chapter">
+      <navLabel>
+        <text>Psalms</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/479.htm"/>
+    </navPoint>
+    <navPoint id="toc648" playOrder="20" class="chapter">
+      <navLabel>
+        <text>Proverbs</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/629.htm"/>
+    </navPoint>
+    <navPoint id="toc680" playOrder="21" class="chapter">
+      <navLabel>
+        <text>Ecclesiastes</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/660.htm"/>
+    </navPoint>
+    <navPoint id="toc693" playOrder="22" class="chapter">
+      <navLabel>
+        <text>Song of Solomon</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/672.htm"/>
+    </navPoint>
+    <navPoint id="toc702" playOrder="23" class="chapter">
+      <navLabel>
+        <text>Isaiah</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/680.htm"/>
+    </navPoint>
+    <navPoint id="toc769" playOrder="24" class="chapter">
+      <navLabel>
+        <text>Jeremiah</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/746.htm"/>
+    </navPoint>
+    <navPoint id="toc822" playOrder="25" class="chapter">
+      <navLabel>
+        <text>Lamentations</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/798.htm"/>
+    </navPoint>
+    <navPoint id="toc828" playOrder="26" class="chapter">
+      <navLabel>
+        <text>Ezekiel</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/803.htm"/>
+    </navPoint>
+    <navPoint id="toc877" playOrder="27" class="chapter">
+      <navLabel>
+        <text>Daniel</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/851.htm"/>
+    </navPoint>
+    <navPoint id="toc890" playOrder="28" class="chapter">
+      <navLabel>
+        <text>Hosea</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/863.htm"/>
+    </navPoint>
+    <navPoint id="toc905" playOrder="29" class="chapter">
+      <navLabel>
+        <text>Joel</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/877.htm"/>
+    </navPoint>
+    <navPoint id="toc909" playOrder="30" class="chapter">
+      <navLabel>
+        <text>Amos</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/880.htm"/>
+    </navPoint>
+    <navPoint id="toc919" playOrder="31" class="chapter">
+      <navLabel>
+        <text>Obadiah</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/889.htm"/>
+    </navPoint>
+    <navPoint id="toc921" playOrder="32" class="chapter">
+      <navLabel>
+        <text>Jonah</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/890.htm"/>
+    </navPoint>
+    <navPoint id="toc926" playOrder="33" class="chapter">
+      <navLabel>
+        <text>Micah</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/894.htm"/>
+    </navPoint>
+    <navPoint id="toc934" playOrder="34" class="chapter">
+      <navLabel>
+        <text>Nahum</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/901.htm"/>
+    </navPoint>
+    <navPoint id="toc938" playOrder="35" class="chapter">
+      <navLabel>
+        <text>Habakkuk</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/904.htm"/>
+    </navPoint>
+    <navPoint id="toc942" playOrder="36" class="chapter">
+      <navLabel>
+        <text>Zephaniah</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/907.htm"/>
+    </navPoint>
+    <navPoint id="toc946" playOrder="37" class="chapter">
+      <navLabel>
+        <text>Haggai</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/910.htm"/>
+    </navPoint>
+    <navPoint id="toc949" playOrder="38" class="chapter">
+      <navLabel>
+        <text>Zechariah</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/912.htm"/>
+    </navPoint>
+    <navPoint id="toc964" playOrder="39" class="chapter">
+      <navLabel>
+        <text>Malachi</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/926.htm"/>
+    </navPoint>
+    <navPoint id="toc969" playOrder="40" class="chapter">
+      <navLabel>
+        <text>Matthew</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/930.htm"/>
+    </navPoint>
+    <navPoint id="toc998" playOrder="41" class="chapter">
+      <navLabel>
+        <text>Mark</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/958.htm"/>
+    </navPoint>
+    <navPoint id="toc1015" playOrder="42" class="chapter">
+      <navLabel>
+        <text>Luke</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/974.htm"/>
+    </navPoint>
+    <navPoint id="toc1040" playOrder="43" class="chapter">
+      <navLabel>
+        <text>John</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/998.htm"/>
+    </navPoint>
+    <navPoint id="toc1062" playOrder="44" class="chapter">
+      <navLabel>
+        <text>Acts</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/1019.htm"/>
+    </navPoint>
+    <navPoint id="toc1091" playOrder="45" class="chapter">
+      <navLabel>
+        <text>Romans</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/1047.htm"/>
+    </navPoint>
+    <navPoint id="toc1108" playOrder="46" class="chapter">
+      <navLabel>
+        <text>1 Corinthians</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/1063.htm"/>
+    </navPoint>
+    <navPoint id="toc1125" playOrder="47" class="chapter">
+      <navLabel>
+        <text>2 Corinthians</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/1079.htm"/>
+    </navPoint>
+    <navPoint id="toc1139" playOrder="48" class="chapter">
+      <navLabel>
+        <text>Galatians</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/1092.htm"/>
+    </navPoint>
+    <navPoint id="toc1146" playOrder="49" class="chapter">
+      <navLabel>
+        <text>Ephesians</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/1098.htm"/>
+    </navPoint>
+    <navPoint id="toc1153" playOrder="50" class="chapter">
+      <navLabel>
+        <text>Philippians</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/1104.htm"/>
+    </navPoint>
+    <navPoint id="toc1158" playOrder="51" class="chapter">
+      <navLabel>
+        <text>Colossians</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/1108.htm"/>
+    </navPoint>
+    <navPoint id="toc1163" playOrder="52" class="chapter">
+      <navLabel>
+        <text>1 Thessalonians</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/1112.htm"/>
+    </navPoint>
+    <navPoint id="toc1169" playOrder="53" class="chapter">
+      <navLabel>
+        <text>2 Thessalonians</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/1117.htm"/>
+    </navPoint>
+    <navPoint id="toc1173" playOrder="54" class="chapter">
+      <navLabel>
+        <text>1 Timothy</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/1120.htm"/>
+    </navPoint>
+    <navPoint id="toc1180" playOrder="55" class="chapter">
+      <navLabel>
+        <text>2 Timothy</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/1126.htm"/>
+    </navPoint>
+    <navPoint id="toc1185" playOrder="56" class="chapter">
+      <navLabel>
+        <text>Titus</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/1130.htm"/>
+    </navPoint>
+    <navPoint id="toc1189" playOrder="57" class="chapter">
+      <navLabel>
+        <text>Philemon</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/1133.htm"/>
+    </navPoint>
+    <navPoint id="toc1191" playOrder="58" class="chapter">
+      <navLabel>
+        <text>Hebrews</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/1134.htm"/>
+    </navPoint>
+    <navPoint id="toc1205" playOrder="59" class="chapter">
+      <navLabel>
+        <text>James</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/1147.htm"/>
+    </navPoint>
+    <navPoint id="toc1211" playOrder="60" class="chapter">
+      <navLabel>
+        <text>1 Peter</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/1152.htm"/>
+    </navPoint>
+    <navPoint id="toc1217" playOrder="61" class="chapter">
+      <navLabel>
+        <text>2 Peter</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/1157.htm"/>
+    </navPoint>
+    <navPoint id="toc1221" playOrder="62" class="chapter">
+      <navLabel>
+        <text>1 John</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/1160.htm"/>
+    </navPoint>
+    <navPoint id="toc1227" playOrder="63" class="chapter">
+      <navLabel>
+        <text>2 John</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/1165.htm"/>
+    </navPoint>
+    <navPoint id="toc1229" playOrder="64" class="chapter">
+      <navLabel>
+        <text>3 John</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/1166.htm"/>
+    </navPoint>
+    <navPoint id="toc1231" playOrder="65" class="chapter">
+      <navLabel>
+        <text>Jude</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/1167.htm"/>
+    </navPoint>
+    <navPoint id="toc1233" playOrder="66" class="chapter">
+      <navLabel>
+        <text>Revelation</text>
+      </navLabel>
+      <content src="bsb%20-%20final%20-%207-18-21/OEBPS/Text/1168.htm"/>
+    </navPoint>
+  </navMap>
+</ncx>
