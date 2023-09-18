@@ -18,8 +18,31 @@
 		</svg>
 
 		<div id="dropdown" style="text-align:left">
+
 			<div onclick="indexClicked()">Index</div>
+
 			<div onclick="historyClicked()">History</div>
+
+			<div style="display:flex" onclick="var i = this.querySelector('input').click(); event.stopPropagation()">
+				<div>Titles</div>
+				<div><input type="checkbox" data-value="titles" onchange="setSetting(this.checked, 'titles')" onclick="event.stopPropagation()"></div>
+			</div>
+
+			<div style="display:flex" onclick="var i = this.querySelector('input').click(); event.stopPropagation()">
+				<div>Verses</div>
+				<div><input type="checkbox" data-value="verses" onchange="setSetting(this.checked, 'verses')" onclick="event.stopPropagation()"></div>
+			</div>
+
+			<div style="display:flex" onclick="var i = this.querySelector('input').click(); event.stopPropagation()">
+				<div>References</div>
+				<div><input type="checkbox" data-value="references" onchange="setSetting(this.checked, 'references')" onclick="event.stopPropagation()"></div>
+			</div>
+
+			<div style="display:flex" onclick="var i = this.querySelector('input').click(); event.stopPropagation()">
+				<div>Footnotes</div>
+				<div><input type="checkbox" data-value="footnotes" onchange="setSetting(this.checked, 'footnotes')" onclick="event.stopPropagation()"></div>
+			</div>
+
 			<div>
 				<div>Font Size</div>
 				<div class="buttonHolder">
@@ -27,6 +50,7 @@
 					<button onclick="fontSize(0.9091, event); event.stopPropagation()">-</button>
 				</div>
 			</div>
+
 			<div>
 				<div>Mode</div>
 				<div class="buttonHolder">
@@ -34,6 +58,7 @@
 					<button onclick="darkMode(false); event.stopPropagation()">Light</button>
 				</div>
 			</div>
+
 			<!-- <div onclick="aboutClicked(); hideDropDown()">About</div> -->
 		</div>
 
@@ -53,6 +78,50 @@
 	var browseHistory = []
 	var currentBookIndex = 0
 	var currentChapter = 1 // one based
+
+	function applySettings() {
+		// Titles
+		if (document.querySelectorAll("input[data-value=titles]:checked").length > 0) {
+			document.querySelectorAll(".hdg").forEach(el => el.style.display = null)
+		} else {
+			document.querySelectorAll(".hdg").forEach(el => el.style.display = "none")
+		}
+
+		// Verses
+		if (document.querySelectorAll("input[data-value=verses]:checked").length > 0) {
+			document.querySelectorAll(".reftext").forEach(el => el.style.display = null)
+		} else {
+			document.querySelectorAll(".reftext").forEach(el => el.style.display = "none")
+		}
+
+		// Cross references
+		if (document.querySelectorAll("input[data-value=references]:checked").length > 0) {
+			document.querySelectorAll(".cross1").forEach(el => el.style.display = null)
+		} else {
+			document.querySelectorAll(".cross1").forEach(el => el.style.display = "none")
+		}
+
+		// Verses
+		if (document.querySelectorAll("input[data-value=footnotes]:checked").length > 0) {
+			document.querySelectorAll(".fn").forEach(el => el.style.display = null)
+		} else {
+			document.querySelectorAll(".fn").forEach(el => el.style.display = "none")
+		}
+	}
+
+	function setSetting(value, name) {
+		if (localStorage.settings == undefined) localStorage.settings = "{}"
+		var settings = JSON.parse(localStorage.settings)
+		settings[name] = value
+
+		localStorage.settings = JSON.stringify(settings)
+		applySettings()
+	}
+
+	for(key in JSON.parse(localStorage.settings ?? "{}")) {
+		document.querySelector("input[data-value="+key+"]").checked = JSON.parse(localStorage.settings ?? "{}")[key]
+	}
+	applySettings()
 
 	function darkMode(dark) {
 		localStorage.mode = dark ? "dark" : "light"
@@ -176,12 +245,14 @@
 		var url = "./chapters/" + slug + "-" + chapter + ".html"
 		history.pushState(url, '')
 		loadURL(url)
+
 		browseHistory.push({
 			name: book,
 			slug: slug,
 			chapter: chapter,
 			date: ((new Date()) + '').substr(0, 10)
 		})
+
 		localStorage.browseHistory = JSON.stringify(browseHistory)
 		currentBookIndex = slugToIndex(slug)
 		currentChapter = chapter
@@ -210,22 +281,33 @@
 		loadThisChapter(books[currentBookIndex].name, books[currentBookIndex].slug, currentChapter)
 	}
 
+	function titleCase(str) {
+		return str.toLowerCase().split(' ').map(function(word) {
+			return word.replace(word[0], word[0].toUpperCase());
+		}).join(' ');
+	}
+
 	function loadURL(url) {
 		showPage("chapter")
 		fetch(url).then(function (response) {
 			return response.text()
 		}).then(function (text) {
 			var chapter = document.getElementById("chapter")
-			chapter.innerHTML = addArrows(text)
+			var title = url.substr(11, url.length-16)
+			title = titleCase(title.replaceAll("-", " "))
+			title = title.replace(" Of ", " of ")	// Song of Solomon
+			chapter.innerHTML = addArrows(text, title)
+			applySettings()
 		})
 	}
 
-	function addArrows(html) {
-		var arrows = `<div style="position:relative; top:-8px">
-			<svg onclick="moveChapter(-1)" style="color:#b9b9b9; cursor:pointer; float:left; width:34px;height:34px" viewBox="0 0 24 24">
+	function addArrows(html,  title) {
+		var arrows = `<div style="display: flex; justify-content: space-between;">
+			<svg onclick="moveChapter(-1)" style="color:#b9b9b9; cursor:pointer; width:34px;height:34px" viewBox="0 0 24 24">
 				<path fill="currentColor" d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" />
 			</svg>
-			<svg onclick="moveChapter(1)" style="color:#b9b9b9; cursor:pointer; float:right; width:34px;height:34px" viewBox="0 0 24 24">
+			<div id="chapterTitle">${title}</div>
+			<svg onclick="moveChapter(1)" style="color:#b9b9b9; cursor:pointer; width:34px;height:34px" viewBox="0 0 24 24">
 				<path fill="currentColor" d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" />
 			</svg>
 		</div>`
@@ -268,7 +350,7 @@
 </script>
 
 <script>
-	if (window.location.hostname != "localhostqqq") {
+	if (window.location.hostname != "localhost") {
 		if ('serviceWorker' in navigator) {
 			window.addEventListener('load', function () {
 				navigator.serviceWorker.register('./serviceWorker.js', {
