@@ -37,14 +37,33 @@ async function parseChapters() {
 		const title = doc.querySelector("title").text
 		if (!title.endsWith("BSB")) continue
 		
+		// Convert title to file name
 		var newFilename = title.substring(0, title.length - 4)
 		newFilename = newFilename.toLocaleLowerCase()
 		newFilename = newFilename.replaceAll(" ", "-")
 
+		// Remove certain things
 		doc.querySelector("#topheading")?.remove()
 		doc.querySelector(".bsbheading")?.remove()
 		doc.querySelector(".calibre8")?.remove()	// The "Home" link on the bottom
 
+		// Remove tags
+		doc.querySelectorAll("a").forEach( (el) => {
+			el.replaceWith(el.innerHTML)  
+		})
+
+		// Foot footnotes into its own div to hide easier
+		/*
+		var footnotesDoc = parse(html)
+		footnotesDoc.querySelector("body > div.calibre2").remove
+		var footnotes = parse("<div id='footnotes'></div>")
+		footnotes.innerHTML = footnotesDoc.querySelector("body").innerHTML
+		// const footnotes = parse("<div class='footnotes'></div")
+		// footnotes.appendChild(doc.querySelector(".calibre2"))
+		doc.querySelector("body").appendChild(footnotes)
+		*/
+
+		// Save the file
 		var body = doc.querySelector("body").innerHTML
 		writeFile(toDir + "/" + newFilename + ".html", body)
 
