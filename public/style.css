@@ -133,6 +133,54 @@ body.dark a {
 	color: #ada3fd;
 }
 
+.hdg {
+	font-weight: bold;
+}
+
+#chapterTitle {
+	font-style: italic;
+}
+
+.reftext {
+	font-size: small;
+	vertical-align: super;
+	margin-right: 2px;
+}
+
+.cross1 {
+	color: #a3a3a3 !important;
+	font-style: italic;
+	font-weight: normal;
+}
+
+.fn {
+	font-size: small;
+	vertical-align: super;
+	margin-right: 2px;
+	margin-left: 1px;
+}
+
+.fnverse {
+	vertical-align: super;
+	font-size: small;
+}
+
+.footnotesbot {
+	/* color: blue; */
+	font-size: small;
+}
+
+.indent1stline {
+	margin-left: 20px;
+	margin-bottom: 0px;
+}
+
+.indent {
+	margin-left: 40px;
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+
 @media (prefers-color-scheme: dark) {
 	body {
 		background-color: #333;
