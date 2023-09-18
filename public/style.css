@@ -157,6 +157,7 @@ body.dark a {
 	font-size: small;
 	vertical-align: super;
 	margin-right: 2px;
+	margin-left: 1px;
 }
 
 .fnverse {
@@ -165,8 +166,19 @@ body.dark a {
 }
 
 .footnotesbot {
-	color: blue;
+	/* color: blue; */
 	font-size: small;
+}
+
+.indent1stline {
+	margin-left: 20px;
+	margin-bottom: 0px;
+}
+
+.indent {
+	margin-left: 40px;
+	margin-top: 0px;
+	margin-bottom: 0px;
 }
 
 @media (prefers-color-scheme: dark) {

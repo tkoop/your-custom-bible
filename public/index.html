@@ -18,29 +18,29 @@
 		</svg>
 
 		<div id="dropdown" style="text-align:left">
-			
+
 			<div onclick="indexClicked()">Index</div>
 
 			<div onclick="historyClicked()">History</div>
 
-			<div style="display:flex" onclick="event.stopPropagation()">
+			<div style="display:flex" onclick="var i = this.querySelector('input').click(); event.stopPropagation()">
 				<div>Titles</div>
-				<div><input type="checkbox"></div>
+				<div><input type="checkbox" data-value="titles" onchange="setSetting(this.checked, 'titles')" onclick="event.stopPropagation()"></div>
 			</div>
 
-			<div style="display:flex" onclick="event.stopPropagation()">
+			<div style="display:flex" onclick="var i = this.querySelector('input').click(); event.stopPropagation()">
 				<div>Verses</div>
-				<div><input type="checkbox"></div>
+				<div><input type="checkbox" data-value="verses" onchange="setSetting(this.checked, 'verses')" onclick="event.stopPropagation()"></div>
 			</div>
 
-			<div style="display:flex" onclick="event.stopPropagation()">
+			<div style="display:flex" onclick="var i = this.querySelector('input').click(); event.stopPropagation()">
 				<div>References</div>
-				<div><input type="checkbox"></div>
+				<div><input type="checkbox" data-value="references" onchange="setSetting(this.checked, 'references')" onclick="event.stopPropagation()"></div>
 			</div>
 
-			<div style="display:flex" onclick="event.stopPropagation()">
+			<div style="display:flex" onclick="var i = this.querySelector('input').click(); event.stopPropagation()">
 				<div>Footnotes</div>
-				<div><input type="checkbox"></div>
+				<div><input type="checkbox" data-value="footnotes" onchange="setSetting(this.checked, 'footnotes')" onclick="event.stopPropagation()"></div>
 			</div>
 
 			<div>
@@ -78,6 +78,50 @@
 	var browseHistory = []
 	var currentBookIndex = 0
 	var currentChapter = 1 // one based
+
+	function applySettings() {
+		// Titles
+		if (document.querySelectorAll("input[data-value=titles]:checked").length > 0) {
+			document.querySelectorAll(".hdg").forEach(el => el.style.display = null)
+		} else {
+			document.querySelectorAll(".hdg").forEach(el => el.style.display = "none")
+		}
+
+		// Verses
+		if (document.querySelectorAll("input[data-value=verses]:checked").length > 0) {
+			document.querySelectorAll(".reftext").forEach(el => el.style.display = null)
+		} else {
+			document.querySelectorAll(".reftext").forEach(el => el.style.display = "none")
+		}
+
+		// Cross references
+		if (document.querySelectorAll("input[data-value=references]:checked").length > 0) {
+			document.querySelectorAll(".cross1").forEach(el => el.style.display = null)
+		} else {
+			document.querySelectorAll(".cross1").forEach(el => el.style.display = "none")
+		}
+
+		// Verses
+		if (document.querySelectorAll("input[data-value=footnotes]:checked").length > 0) {
+			document.querySelectorAll(".fn").forEach(el => el.style.display = null)
+		} else {
+			document.querySelectorAll(".fn").forEach(el => el.style.display = "none")
+		}
+	}
+
+	function setSetting(value, name) {
+		if (localStorage.settings == undefined) localStorage.settings = "{}"
+		var settings = JSON.parse(localStorage.settings)
+		settings[name] = value
+
+		localStorage.settings = JSON.stringify(settings)
+		applySettings()
+	}
+
+	for(key in JSON.parse(localStorage.settings ?? "{}")) {
+		document.querySelector("input[data-value="+key+"]").checked = JSON.parse(localStorage.settings ?? "{}")[key]
+	}
+	applySettings()
 
 	function darkMode(dark) {
 		localStorage.mode = dark ? "dark" : "light"
@@ -253,6 +297,7 @@
 			title = titleCase(title.replaceAll("-", " "))
 			title = title.replace(" Of ", " of ")	// Song of Solomon
 			chapter.innerHTML = addArrows(text, title)
+			applySettings()
 		})
 	}
 
