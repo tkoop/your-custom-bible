@@ -32,7 +32,6 @@ async function parseChapters() {
 	var foundWords = {}
 
 	for(const filename of filenames) {
-		// console.log(filename)
 		const fromFile = await open(fromDir + "/" + filename)
 		var html = await fromFile.readFile()
 		fromFile.close()
@@ -50,24 +49,19 @@ async function parseChapters() {
 		doc.querySelector(".bsbheading")?.remove()
 		doc.querySelector(".calibre8")?.remove()	// The "Home" link on the bottom
 
+		// Footnotes begins
+		doc.querySelector("a#fn")
+
 		// Remove tags
 		doc.querySelectorAll("a").forEach( (el) => {
+			if (el.getAttribute("id") == "fn") return
 			el.replaceWith(el.innerHTML)  
 		})
 
-		// Foot footnotes into its own div to hide easier
-		/*
-		var footnotesDoc = parse(html)
-		footnotesDoc.querySelector("body > div.calibre2").remove
-		var footnotes = parse("<div id='footnotes'></div>")
-		footnotes.innerHTML = footnotesDoc.querySelector("body").innerHTML
-		// const footnotes = parse("<div class='footnotes'></div")
-		// footnotes.appendChild(doc.querySelector(".calibre2"))
-		doc.querySelector("body").appendChild(footnotes)
-		*/
-
 		// Save the file
 		var body = doc.querySelector("body").innerHTML
+		var footNotesAt = body.indexOf('<a class="pcalibre2 pcalibre1 pcalibre pcalibre3" id="fn">')
+		body = body.substring(0, footNotesAt) + "<div class='fn'>" + body.substring(footNotesAt) + "</div>"
 
 		for(var word in words) {
 			body = body.replaceAll(word, words[word].ca)

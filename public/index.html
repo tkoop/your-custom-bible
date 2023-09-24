@@ -64,6 +64,9 @@
 				</div>
 			</div>
 
+			<div onclick="aboutClicked()">About</div>
+
+
 			<!-- <div onclick="aboutClicked(); hideDropDown()">About</div> -->
 		</div>
 
@@ -73,6 +76,7 @@
 	<div id="body">
 		<div id="index" class="page" style="display:block"></div>
 		<div id="history" class="page">History page</div>
+		<div id="about" class="page"></div>
 		<div id="chapter" class="page"></div>
 	</div>
 </body>
@@ -191,6 +195,34 @@
 			}
 		}
 		return 0
+	}
+
+	function aboutClicked() {
+		history.pushState('about', '')
+		showPage("about")
+
+		fetch("about.html").then(function (response) {
+			return response.text()
+		}).then(function (text) {
+			document.getElementById("about").innerHTML = text
+		})
+	}
+
+	function checkUpdates() {
+		if ('serviceWorker' in navigator) {
+			navigator.serviceWorker.getRegistrations().then(function(registrations) {
+				for(let registration of registrations) {
+					console.log("Calling unregister.") 
+					registration.unregister()
+				}
+				window.location.reload()
+			}).catch(function(err) {
+				console.log('Service Worker registration failed: ', err);
+			});
+		} else {
+			console.log("service workers not supported.")
+			window.location.reload()
+		}
 	}
 
 	function historyClicked() {
