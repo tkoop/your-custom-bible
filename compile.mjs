@@ -17,6 +17,7 @@ Parse those files, renaming them to be their book and chapter name like "1-chron
 
 import { readdir, writeFile, open } from 'node:fs/promises'
 import { parse } from 'node-html-parser'	// https://www.npmjs.com/package/node-html-parser
+import { words } from './words.mjs'
 
 parseChapters()
 
@@ -27,6 +28,8 @@ async function parseChapters() {
 	const fromDir = 'bsb/bsb - final - 7-18-21/OEBPS/Text'
 	const toDir = 'public/chapters'
 	const filenames = await readdir(fromDir)
+
+	var foundWords = {}
 
 	for(const filename of filenames) {
 		// console.log(filename)
@@ -65,11 +68,38 @@ async function parseChapters() {
 
 		// Save the file
 		var body = doc.querySelector("body").innerHTML
+
+		for(var word in words) {
+			body = body.replaceAll(word, words[word].ca)
+
+			/*
+			const regex = new RegExp('(?:[\\W])('+word+')(?:\\W)', 'gm')
+
+
+			var count = (body.match(regex) ?? []).length
+
+			if (count > 0) {
+				if (foundWords[word]) {
+					foundWords[word] += count
+					console.log(newFilename + " '" + word + "'")
+					console.log(count)
+				} else {
+					foundWords[word] = 1
+					console.log(newFilename + " '" + word + "'")
+					console.log(count)
+				}
+			}
+			*/
+		}
+
 		writeFile(toDir + "/" + newFilename + ".html", body)
 
-		console.log(newFilename)
+
+	//	console.log(newFilename)
 
 	}
+
+	console.log(JSON.stringify(foundWords))
 
 	/*
 	fs.readFile("brb.html", function (err, buffer) {
