@@ -64,12 +64,17 @@ async function parseChapters() {
 		body = body.substring(0, footNotesAt) + "<div class='fn'>" + body.substring(footNotesAt) + "</div>"
 
 		for(var word in words) {
-			body = body.replaceAll(word, words[word].ca)
+			// body = body.replaceAll(word, words[word].ca)
 
+			const regex = new RegExp('\\b('+word+')\\b', 'gm')
+			var replacement = ""
+			replacement += "<span class='spell ca'>" + words[word].ca + "</span>"
+			replacement += "<span class='spell gb'>" + words[word].gb + "</span>"
+			replacement += "<span class='spell us'>" + words[word].us + "</span>"
+
+			body = body.replace(regex, replacement)
+			
 			/*
-			const regex = new RegExp('(?:[\\W])('+word+')(?:\\W)', 'gm')
-
-
 			var count = (body.match(regex) ?? []).length
 
 			if (count > 0) {

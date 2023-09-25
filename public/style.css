@@ -170,12 +170,17 @@ body.dark a {
 	font-size: small;
 }
 
-.indent1stline {
+.indent1stline, .indent1stlinered {
 	margin-left: 20px;
 	margin-bottom: 0px;
 }
 
-.indent {
+.indentred1 {
+	margin-left: 20px;
+	margin-bottom: 0px;
+}
+
+.indent, .indentred {
 	margin-left: 40px;
 	margin-top: 0px;
 	margin-bottom: 0px;
