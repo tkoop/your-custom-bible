@@ -116,6 +116,10 @@
 		} else {
 			document.querySelectorAll(".fn").forEach(el => el.style.display = "none")
 		}
+
+		// Spelling
+		document.querySelectorAll(".spell").forEach(el => el.style.display = "none")
+		document.querySelectorAll(".spell.ca").forEach(el => el.style.display = "inline")
 	}
 
 	function setSetting(value, name) {
