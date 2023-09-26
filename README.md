@@ -1,17 +1,17 @@
-### Berean Readers Bible
+### Berean Bible
 
-This project endevours to be a Bible reader for the Berean Readers Bible, as a PWA.
+This project endevours to be a Bible reader for the Berean Bible, as a PWA.
 
 The content of this Bible comes from https://berean.bible/downloads.htm 
 
-This project is not associated with the creators of the Berean Readers Bible.
+This project is not associated with the creators of the Berean Bible.
 
 
 ## To Make It
 
-Download the Berean Readers Bible from https://berean.bible/downloads.htm as a Word document.  (This has already been done for you and lives in the root directory as brb.docx)  Open it with Libre Office and save it as html.  (This also has been done for you and lives in the root directory as brb.html)
+Download the Berean Study Bible from https://berean.bible/downloads.htm as an epub file.  (This has already been done for you and lives in the root directory as brb.docx)  Rename it to .zip and unzip it.  (This also has been done for you and lives in the root directory as /brb)
 
-Run this command to parse brb.html into individual chapter files that will be put into public/chapters.  This will also create the public/books.js file.
+Run this command to parse the chapter html files into individual chapter files that will be put into public/chapters.
 
 ```
 npm run compile
