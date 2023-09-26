@@ -45,7 +45,7 @@
 
 			<div style="display:flex">
 				<div>Spelling</div>
-				<div><select id="spelling" onchange="setSetting(this.options[this.selectedIndex].value, 'spelling')">
+				<div><select style="padding: 6px; border-radius: 6px; background-color: #7575ff;" id="spelling" onclick="event.stopPropagation()" onchange="setSetting(this.options[this.selectedIndex].value, 'spelling'); event.stopPropagation()">
 					<option value="ca">Canadian</option>
 					<option value="gb">British</option>
 					<option value="us">USA</option>
