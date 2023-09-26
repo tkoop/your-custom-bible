@@ -44,8 +44,13 @@
 			</div>
 
 			<div style="display:flex">
-				<div>Language</div>
-				<div>Canadian</div>
+				<div>Spelling</div>
+				<div><select id="spelling" onchange="setSetting(this.options[this.selectedIndex].value, 'spelling')">
+					<option value="ca">Canadian</option>
+					<option value="gb">British</option>
+					<option value="us">USA</option>
+				</select>
+				</div>
 			</div>
 
 			<div>
@@ -118,8 +123,10 @@
 		}
 
 		// Spelling
+		var spellingSelect = document.querySelector("#spelling")
+		var spellingCountry = spellingSelect.options[spellingSelect.selectedIndex].value
 		document.querySelectorAll(".spell").forEach(el => el.style.display = "none")
-		document.querySelectorAll(".spell.ca").forEach(el => el.style.display = "inline")
+		document.querySelectorAll(".spell."+spellingCountry).forEach(el => el.style.display = "inline")
 	}
 
 	function setSetting(value, name) {
@@ -132,7 +139,16 @@
 	}
 
 	for(key in JSON.parse(localStorage.settings ?? "{}")) {
-		document.querySelector("input[data-value="+key+"]").checked = JSON.parse(localStorage.settings ?? "{}")[key]
+		var value = JSON.parse(localStorage.settings ?? "{}")[key]
+		if (key == "spelling") {
+			for (var op in document.querySelector("select#spelling")) {
+				if (op.value == value) {
+					op.selected = true
+				}
+			}
+		} else {
+			document.querySelector("input[data-value="+key+"]").checked = value
+		}
 	}
 	applySettings()
 
@@ -353,7 +369,7 @@
 			</svg>
 		</div>`
 
-		return arrows + html + arrows
+		return arrows + html + "<div style='height:20px'></div>" + arrows
 	}
 
 	function createLink(name, slug, chapter, includeBook) {
@@ -376,8 +392,8 @@
 		document.getElementById("index").appendChild(bookDiv);
 	});
 
-	document.getElementById("index").innerHTML +=
-		'<hr><address>GitHub: <a href="https://github.com/tkoop/berean-readers-bible-pwa" target="_blank">tkoop/berean-readers-bible-pwa</address>';
+	// document.getElementById("index").innerHTML +=
+	//	'<hr><address>GitHub: <a href="https://github.com/tkoop/berean-readers-bible-pwa" target="_blank">tkoop/berean-readers-bible-pwa</address>'
 
 	if (browseHistory.length > 0) {
 		let history = browseHistory[browseHistory.length - 1]
