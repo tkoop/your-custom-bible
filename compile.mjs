@@ -75,6 +75,18 @@ async function parseChapters() {
 			body = body.replace(regex, replacement)
 		}
 
+		// God's Name
+		body = body.replaceAll('The LORD', '<span class="lord" data-name="The LORD">The LORD</span>')
+		body = body.replaceAll('the LORD', '<span class="lord" data-name="the LORD">the LORD</span>')
+		body = body.replaceAll('O LORD', 'O <span class="lord" data-name="LORD">LORD</span>')
+		body = body.replaceAll(', LORD', ', <span class="lord" data-name="LORD">LORD</span>')
+		body = body.replaceAll('\>LORD', '><span class="lord" data-name="LORD">LORD</span>')
+		body = body.replaceAll('One LORD', 'One <span class="lord" data-name="LORD">LORD</span>')
+		body = body.replaceAll('mighty LORD', 'mighty <span class="lord" data-name="LORD">LORD</span>')
+		body = body.replaceAll('our LORD', 'our <span class="lord" data-name="LORD">LORD</span>')
+
+		body = body.replaceAll('THE LORD', '<span class="caplord" data-name="THE LORD">THE LORD</span>')
+
 		writeFile(toDir + "/" + newFilename + ".html", body)
 	}
 }

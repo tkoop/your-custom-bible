@@ -53,6 +53,23 @@
 				</div>
 			</div>
 
+			<div style="display:flex">
+				<div>God's Name</div>
+				<div><select style="padding: 6px; border-radius: 6px; background-color: #7575ff;" id="name" onclick="event.stopPropagation()" onchange="setSetting(this.options[this.selectedIndex].value, 'name'); event.stopPropagation()">
+					<option value="LORD">LORD</option>
+					<option value="Yahweh">Yahweh</option>
+					<option value="Jehovah">Jehovah</option>
+					<option value="YHWH">YHWH</option>
+					<option value="YHVH">YHVH</option>
+					<option value="HaShem">HaShem</option>
+					<option value="Adonai">Adonai</option>
+					<option value="Elohim">Elohim</option>
+					<option value="G-d">G-d</option>
+					<option value="God">God</option>
+				</select>
+				</div>
+			</div>
+
 			<div>
 				<div>Font Size</div>
 				<div class="buttonHolder">
@@ -127,6 +144,17 @@
 		var spellingCountry = spellingSelect.options[spellingSelect.selectedIndex].value
 		document.querySelectorAll(".spell").forEach(el => el.style.display = "none")
 		document.querySelectorAll(".spell."+spellingCountry).forEach(el => el.style.display = "inline")
+
+		// God's name
+		var nameSelect = document.querySelector("#name")
+		var name = nameSelect.options[nameSelect.selectedIndex].value
+		if (name == "LORD") {
+			document.querySelectorAll(".lord").forEach(el => el.innerHTML = el.dataset.name)
+			document.querySelectorAll(".caplord").forEach(el => el.innerHTML = el.dataset.name)
+		} else {
+			document.querySelectorAll(".lord").forEach(el => el.innerHTML = name)
+			document.querySelectorAll(".caplord").forEach(el => el.innerHTML = name.toUpperCase())
+		}
 	}
 
 	function setSetting(value, name) {
@@ -140,12 +168,12 @@
 
 	for(key in JSON.parse(localStorage.settings ?? "{}")) {
 		var value = JSON.parse(localStorage.settings ?? "{}")[key]
-		if (key == "spelling") {
-			for (var op in document.querySelector("select#spelling")) {
+		if (key == "spelling" || key == "name") {
+			document.querySelectorAll("select#"+key+" option").forEach(op => {
 				if (op.value == value) {
 					op.selected = true
 				}
-			}
+			})
 		} else {
 			document.querySelector("input[data-value="+key+"]").checked = value
 		}
