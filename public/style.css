@@ -1,7 +1,4 @@
-@font-face {
-	font-family: 'SourceSansPro';
-	src: url('fonts/SourceSansPro-Regular.ttf') format('truetype'),
-}
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700&family=Sawarabi+Mincho&display=swap');
 
 body {
 	font-family: 'SourceSansPro', sans-serif;
@@ -52,8 +49,8 @@ body {
 }
 
 #dropdown button {
-	border: 0px;
-	background: #7575ff;
+	border: 1px solid #818181;
+	background: #c3c3ff;
 	color: black;
 	padding: 8px 16px;
 	border-radius: 6px;
@@ -106,6 +103,7 @@ div.index-chapters a {
 	margin-bottom: 5px;
 	text-align: center;
 	padding-top: 0.2em;
+	font-family: sans-serif;
 }
 
 .standardButton {
