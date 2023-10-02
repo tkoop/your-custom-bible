@@ -56,16 +56,16 @@
 			<div style="display:flex">
 				<div>God's Name</div>
 				<div><select style="padding: 6px; border-radius: 6px; background-color: #c3c3ff;" id="name" onclick="event.stopPropagation()" onchange="setSetting(this.options[this.selectedIndex].value, 'name'); event.stopPropagation()">
-					<option value="Yahweh">Yahweh</option>
-					<option value="LORD">LORD</option>
-					<option value="Jehovah">Jehovah</option>
-					<option value="YHWH">YHWH</option>
-					<option value="YHVH">YHVH</option>
-					<option value="HaShem">HaShem</option>
-					<option value="Adonai">Adonai</option>
-					<option value="Elohim">Elohim</option>
-					<option value="G-d">G-d</option>
-					<option value="God">God</option>
+					<option value="Yahweh" data-letter="Y">Yahweh</option>
+					<option value="LORD" data-letter="L">LORD</option>
+					<option value="Jehovah" data-letter="J">Jehovah</option>
+					<option value="YHWH" data-letter="W">YHWH</option>
+					<option value="YHVH" data-letter="V">YHVH</option>
+					<option value="HaShem" data-letter="H">HaShem</option>
+					<option value="Adonai" data-letter="A">Adonai</option>
+					<option value="Elohim" data-letter="E">Elohim</option>
+					<option value="G-d" data-letter="D">G-d</option>
+					<option value="God" data-letter="G">God</option>
 				</select>
 				</div>
 			</div>
@@ -157,6 +157,10 @@
 		} else {
 			document.querySelectorAll(".lord").forEach(el => el.innerHTML = name)
 			document.querySelectorAll(".caplord").forEach(el => el.innerHTML = name.toUpperCase())
+		}
+
+		if (document.querySelectorAll(".version")) {
+			document.querySelectorAll(".version").forEach(el => el.innerHTML = getVersion())
 		}
 	}
 
@@ -384,9 +388,22 @@
 			var title = url.substr(11, url.length-16)
 			title = titleCase(title.replaceAll("-", " "))
 			title = title.replace(" Of ", " of ")	// Song of Solomon
+			title = title + " (<span class='version'></span>)"
 			chapter.innerHTML = addArrows(text, title)
 			applySettings()
 		})
+	}
+
+	function getVersion() {
+		var spellingSelect = document.querySelector("#spelling")
+		var spellingCountry = spellingSelect.options[spellingSelect.selectedIndex].value
+		var letter = spellingCountry.substr(0,1).toUpperCase()
+		if (letter == "G") letter = "B"
+
+		var nameSelect = document.querySelector("#name")
+		var nameLetter = nameSelect.options[nameSelect.selectedIndex].dataset.letter
+
+		return "YCB-" + letter + nameLetter
 	}
 
 	function addArrows(html,  title) {
