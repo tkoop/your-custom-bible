@@ -3,10 +3,10 @@
 <head>
 	<meta name="encoding" content="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="theme-color" content="#000">
+	<meta name="theme-color" content="#ececb2ff">
 	<title>Your Custom Bible</title>
 	<link rel="stylesheet" href="style.css" />
-	<link rel="icon" type="image/png" href="images/logo_32.png" />
+	<link rel="icon" type="image/png" href="images/logo.png" />
 	<link rel="manifest" href="manifest.json">
 </head>
 
@@ -45,7 +45,7 @@
 
 			<div style="display:flex">
 				<div>Spelling</div>
-				<div><select style="padding: 6px; border-radius: 6px; background-color: #7575ff;" id="spelling" onclick="event.stopPropagation()" onchange="setSetting(this.options[this.selectedIndex].value, 'spelling'); event.stopPropagation()">
+				<div><select style="padding: 6px; border-radius: 6px; background-color: #c3c3ff;" id="spelling" onclick="event.stopPropagation()" onchange="setSetting(this.options[this.selectedIndex].value, 'spelling'); event.stopPropagation()">
 					<option value="ca">Canadian</option>
 					<option value="gb">British</option>
 					<option value="us">USA</option>
@@ -55,9 +55,9 @@
 
 			<div style="display:flex">
 				<div>God's Name</div>
-				<div><select style="padding: 6px; border-radius: 6px; background-color: #7575ff;" id="name" onclick="event.stopPropagation()" onchange="setSetting(this.options[this.selectedIndex].value, 'name'); event.stopPropagation()">
-					<option value="LORD">LORD</option>
+				<div><select style="padding: 6px; border-radius: 6px; background-color: #c3c3ff;" id="name" onclick="event.stopPropagation()" onchange="setSetting(this.options[this.selectedIndex].value, 'name'); event.stopPropagation()">
 					<option value="Yahweh">Yahweh</option>
+					<option value="LORD">LORD</option>
 					<option value="Jehovah">Jehovah</option>
 					<option value="YHWH">YHWH</option>
 					<option value="YHVH">YHVH</option>
@@ -92,10 +92,13 @@
 			<!-- <div onclick="aboutClicked(); hideDropDown()">About</div> -->
 		</div>
 
-		<h2 onclick="indexClicked()" style="cursor:pointer">Your Custom Bible</h2>
+		<!--
+		<h2 onclick="indexClicked()" style="margin-top:-12px; cursor:pointer; font-family: 'Cairo', sans-serif;">Your Custom Bible</h2>
+		-->
+		<img onclick="indexClicked()" src="images/banner.png" style="cursor: pointer; height: 88%; margin-top: -4px;">
 
 	</div>
-	<div id="body">
+	<div id="body" style="font-family: 'Sawarabi Mincho', sans-serif;">
 		<div id="index" class="page" style="display:block"></div>
 		<div id="history" class="page">History page</div>
 		<div id="about" class="page"></div>
