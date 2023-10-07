@@ -18,8 +18,11 @@ Parse those files, renaming them to be their book and chapter name like "1-chron
 import { readdir, writeFile, open } from 'node:fs/promises'
 import { parse } from 'node-html-parser'	// https://www.npmjs.com/package/node-html-parser
 import { words } from './words.mjs'
+import { info } from 'node:console'
 
 parseChapters()
+
+var capWords = {}	// words are keys, values are "true"
 
 
 async function parseChapters() {
@@ -84,108 +87,169 @@ async function parseChapters() {
 		body = body.replaceAll('One LORD', 'One <span class="lord" data-name="LORD">LORD</span>')
 		body = body.replaceAll('mighty LORD', 'mighty <span class="lord" data-name="LORD">LORD</span>')
 		body = body.replaceAll('our LORD', 'our <span class="lord" data-name="LORD">LORD</span>')
-
 		body = body.replaceAll('THE LORD', '<span class="caplord" data-name="THE LORD">THE LORD</span>')
+
+		// Capitalized Divine Names
+		if (newFilename.startsWith("genesis")) body = parseDivineNames(body)
+
 
 		writeFile(toDir + "/" + newFilename + ".html", body)
 	}
+
+	console.log("Cap words: " + Object.keys(capWords).sort().map(w=>w+":"+capWords[w]).join(", "))
 }
 
+function isLetter(char) {
+  return char.toLowerCase() !== char.toUpperCase()
+}
 
-function parseHTML(html) {
-	let pos = getNextChapterStart(html, 0)
-	let nextPos = getNextChapterStart(html, pos + 239)
-	let chapterCount = 0
-	let books = []	//	each item is an object containing "name", "slug", "chapters"
+function parseDivineNames(body) {
+	var beginning = true	// Expecting the beginning of a sentence? We expect a capital letter.
+	var inTag = false	// In a tag? We'll ignore everything here.
+	var inWord = false // In a word?
+	var inHeading = false
+	var inRefText = false
+	var closingTag = false
+	// var inQuote = false
 
-	while (nextPos > 0) {
-		let chapterHTML = html.substring(pos, nextPos)
-		let parsed = parseTitle(chapterHTML)
-		let book = parsed.book
-		let chapter = parsed.chapter
-		let slug = parsed.slug
+	var tags = []	// a stack of tags. Each item is an array of words. Push and pop.
 
-		if (books.length > 0 && books[books.length - 1].slug == slug) {
-			// book already exists
-			books[books.length - 1].chapters++
-		} else {
-			// make a new book
-			books.push({
-				name: book,
-				slug: slug,
-				chapters: 1,
-			})
+	var index = 0
+	var word = ""
+
+	function processWord(thisWord, index) {
+		var inFootnote = (tags.length > 0 && tags[0][2] == "fn")
+
+		// console.log("word: '" + thisWord + "' beginning? ", beginning, " heading?", inHeading, " inreftext", inRefText)
+		if (inHeading || inRefText || inFootnote) {
+			beginning = false
+			word = ""
+			return
 		}
 
-		console.log(chapterCount + ", " + pos + ", " + book + ":" + chapter)
+		if (thisWord == "I") {
+			beginning = false
+			word = ""
+			return
+		}
 
-		saveChapter(slug, chapter, chapterHTML)
-
-		chapterCount++
-
-		pos = nextPos
-		nextPos = getNextChapterStart(html, nextPos + 239)
+		if (thisWord.substring(0, 1) == thisWord.substring(0, 1).toUpperCase()) {
+			if (beginning) {
+				// All is good. It's a capital at the beginning of a sentence.
+			} else {
+				// Capital not at beginning of sentence. Alert!
+				// console.log(`Capital word found: '${thisWord}'`)
+				capWords[thisWord] = (capWords[thisWord] ?? 0) + 1
+				if (thisWord == "But") {
+					console.log(body.substring(index-50, index+20))
+				}
+			}
+		} else {
+			if (beginning) {
+				// Lower case at start of sentence. :(
+			} else {
+				// Lower case in middle of sentence
+			}
+		}
+		// console.log("setting beginning to false")
+		beginning = false
+		word = ""
 	}
 
-	chapterHTML = html.substring(pos, html.indexOf("</body>", pos))
-	let parsed = parseTitle(chapterHTML)
-	let book = parsed.book
-	let chapter = parsed.chapter
-	let slug = parsed.slug
+	for(var index=0; index<body.length; index++) {
+		var ch = body.substring(index, index+1)
+		// console.log(`beginning is ${beginning}, inTag is ${inTag}, inWord is ${inWord} and we're looking at a '${ch}'`)
 
-	saveChapter(slug, chapter, chapterHTML)
-	books[books.length - 1].chapters++
+		if (inTag) {
+			if (ch == ">") {
+				// console.log("end tag word: " + word)
+				if (closingTag && word == "p") {
+					inHeading = false
+					beginning = true	// we just came across a <p> or </p> tag
+				}
+				if (closingTag && word == "span") {
+					inRefText = false
+				}
+				if (closingTag) {
+					tags.pop()
+				}
+				// console.log(JSON.stringify(tags))
+				word = ""
+				inTag = false
+				if (tags.length >= 1 && tags[tags.length - 1][0] == "br") {
+					// This was a <br> tag, so let's not store it.
+					tags.pop()
+				}
+				continue
+			}
+			if (isLetter(ch)) {
+				word = word + ch
+			} else {
+				if (ch == "/") {
+					closingTag = true
+					tags.pop()	// We just pushed a new empty tag, so we'll undo that here
+				}
+				if (word != "") {
+					// console.log("tag word: '" + word + "'")
+					if (word == "reftext") {
+						inRefText = true
+					}
+					if (word == "hdg" || word == "subhdg") {
+						inHeading = true
+					}
+				}
+				if (word != "") tags[tags.length-1].push(word)
+				word = ""
+			}
+			continue
+		}
 
-	console.log(chapterCount + ", till the end, " + book + ":" + chapter)
+		if (ch == "<") {
+			tags.push([])	// Yes, but maybe it's a closing tag, so we'll pop it if it is a closing tag
+			closingTag = false
+			if (word != "") processWord(word, index)
+			inTag = true
+			continue
+		}
+		
+		if (ch == "“") {	// opening quotation mark
+			// inQuote = true
+			beginning = true
+		}
 
-	console.log(JSON.stringify(books))
+		/*
+		if (ch == "”") {	// closing quotation mark
+			inQuote = false
+			beginning = false
+	}
+	*/
 
-	fs.writeFile("public/books.js", "var books = " + JSON.stringify(books), (err) => {
-		if (err) console.log(err);
-		console.log("Successfully wrote public/books.js.");
-	});
-}
+		if (ch == "." || ch == "?" || ch == "!") {
+			if (word != "") processWord(word, index)
+			beginning = true
+			continue
+		}
 
-function saveChapter(slug, chapter, chapterHTML) {
-	chapterHTML = chapterHTML.replace(/.*#eeeeee.*\n/g, "")
-	chapterHTML = chapterHTML.replace(/.*:\/\/biblehub\.com.*\n/g, "")
-	chapterHTML = chapterHTML.replace(/.*\[Online\].*\n/g, "")
-	chapterHTML = chapterHTML.replace(/ color="#001320"/g, "")
-	chapterHTML = chapterHTML.replace(/face="Tahoma, serif"/g, "")
-	chapterHTML = chapterHTML.replace(/; line-height: 0.51cm/g, "")
+		if (!inWord && isLetter(ch)) {
+			word = ch
+			inWord = true
+			continue
+		}
 
-	fs.writeFile("public/chapters/" + slug + "-" + chapter + ".html", chapterHTML, (err) => {
-		if (err) console.log(err);
-		console.log("Successfully wrote public/chapters/" + slug + "-" + chapter + ".html");
-	});
+		if (inWord && isLetter(ch)) {
+			word = word + ch
+			continue
+		} 
 
-}
-
-function parseTitle(html) {
-	let fontHTML = '<font color="#001320"><font face="Tahoma, serif"><font size="5" style="font-size: 17pt"><b>'
-	let start = html.indexOf(fontHTML) + fontHTML.length
-	let end = html.indexOf("<", start)
-	let bookName = html.substring(start, end)
-	let parts = bookName.trim().split(/\s/).map(x => x.trim())
-
-	let book, chapter
-
-	if (parts.length == 4) {
-		book = parts[0] + " " + parts[1] + " " + parts[2]	// e.g. "Song of Solomon"
-		chapter = parts[3]
-	} else if (parts.length == 3) {
-		book = parts[0] + " " + parts[1]	// e.g. "1 John"
-		chapter = parts[2]
-	} else {
-		book = parts[0]
-		chapter = parts[1]
+		if (inWord && !isLetter(ch)) {
+			if (word != "") processWord(word, index)
+			inWord = false
+			continue
+		} 
 	}
 
-	return {book, chapter, slug:book.replace(/\s/g, "-").toLowerCase()}
-}
 
-function getNextChapterStart(html, start) {
-	let fontPos = html.indexOf('<font color="#001320"><font face="Tahoma, serif"><font size="5" style="font-size: 17pt"><b>', start)
-	if (fontPos < 0) return null
-	return html.lastIndexOf("<p", fontPos)
+	console.log("parsing")
+
+	return body
 }
