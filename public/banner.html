@@ -1,0 +1,269 @@
+<div id="header">
+	<svg id="menuIcon" onclick="window.showDropDown(event)" xmlns="http://www.w3.org/2000/svg"
+		xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="24" height="24" viewBox="0 0 24 24">
+		<path d="M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z" />
+	</svg>
+
+	<div id="dropdown" style="text-align:left">
+
+		<div onclick="homeClicked()">Home</div>
+
+		<div onclick="historyClicked()">History</div>
+
+		<div style="display:flex" onclick="var i = this.querySelector('input').click(); event.stopPropagation()">
+			<div>Titles</div>
+			<div><input type="checkbox" data-value="titles" onchange="setSetting(this.checked, 'titles')" onclick="event.stopPropagation()"></div>
+		</div>
+
+		<div style="display:flex" onclick="var i = this.querySelector('input').click(); event.stopPropagation()">
+			<div>Verses</div>
+			<div><input type="checkbox" data-value="verses" onchange="setSetting(this.checked, 'verses')" onclick="event.stopPropagation()"></div>
+		</div>
+
+		<div style="display:flex" onclick="var i = this.querySelector('input').click(); event.stopPropagation()">
+			<div>References</div>
+			<div><input type="checkbox" data-value="references" onchange="setSetting(this.checked, 'references')" onclick="event.stopPropagation()"></div>
+		</div>
+
+		<div style="display:flex" onclick="var i = this.querySelector('input').click(); event.stopPropagation()">
+			<div>Footnotes</div>
+			<div><input type="checkbox" data-value="footnotes" onchange="setSetting(this.checked, 'footnotes')" onclick="event.stopPropagation()"></div>
+		</div>
+
+		<div style="display:flex">
+			<div>Spelling</div>
+			<div><select style="padding: 6px; border-radius: 6px; background-color: #c3c3ff;" id="spelling" onclick="event.stopPropagation()" onchange="setSetting(this.options[this.selectedIndex].value, 'spelling'); event.stopPropagation()">
+				<option value="ca">Canadian</option>
+				<option value="gb">British</option>
+				<option value="us">USA</option>
+			</select>
+			</div>
+		</div>
+
+		<div style="display:flex">
+			<div>God's Name</div>
+			<div><select style="padding: 6px; border-radius: 6px; background-color: #c3c3ff;" id="name" onclick="event.stopPropagation()" onchange="setSetting(this.options[this.selectedIndex].value, 'name'); event.stopPropagation()">
+				<option value="Yahweh" data-letter="Y">Yahweh</option>
+				<option value="LORD" data-letter="L">LORD</option>
+				<option value="Jehovah" data-letter="J">Jehovah</option>
+				<option value="YHWH" data-letter="W">YHWH</option>
+				<option value="YHVH" data-letter="V">YHVH</option>
+				<option value="HaShem" data-letter="H">HaShem</option>
+				<option value="Adonai" data-letter="A">Adonai</option>
+				<option value="Elohim" data-letter="E">Elohim</option>
+				<option value="G-d" data-letter="D">G-d</option>
+				<option value="God" data-letter="G">God</option>
+			</select>
+			</div>
+		</div>
+
+		<div>
+			<div>Font Size</div>
+			<div class="buttonHolder">
+				<button onclick="fontSize(1.1, event); event.stopPropagation()">+</button> 
+				<button onclick="fontSize(0.9091, event); event.stopPropagation()">-</button>
+			</div>
+		</div>
+
+		<div>
+			<div>Mode</div>
+			<div class="buttonHolder">
+				<button onclick="darkMode(true); event.stopPropagation()">Dark</button> 
+				<button onclick="darkMode(false); event.stopPropagation()">Light</button>
+			</div>
+		</div>
+
+		<div onclick="aboutClicked()">About</div>
+	</div>
+
+	<img onclick="homeClicked()" src="images/banner.png" style="cursor: pointer; height: 88%; margin-top: -4px;">
+
+</div>
+
+
+
+
+<script>
+adsadsf
+	window.banner = {
+
+	}
+
+	console.log("banner")
+
+	window.showDropDown = function(event) {
+		event.stopPropagation()
+		document.getElementById("dropdown").style.display = "block"
+	}
+
+	function hideDropDown() {
+		document.getElementById("dropdown").style.display = "none"
+	}
+
+	/*
+	function applySettings() {
+		// Titles
+		if (document.querySelectorAll("input[data-value=titles]:checked").length > 0) {
+			document.querySelectorAll(".hdg").forEach(el => el.style.display = null)
+		} else {
+			document.querySelectorAll(".hdg").forEach(el => el.style.display = "none")
+		}
+
+		// Verses
+		if (document.querySelectorAll("input[data-value=verses]:checked").length > 0) {
+			document.querySelectorAll(".reftext").forEach(el => el.style.display = null)
+		} else {
+			document.querySelectorAll(".reftext").forEach(el => el.style.display = "none")
+		}
+
+		// Cross references
+		if (document.querySelectorAll("input[data-value=references]:checked").length > 0) {
+			document.querySelectorAll(".cross1").forEach(el => el.style.display = null)
+		} else {
+			document.querySelectorAll(".cross1").forEach(el => el.style.display = "none")
+		}
+
+		// Verses
+		if (document.querySelectorAll("input[data-value=footnotes]:checked").length > 0) {
+			document.querySelectorAll(".fn").forEach(el => el.style.display = null)
+		} else {
+			document.querySelectorAll(".fn").forEach(el => el.style.display = "none")
+		}
+
+		// Spelling
+		var spellingSelect = document.querySelector("#spelling")
+		var spellingCountry = spellingSelect.options[spellingSelect.selectedIndex].value
+		document.querySelectorAll(".spell").forEach(el => el.style.display = "none")
+		document.querySelectorAll(".spell."+spellingCountry).forEach(el => el.style.display = "inline")
+
+		// God's name
+		var nameSelect = document.querySelector("#name")
+		var name = nameSelect.options[nameSelect.selectedIndex].value
+		if (name == "LORD") {
+			document.querySelectorAll(".lord").forEach(el => el.innerHTML = el.dataset.name)
+			document.querySelectorAll(".caplord").forEach(el => el.innerHTML = el.dataset.name)
+		} else {
+			document.querySelectorAll(".lord").forEach(el => el.innerHTML = name)
+			document.querySelectorAll(".caplord").forEach(el => el.innerHTML = name.toUpperCase())
+		}
+
+		if (document.querySelectorAll(".version")) {
+			document.querySelectorAll(".version").forEach(el => el.innerHTML = getVersion())
+		}
+	}
+
+	function setSetting(value, name) {
+		if (localStorage.settings == undefined) localStorage.settings = "{}"
+		var settings = JSON.parse(localStorage.settings)
+		settings[name] = value
+
+		localStorage.settings = JSON.stringify(settings)
+		applySettings()
+	}
+
+	for(key in JSON.parse(localStorage.settings ?? "{}")) {
+		var value = JSON.parse(localStorage.settings ?? "{}")[key]
+		if (key == "spelling" || key == "name") {
+			document.querySelectorAll("select#"+key+" option").forEach(op => {
+				if (op.value == value) {
+					op.selected = true
+				}
+			})
+		} else {
+			document.querySelector("input[data-value="+key+"]").checked = value
+		}
+	}
+	applySettings()
+
+	function darkMode(dark) {
+		localStorage.mode = dark ? "dark" : "light"
+
+		if (dark) {
+			document.body.classList.add("dark")
+		} else {
+			document.body.classList.remove("dark")
+		}
+	}
+
+	darkMode(localStorage.mode == "dark")
+
+	function fontSize(scale, event) {
+		var size = localStorage.fontSize
+		if (size == undefined) size = 16
+		size = parseFloat(size)
+		size = size * scale
+		localStorage.fontSize = size
+		document.getElementById("body").style.fontSize = size + "px"
+
+		if (event) {
+			event.stopImmediatePropagation()
+			event.stopPropagation()
+			event.preventDefault()
+		}
+	}
+
+	fontSize(1)
+
+
+
+
+
+	function aboutClicked() {
+		history.pushState('about', '')
+		showPage("about")
+
+		fetch("about.html").then(function (response) {
+			return response.text()
+		}).then(function (text) {
+			document.getElementById("about").innerHTML = text
+		})
+	}
+
+
+	function historyClicked() {
+		history.pushState('history', '')
+		showPage("history")
+
+		let html = "<h2>History</h2>"
+		let previousDate = null
+		let dateString = null
+
+		if (browseHistory.length == 0) {
+			html += "<p style='font-style:italic'>No history</p>"
+		} else {
+			for (let i = browseHistory.length - 1; i >= 0; i--) {
+				if (browseHistory[i].date != previousDate) {
+					if (html.substr(html.length - 2) == ', ') {
+						html = html.substr(0, html.length - 2)
+					}
+					previousDate = browseHistory[i].date
+					dateString = new Date(Date.parse(browseHistory[i].date)).toLocaleDateString('en-CA', {
+						month: 'short', // this order has nothing to do with the output
+						day: 'numeric',
+						year: 'numeric'
+					})
+					html += "</p><h3>" + dateString + "</h3><p>"
+				}
+				html += createLink(browseHistory[i].name, browseHistory[i].slug, browseHistory[i].chapter, true) + ", "
+			}
+		}
+		if (html.substr(html.length - 2) == ', ') {
+			html = html.substr(0, html.length - 2)
+		}
+
+		document.getElementById("history").innerHTML = html
+		window.scrollTo(0, 0)
+	}
+
+	function homeClicked() {
+		history.pushState('home', '')
+		showPage("home")
+	}
+
+	window.addEventListener('click', (event) => {
+		hideDropDown()
+	})
+
+*/
+
+</script>

@@ -1,0 +1,18 @@
+
+<script>
+
+	if (browseHistory.length > 0) {
+		let history = browseHistory[browseHistory.length - 1]
+
+		var url = "./chapters/" + history.slug + "-" + history.chapter + ".html"
+		loadURL(url)
+		currentChapter = history.chapter
+		currentBookIndex = slugToIndex(history.slug)
+	}
+
+	if (localStorage.browseHistory != undefined) {
+		browseHistory = JSON.parse(localStorage.browseHistory)
+	}
+
+	
+</script>

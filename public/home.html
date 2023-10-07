@@ -1,0 +1,45 @@
+<h1>Chapter of the Day</h1>
+
+
+<h1>History</h1>
+
+
+
+<h1>All Chapters</h1>
+
+
+<script src="books.js"></script>
+
+<script>
+	books.forEach(function (book) {
+		var bookDiv = document.createElement("div")
+		bookDiv.innerHTML = "<div class='index-book'>" + book.name + "</div>"
+		var chapterLinks = "<div class='index-chapters'>"
+		for (let i = 1; i <= book.chapters; i++) {
+			chapterLinks += createLink(book.name, book.slug, i) + " "
+		}
+		chapterLinks += "</div>"
+		bookDiv.innerHTML += chapterLinks
+		document.getElementById("home").appendChild(bookDiv)
+	})
+
+
+	function createLink(name, slug, chapter, includeBook) {
+		if (includeBook) {
+			return `<a href='#' style='white-space:nowrap' data-slug='${slug}' data-book='${name}' data-chapter='${chapter}' onclick='loadChapter(this); return false'>${name} ${chapter}</a>`
+		} else {
+			return `<a href='#' data-slug='${slug}' data-book='${name}' data-chapter='${chapter}' onclick='loadChapter(this); return false'>${chapter}</a>`
+		}
+	}
+
+  function slugToIndex(slug) {
+		for (var i = 0; i < books.length; i++) {
+			if (books[i].slug == slug) {
+				return i
+			}
+		}
+		return 0
+	}
+
+
+</script>
