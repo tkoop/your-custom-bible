@@ -56,8 +56,8 @@
 			<div style="display:flex">
 				<div>Case</div>
 				<div><select style="padding: 6px; border-radius: 6px; background-color: #c3c3ff;" id="case" onclick="event.stopPropagation()" onchange="setSetting(this.options[this.selectedIndex].value, 'case'); event.stopPropagation()">
-					<option value="lower">Lower case</option>
-					<option value="upper">Upper case</option>
+					<option value="lower" data-version="L">Lower case</option>
+					<option value="upper" data-version="U">Upper case</option>
 				</select>
 				</div>
 			</div>
@@ -423,7 +423,10 @@
 		var nameSelect = document.querySelector("#name")
 		var nameLetter = nameSelect.options[nameSelect.selectedIndex].dataset.letter
 
-		return "YCB-" + letter + nameLetter
+		var caseSelect = document.querySelector("#case")
+		upperLower = caseSelect.options[caseSelect.selectedIndex].dataset.version
+
+		return "YCB-" + letter + nameLetter + upperLower
 	}
 
 	function addArrows(html,  title) {
