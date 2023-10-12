@@ -18,11 +18,10 @@ Parse those files, renaming them to be their book and chapter name like "1-chron
 import { readdir, writeFile, open } from 'node:fs/promises'
 import { parse } from 'node-html-parser'	// https://www.npmjs.com/package/node-html-parser
 import { words } from './words.mjs'
+import { isPlural } from './pluralYous.mjs'
 import { info } from 'node:console'
 
 parseChapters()
-
-var capWords = {}	// words are keys, values are "true"
 
 
 async function parseChapters() {
@@ -41,12 +40,15 @@ async function parseChapters() {
 		var doc = parse(html)
 		const title = doc.querySelector("title").text
 		if (!title.endsWith("BSB")) continue
-		
+
 		// Convert title to file name
 		var newFilename = title.substring(0, title.length - 4)
 		newFilename = newFilename.toLocaleLowerCase()
 		newFilename = newFilename.replaceAll(" ", "-")
 
+		var book = newFilename.substring(0, newFilename.lastIndexOf("-"))
+		var chapter = newFilename.substring(newFilename.lastIndexOf("-")+1)
+		
 		// Remove certain things
 		doc.querySelector("#topheading")?.remove()
 		doc.querySelector(".bsbheading")?.remove()
@@ -64,7 +66,7 @@ async function parseChapters() {
 		// Footnotes begins
 		var footNotesAt = body.indexOf('<a class="pcalibre2 pcalibre1 pcalibre pcalibre3" id="fn">')
 		if (footNotesAt >= 0) {
-			body = body.substring(0, footNotesAt) + "<div class='fn'>" + body.substring(footNotesAt) + "</div>"
+			body = body.substring(0, footNotesAt) + '<div class="fn">' + body.substring(footNotesAt) + '</div>'
 		}
 
 		// Spelling
@@ -90,73 +92,125 @@ async function parseChapters() {
 		body = body.replaceAll('THE LORD', '<span class="caplord" data-name="THE LORD">THE LORD</span>')
 
 		// Capitalized Divine Names
-		if (newFilename.startsWith("genesis")) body = parseDivineNames(body)
+		// console.log(newFilename, `'${book}', '${chapter}'`)
+		// if (newFilename.startsWith("exodus")) body = parseDivineNamesAndYalls(body, book, chapter)
+		body = parseDivineNamesAndYalls(body, book, chapter)
 
 
 		writeFile(toDir + "/" + newFilename + ".html", body)
 	}
 
-	console.log("Cap words: " + Object.keys(capWords).sort().map(w=>w+":"+capWords[w]).join(", "))
+	// console.log("Cap words: " + Object.keys(reportedAllows).sort().map(w=>w+":"+reportedAllows[w]).join(", "))
+	// console.log("Cap words: " + Object.keys(reportedAllows).sort())
+
 }
 
-function isLetter(char) {
-  return char.toLowerCase() !== char.toUpperCase()
+function isWordCharacter(char) {
+  if (char.toLowerCase() !== char.toUpperCase()) return true
+
+	const chars = "0123456789-'"
+	if (chars.indexOf(char) >= 0) return true
+
+	return false
 }
 
-function parseDivineNames(body) {
+var reportedAllows = {}
+var reportedBads = {}
+
+function parseDivineNamesAndYalls(body, book, chapter) {
+	// console.log(book, chapter)
 	var beginning = true	// Expecting the beginning of a sentence? We expect a capital letter.
 	var inTag = false	// In a tag? We'll ignore everything here.
 	var inWord = false // In a word?
-	var inHeading = false
-	var inRefText = false
+	// var inHeading = false
+	// var inRefText = false
 	var closingTag = false
-	// var inQuote = false
+	var verse = 0
 
 	var tags = []	// a stack of tags. Each item is an array of words. Push and pop.
 
 	var index = 0
 	var word = ""
 
+	var badCapitalWords = ['Spirit', 'He', 'His', 'Us', 'Our', 'Most', 'High', 'Creator', 'Oak', 'You', 'Me', 'Him', 'Almighty', 'My', 'Your', 'Garden', 'One', 'Judge', 'Wilderness', 'Himself', 'The', 'Will', 'Provide', 'Myself', 'Bring', 'Book', 'Feast', 'Unleavened', 'Bread', 'Ten', 'Commandments', 'Covenant', 'Ark', 'Desert', 'Feast', 'Most', 'Holy', 'Place', 'Is', 'My', 'Banner', 'Law', 'Meeting', 'Mine', 'Name', 'Place', 'Presence', 'Tent', 'Testimony', 'Weeks', 'Baby', 'Baptist', 'Beginning', 'Being', 'Beloved', 'Branch', 'Blessed', 'Blood', 'Breach', 'Broad', 'Brook', 'Brothers', 'Canal', 'City', 'Chosen', 'Corner', 'Days', 'Day', 'Dawn', 'Daughter', 'Destiny', 'Destroy', 'Eastern', 'Dwelling', 'Dung', 'Dove', 'Diviners', 'Divine', 'Distant', 'Elevin', 'Everlasting', 'Excellency', 'Fair', 'Faithful', 'Fast', 'Father', 'Favor', 'Fear', 'Field', 'First', 'Freedmen', 'Fountain', 'Forum', 'Fortune', 'Forsaken', 'Forest', 'Fool', 'Folly', 'Fish', 'Gate', 'Glory', 'Goats', 'Greater', 'Great', 'Inspection', 'Land', 'Light', 'Life', 'Magesty', 'Lower', 'Lawgiver', 'Launderer', 'Last', 'Lion', 'Lily', 'Lilies', 'Majestic', 'Majesty', 'Maker', 'Messenger', 'Messiah', 'Mighty', 'Middle', 'Moon', 'Moons', 'Monument', 'Morning', 'Mountain', 'Mysteries', 'New', 'Oaks', 'Not', 'Ovens', 'Out', 'Prophets', 'Province', 'Pool', 'Prophet', 'Prophets', 'Protector', 'Rabbi', 'Righteous', 'Righteousness', 'Rock', 'Rocks', 'Root', 'Salvation', 'Salt', 'Savior', 'Scripture', 'Scriptures', 'Sea', 'Second', 'Seer', 'Seers', 'Serpent', 'Servant', 'Seven', 'Sheep', 'Shepherd', 'Shepherds', 'Song', 'Songs', 'Slaughter', 'Skull', 'Sought', 'Sovereign', 'Spirits', 'Spring', 'Star', 'Still', 'Stoic', 'Stone', 'Street', 'Streets', 'Strength', 'Supper', 'Teacher', 'Taverns', 'Thunder', 'Three', 'Thirty', 'Their', 'Tower', 'Travelers', 'Treatise', 'Tower', 'Twelve', 'Twin', 'True', 'Truth', 'Union', 'Valley', 'Yours', 'Yourself']
+
+	var replacements = []	// each item in array is an object with keys: 
+			// "at" (index in string to start replacing), 
+			// "length" (length of word to remove), 
+			// "replacement" (the string to replace those characters with)
+
 	function processWord(thisWord, index) {
-		var inFootnote = (tags.length > 0 && tags[0][2] == "fn")
+		// console.log(beginning, thisWord, JSON.stringify(tags))
+		word = ""
+		if (Number.parseInt(thisWord) == thisWord) return
 
-		// console.log("word: '" + thisWord + "' beginning? ", beginning, " heading?", inHeading, " inreftext", inRefText)
-		if (inHeading || inRefText || inFootnote) {
-			beginning = false
-			word = ""
+		if (tags.length > 0 && (tags[tags.length-1][2] == "fn" || tags[0][2] == "fn")) {
 			return
 		}
 
-		if (thisWord == "I") {
-			beginning = false
-			word = ""
+		if (tags.length > 0 && (tags[tags.length-1][2] == "hdg" || tags[tags.length-1][2] == "subhdg")) {
+			beginning = true
 			return
 		}
+
+		if (tags.length > 0 && tags[tags.length-1][2] == "cross1") {
+			beginning = true
+			return
+		}
+
+		if (tags.length > 0 && tags[tags.length-1][2] == "reftext") {
+			verse = thisWord
+			return
+		}
+
+		/*
+		var thisWordLower = thisWord.toLowerCase()
+		if (thisWordLower == "you" || thisWordLower == "your" || thisWordLower == "yours" || thisWordLower == "yourselves") {
+			// console.log("'"+thisWord+"' found in ", book, chapter, verse, "Plural?", isPlural(book, chapter, verse))
+		}
+		*/
 
 		if (thisWord.substring(0, 1) == thisWord.substring(0, 1).toUpperCase()) {
 			if (beginning) {
 				// All is good. It's a capital at the beginning of a sentence.
+				// console.log("Good capital word at beginning of sentence. beginning is now false.")
+				beginning = false
 			} else {
 				// Capital not at beginning of sentence. Alert!
-				// console.log(`Capital word found: '${thisWord}'`)
-				capWords[thisWord] = (capWords[thisWord] ?? 0) + 1
-				if (thisWord == "But") {
-					console.log(body.substring(index-50, index+20))
+				if (badCapitalWords.includes(thisWord)) {
+					replacements.push({
+						at: index - thisWord.length,
+						length: thisWord.length,
+						replacement: "<span class='cap'>" + thisWord + "</span><span class='nocap'>" + thisWord.toLowerCase() + "</span>"
+					})
+
+					if (reportedBads[thisWord] != undefined) {
+						reportedBads[thisWord] = reportedBads[thisWord] + 1
+					} else {
+						// console.log(`Bad capital word found!!!!!!!!!!!!!!!!!!!!!! '${thisWord}'`)
+						reportedBads[thisWord] = 0
+					}
+				} else {
+					if (reportedAllows[thisWord] != undefined) {
+						reportedAllows[thisWord] = reportedAllows[thisWord] + 1
+					} else {
+						// console.log(`Capital, but we'll allow it: '${thisWord}'`)
+						reportedAllows[thisWord] = 0
+					}
 				}
 			}
 		} else {
 			if (beginning) {
 				// Lower case at start of sentence. :(
+					// console.log("Lower case word at beginning of sentence. beginning is now false.")
+					beginning = false
 			} else {
 				// Lower case in middle of sentence
 			}
 		}
-		// console.log("setting beginning to false")
-		beginning = false
-		word = ""
 	}
 
-	for(var index=0; index<body.length; index++) {
+	for(index=0; index<body.length; index++) {
 		var ch = body.substring(index, index+1)
 		// console.log(`beginning is ${beginning}, inTag is ${inTag}, inWord is ${inWord} and we're looking at a '${ch}'`)
 
@@ -164,13 +218,14 @@ function parseDivineNames(body) {
 			if (ch == ">") {
 				// console.log("end tag word: " + word)
 				if (closingTag && word == "p") {
-					inHeading = false
+					// inHeading = false
 					beginning = true	// we just came across a <p> or </p> tag
 				}
-				if (closingTag && word == "span") {
-					inRefText = false
-				}
+				// if (closingTag && word == "span") {
+				// 	inRefText = false
+				// }
 				if (closingTag) {
+					// console.log("should pop tag ", JSON.stringify(tags[tags.length-1]))
 					tags.pop()
 				}
 				// console.log(JSON.stringify(tags))
@@ -178,11 +233,12 @@ function parseDivineNames(body) {
 				inTag = false
 				if (tags.length >= 1 && tags[tags.length - 1][0] == "br") {
 					// This was a <br> tag, so let's not store it.
+					// console.log("popping br")
 					tags.pop()
 				}
 				continue
 			}
-			if (isLetter(ch)) {
+			if (isWordCharacter(ch)) {
 				word = word + ch
 			} else {
 				if (ch == "/") {
@@ -191,13 +247,14 @@ function parseDivineNames(body) {
 				}
 				if (word != "") {
 					// console.log("tag word: '" + word + "'")
-					if (word == "reftext") {
-						inRefText = true
-					}
-					if (word == "hdg" || word == "subhdg") {
-						inHeading = true
-					}
+					// if (word == "reftext") {
+					// 	inRefText = true
+					// }
+					// if (word == "hdg" || word == "subhdg") {
+					// 	inHeading = true
+					// }
 				}
+				// console.log("Adding word '" + word + "'")
 				if (word != "") tags[tags.length-1].push(word)
 				word = ""
 			}
@@ -205,9 +262,9 @@ function parseDivineNames(body) {
 		}
 
 		if (ch == "<") {
+			if (word != "") processWord(word, index)
 			tags.push([])	// Yes, but maybe it's a closing tag, so we'll pop it if it is a closing tag
 			closingTag = false
-			if (word != "") processWord(word, index)
 			inTag = true
 			continue
 		}
@@ -217,6 +274,20 @@ function parseDivineNames(body) {
 			beginning = true
 		}
 
+		if (ch == "‘") {
+			var previousCh = body.substring(index-1, index)
+			if (previousCh == " " || previousCh == ">") {
+				// previous char was a space, so this must be the beginning of a quote
+				// console.log("in quote")
+				// inQuote = true
+				beginning = true
+			} else {
+				// The previous char was a letter, so this is either an apostrophe, like in << haven't >>, or it is the end of quotation, like << yes', she said >>
+				// Either way we are not at the beginning
+				beginning = false
+			}
+		}
+
 		/*
 		if (ch == "”") {	// closing quotation mark
 			inQuote = false
@@ -224,32 +295,34 @@ function parseDivineNames(body) {
 	}
 	*/
 
-		if (ch == "." || ch == "?" || ch == "!") {
+		if (ch == "." || ch == "?" || ch == "!" || ch == ":") {
 			if (word != "") processWord(word, index)
 			beginning = true
 			continue
 		}
 
-		if (!inWord && isLetter(ch)) {
+		if (!inWord && isWordCharacter(ch)) {
 			word = ch
 			inWord = true
 			continue
 		}
 
-		if (inWord && isLetter(ch)) {
+		if (inWord && isWordCharacter(ch)) {
 			word = word + ch
 			continue
 		} 
 
-		if (inWord && !isLetter(ch)) {
+		if (inWord && !isWordCharacter(ch)) {
 			if (word != "") processWord(word, index)
 			inWord = false
 			continue
 		} 
 	}
 
-
-	console.log("parsing")
+	for(var i=replacements.length-1; i>= 0; i--) {
+		var rep = replacements[i]
+		body = body.substring(0, rep.at) + rep.replacement + body.substring(rep.at + rep.length)
+	}
 
 	return body
 }
