@@ -1,8 +1,16 @@
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700&family=Sawarabi+Mincho&display=swap');
+@font-face {
+  font-family: sura;
+  src: url(fonts/Sura-Regular.ttf);
+}
+
+@font-face {
+  font-family: sourceSansPro;
+  src: url(fonts/SourceSansPro-Regular.ttf);
+}
 
 body {
-	font-family: 'SourceSansPro', sans-serif;
-	font-size: 16px;
+	font-family: 'sourceSansPro', serif;
+	font-size: 18px;
 	color: #333;
 	background-color: #fffef8;
 	margin: 0px;
