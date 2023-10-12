@@ -54,6 +54,15 @@
 			</div>
 
 			<div style="display:flex">
+				<div>Case</div>
+				<div><select style="padding: 6px; border-radius: 6px; background-color: #c3c3ff;" id="case" onclick="event.stopPropagation()" onchange="setSetting(this.options[this.selectedIndex].value, 'case'); event.stopPropagation()">
+					<option value="lower">Lower case</option>
+					<option value="upper">Upper case</option>
+				</select>
+				</div>
+			</div>
+
+			<div style="display:flex">
 				<div>God's Name</div>
 				<div><select style="padding: 6px; border-radius: 6px; background-color: #c3c3ff;" id="name" onclick="event.stopPropagation()" onchange="setSetting(this.options[this.selectedIndex].value, 'name'); event.stopPropagation()">
 					<option value="Yahweh" data-letter="Y">Yahweh</option>
@@ -148,6 +157,17 @@
 		document.querySelectorAll(".spell").forEach(el => el.style.display = "none")
 		document.querySelectorAll(".spell."+spellingCountry).forEach(el => el.style.display = "inline")
 
+		// Case
+		var caseSelect = document.querySelector("#case")
+		var caseSetting = caseSelect.options[caseSelect.selectedIndex].value
+		if (caseSetting == 'lower') {
+			document.querySelectorAll(".cap").forEach(el => el.style.display = "none")
+			document.querySelectorAll(".nocap").forEach(el => el.style.display = "inline")
+		} else {
+			document.querySelectorAll(".cap").forEach(el => el.style.display = "inline")
+			document.querySelectorAll(".nocap").forEach(el => el.style.display = "none")
+		}
+		
 		// God's name
 		var nameSelect = document.querySelector("#name")
 		var name = nameSelect.options[nameSelect.selectedIndex].value
@@ -175,7 +195,7 @@
 
 	for(key in JSON.parse(localStorage.settings ?? "{}")) {
 		var value = JSON.parse(localStorage.settings ?? "{}")[key]
-		if (key == "spelling" || key == "name") {
+		if (key == "spelling" || key == "name" || key == "case") {
 			document.querySelectorAll("select#"+key+" option").forEach(op => {
 				if (op.value == value) {
 					op.selected = true

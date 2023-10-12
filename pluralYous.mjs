@@ -168,11 +168,11 @@ const yallVerses = [
     "revelation": "RV"
   }
 
-  function isYall(book, chapter, verse) {
+  function isPlural(book, chapter, verse) {
     const abbrev = books[book]
     const verseKey = abbrev + chapter + "_" + verse
     return yallVerses.includes(verseKey)
   }
 
-  export { isYall }
+  export { isPlural }
 
