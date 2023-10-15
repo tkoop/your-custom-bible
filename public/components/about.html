@@ -1,0 +1,30 @@
+<h1>About</h1>
+
+<p>Your Custom Bible is based on the Berean Study Bible.  Since this translation is in the <a href="https://berean.bible/licensing.htm">public domain</a>, it allows us to customize it as we like.</p>
+
+<p>The rest of the software is licensed under the <a href="https://choosealicense.com/licenses/mit/">MIT license</a>.</p>
+
+<p><button class="standardButton" onclick="checkUpdates()">Check for Updates</button></p>
+
+
+<script>
+
+
+function checkUpdates() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+      for(let registration of registrations) {
+        console.log("Calling unregister.") 
+        registration.unregister()
+      }
+      window.location.reload()
+    }).catch(function(err) {
+      console.log('Service Worker registration failed: ', err);
+    });
+  } else {
+    console.log("service workers not supported.")
+    window.location.reload()
+  }
+}
+
+</script>
