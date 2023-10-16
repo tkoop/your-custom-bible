@@ -12,14 +12,14 @@
 
 <body>
 	<div id="header">
-		<svg id="menuIcon" onclick="showDropDown(event)" xmlns="http://www.w3.org/2000/svg"
+		<svg id="menuIcon" onclick="fireEvent({name:'menuIconClicked', eventObject:event})" xmlns="http://www.w3.org/2000/svg"
 			xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="24" height="24" viewBox="0 0 24 24">
 			<path d="M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z" />
 		</svg>
 
 		<div id="dropdown" style="text-align:left"></div>
 
-		<img onclick="indexClicked()" src="images/banner.png" style="cursor: pointer; height: 88%; margin-top: -4px;">
+		<img onclick="fireEvent({name:'showPage', page:'index'})" src="images/banner.png" style="cursor: pointer; height: 88%; margin-top: -4px;">
 	</div>
 
 	<div id="body" style="font-family: 'sura', sans-serif;">
@@ -31,52 +31,48 @@
 </body>
 
 <script src="framework.js"></script>
+<script src="settings.js"></script>
 <script src="books.js"></script>
 
 <script>
-	var browseHistory = []
 
-
-	loadComponent("dropdown", "components/menu.html")
-	loadComponent("chapter", "components/chapter.html")
-	loadComponent("about", "components/about.html")
-	loadComponent("history", "components/history.html")
-
-	registerEventListener(event=>true, function(event) {
-//		console.log("all event listener", event)
-	})
-
-
-	if (localStorage.browseHistory != undefined) {
-		browseHistory = JSON.parse(localStorage.browseHistory)
+	async function loadComponents() {
+		await loadComponent("dropdown", "components/menu.html")
+		loadComponent("chapter", "components/chapter.html")
+		loadComponent("about", "components/about.html")
+		loadComponent("history", "components/history.html")
 	}
+	loadComponents()
+
 
 	window.addEventListener('popstate', (event) => {
 		if (event.state == null || event.state == "index") {
-			fireEvent({name:"showPage", page:"index"})
+			fireEvent({name:"showPage", page:"index", skipHistory:true})
 		} else if (event.state == "history") {
-			fireEvent({name:"showPage", page:"history"})
+			fireEvent({name:"showPage", page:"history", skipHistory:true})
 		} else {
-			loadURL(event.state)
+			loadURL(event.state, true)
 		}
 	})
 
-
-
-
-
-	function slugToIndex(slug) {
-		for (var i = 0; i < books.length; i++) {
-			if (books[i].slug == slug) {
-				return i
-			}
+	function setDarkMode(goToDarkMode) {
+		if (goToDarkMode) {
+			document.body.classList.add("dark")
+		} else {
+			document.body.classList.remove("dark")
 		}
-		return 0
 	}
+	setDarkMode(settings.darkMode)
+
+	registerEventListener(event=>event.name=="settingsUpdated", function(event) {
+		setDarkMode(settings.darkMode)
+	})
 
 
 	registerEventListener(event=>event.name=="showPage", function(event) {
-		console.log("show page listener	", event)
+		if (!event.skipHistory) {
+			if (event.page != "chapter") history.pushState(event.page, '')
+		}
 		document.querySelectorAll(".page").forEach(e => e.style.display = "none")
 		document.getElementById(event.page).style.display = "block"
 		window.scrollTo(0, 0)

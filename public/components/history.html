@@ -2,28 +2,29 @@
 
 <script>
 
+
 function recreateHistory() {
   let html = "<h2>History</h2>"
   let previousDate = null
   let dateString = null
   
-  if (browseHistory.length == 0) {
+  if (settings.browseHistory.length == 0) {
     html += "<p style='font-style:italic'>No history</p>"
   } else {
-    for (let i = browseHistory.length - 1; i >= 0; i--) {
-      if (browseHistory[i].date != previousDate) {
+    for (let i = settings.browseHistory.length - 1; i >= 0; i--) {
+      if (settings.browseHistory[i].date != previousDate) {
         if (html.substr(html.length - 2) == ', ') {
           html = html.substr(0, html.length - 2)
         }
-        previousDate = browseHistory[i].date
-        dateString = new Date(Date.parse(browseHistory[i].date)).toLocaleDateString('en-CA', {
+        previousDate = settings.browseHistory[i].date
+        dateString = new Date(Date.parse(settings.browseHistory[i].date)).toLocaleDateString('en-CA', {
           month: 'short', // this order has nothing to do with the output
           day: 'numeric',
           year: 'numeric'
         })
         html += "</p><h3>" + dateString + "</h3><p>"
       }
-      html += createLink(browseHistory[i].name, browseHistory[i].slug, browseHistory[i].chapter, true) + ", "
+      html += createLink(settings.browseHistory[i].name, settings.browseHistory[i].slug, settings.browseHistory[i].chapter, true) + ", "
     }
   }
   if (html.substr(html.length - 2) == ', ') {
