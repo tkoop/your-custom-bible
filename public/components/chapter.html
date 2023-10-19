@@ -30,8 +30,8 @@
 			document.querySelectorAll(".cross1").forEach(el => el.style.display = "none")
 		}
 
-		// Verses
-		if (settings.verses) {
+		// Footnotes
+		if (settings.footnotes) {
 			document.querySelectorAll(".fn").forEach(el => el.style.display = null)
 		} else {
 			document.querySelectorAll(".fn").forEach(el => el.style.display = "none")
@@ -168,11 +168,11 @@
 
 	function addArrows(html,  title) {
 		var arrows = `<div style="display: flex; justify-content: space-between;">
-			<svg onclick="moveChapter(-1)" style="color:#b9b9b9; cursor:pointer; width:34px;height:34px" viewBox="0 0 24 24">
+			<svg data-cy="chapterLeft" onclick="moveChapter(-1)" style="color:#b9b9b9; cursor:pointer; width:34px;height:34px" viewBox="0 0 24 24">
 				<path fill="currentColor" d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" />
 			</svg>
 			<div id="chapterTitle">${title}</div>
-			<svg onclick="moveChapter(1)" style="color:#b9b9b9; cursor:pointer; width:34px;height:34px" viewBox="0 0 24 24">
+			<svg data-cy="chapterRight" onclick="moveChapter(1)" style="color:#b9b9b9; cursor:pointer; width:34px;height:34px" viewBox="0 0 24 24">
 				<path fill="currentColor" d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" />
 			</svg>
 		</div>`
@@ -191,7 +191,7 @@
 	books.forEach(function (book) {
 		var bookDiv = document.createElement("div");
 		bookDiv.innerHTML = "<div class='index-book'>" + book.name + "</div>"
-		var chapterLinks = "<div class='index-chapters'>"
+		var chapterLinks = "<div class='index-chapters' data-cy='"+book.name+"'>"
 		for (let i = 1; i <= book.chapters; i++) {
 			chapterLinks += createLink(book.name, book.slug, i) + " "
 		}
