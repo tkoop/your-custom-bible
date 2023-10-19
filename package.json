@@ -5,9 +5,12 @@
 	"version": "1.0.0",
 	"scripts": {
 		"compile": "node compile.mjs",
-		"serve": "node node_modules/simplehttpserver/cli.js public"
+		"serve": "node node_modules/simplehttpserver/cli.js public",
+		"tests": "npx cypress open -b chrome --e2e",
+		"testscli": "npx cypress run -b chrome --e2e"
 	},
 	"dependencies": {
+		"cypress": "^13.3.2",
 		"node-html-parser": "^6.1.10",
 		"simplehttpserver": "^0.3.0"
 	}
