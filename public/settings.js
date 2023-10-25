@@ -42,7 +42,7 @@ function loadSettingsFromLocalStorage() {
   settings.footnotes = localStorageSettings?.footnotes  ?? false
   settings.references = localStorageSettings?.references  ?? false
   settings.verses = localStorageSettings?.verses  ?? false
-  settings.you = localStorageSettings?.you  ?? "you"
+  settings.you = localStorageSettings?.you  ?? "youpl"
   settings.browseHistory = JSON.parse(localStorage?.browseHistory ?? "[]")
 
   fireEvent({name:"settingsUpdated"})
