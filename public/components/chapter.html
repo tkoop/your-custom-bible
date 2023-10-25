@@ -8,6 +8,27 @@
 		applySettings()
 	})
 
+	function matchYou(original, you, your, yours) {
+		var form = "?"
+
+		// all lower case
+		if (original == "you") return you
+		if (original == "your") return your
+		if (original == "yours") return yours
+
+		// first letter capital
+		if (original == "You") return you[0].toUpperCase() + you.substr(1)
+		if (original == "Your") return your[0].toUpperCase() + your.substr(1)
+		if (original == "Yours") return yours[0].toUpperCase() + yours.substr(1)
+
+		// all capital
+		if (original == "YOU") return you.toUpperCase()
+		if (original == "YOUR") return your.toUpperCase()
+		if (original == "YOURS") return yours.toUpperCase()
+
+		return original
+	}
+
 	function applySettings() {
 		// Titles
 		if (settings.titles) {
@@ -58,6 +79,19 @@
 			document.querySelectorAll(".lord").forEach(el => el.innerHTML = settings.name)
 			document.querySelectorAll(".caplord").forEach(el => el.innerHTML = settings.name.toUpperCase())
 		}
+
+		// You plural
+		document.querySelectorAll(".youpl").forEach(el => {
+			if (settings.you == "you") el.innerHTML = matchYou(el.dataset.word, "you", "your", "yours")
+			if (settings.you == "youall") el.innerHTML = matchYou(el.dataset.word, "you all", "you all's", "you alls's")
+			if (settings.you == "yall") el.innerHTML = matchYou(el.dataset.word, "y'all", "y'all's", "y'alls's")
+			if (settings.you == "youguys") el.innerHTML = matchYou(el.dataset.word, "you guys", "you guy's", "you guys's")
+			if (settings.you == "youpl") el.innerHTML = matchYou(el.dataset.word, "you", "your", "yours") + "<sup>(pl)</sup>"
+
+			if (settings.you == "youcoloured") 
+				el.innerHTML = "<span style='color:#00a7f9'>" + matchYou(el.dataset.word, "you", "your", "yours") + "</span>"
+		})
+
 
 		if (document.querySelectorAll(".version")) {
 			document.querySelectorAll(".version").forEach(el => el.innerHTML = getVersion())

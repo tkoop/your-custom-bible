@@ -18,7 +18,8 @@ Parse those files, renaming them to be their book and chapter name like "1-chron
 import { readdir, writeFile, open } from 'node:fs/promises'
 import { parse } from 'node-html-parser'	// https://www.npmjs.com/package/node-html-parser
 import { words } from './words.mjs'
-import { isPlural } from './pluralYous.mjs'
+import { isPlural } from './yours.mjs'
+//import { isPlural } from './pluralYous.mjs'
 import { info } from 'node:console'
 
 parseChapters()
@@ -93,7 +94,9 @@ async function parseChapters() {
 
 		// Capitalized Divine Names
 		// console.log(newFilename, `'${book}', '${chapter}'`)
-		// if (newFilename.startsWith("exodus")) body = parseDivineNamesAndYalls(body, book, chapter)
+//		if (newFilename.startsWith("1-timothy")) {
+		//	body = parseDivineNamesAndYalls(body, book, chapter)
+	//	}
 		body = parseDivineNamesAndYalls(body, book, chapter)
 
 
@@ -131,6 +134,7 @@ function parseDivineNamesAndYalls(body, book, chapter) {
 
 	var index = 0
 	var word = ""
+	var youCount = 0
 
 	var badCapitalWords = ['Spirit', 'He', 'His', 'Us', 'Our', 'Most', 'High', 'Creator', 'Oak', 'You', 'Me', 'Him', 'Almighty', 'My', 'Your', 'Garden', 'One', 'Judge', 'Wilderness', 'Himself', 'The', 'Will', 'Provide', 'Myself', 'Bring', 'Book', 'Feast', 'Unleavened', 'Bread', 'Ten', 'Commandments', 'Covenant', 'Ark', 'Desert', 'Feast', 'Most', 'Holy', 'Place', 'Is', 'My', 'Banner', 'Law', 'Meeting', 'Mine', 'Name', 'Place', 'Presence', 'Tent', 'Testimony', 'Weeks', 'Baby', 'Baptist', 'Beginning', 'Being', 'Beloved', 'Branch', 'Blessed', 'Blood', 'Breach', 'Broad', 'Brook', 'Brothers', 'Canal', 'City', 'Chosen', 'Corner', 'Days', 'Day', 'Dawn', 'Daughter', 'Destiny', 'Destroy', 'Eastern', 'Dwelling', 'Dung', 'Dove', 'Diviners', 'Divine', 'Distant', 'Elevin', 'Everlasting', 'Excellency', 'Fair', 'Faithful', 'Fast', 'Father', 'Favor', 'Fear', 'Field', 'First', 'Freedmen', 'Fountain', 'Forum', 'Fortune', 'Forsaken', 'Forest', 'Fool', 'Folly', 'Fish', 'Gate', 'Glory', 'Goats', 'Greater', 'Great', 'Inspection', 'Land', 'Light', 'Life', 'Magesty', 'Lower', 'Lawgiver', 'Launderer', 'Last', 'Lion', 'Lily', 'Lilies', 'Majestic', 'Majesty', 'Maker', 'Messenger', 'Messiah', 'Mighty', 'Middle', 'Moon', 'Moons', 'Monument', 'Morning', 'Mountain', 'Mysteries', 'New', 'Oaks', 'Not', 'Ovens', 'Out', 'Prophets', 'Province', 'Pool', 'Prophet', 'Prophets', 'Protector', 'Rabbi', 'Righteous', 'Righteousness', 'Rock', 'Rocks', 'Root', 'Salvation', 'Salt', 'Savior', 'Scripture', 'Scriptures', 'Sea', 'Second', 'Seer', 'Seers', 'Serpent', 'Servant', 'Seven', 'Sheep', 'Shepherd', 'Shepherds', 'Song', 'Songs', 'Slaughter', 'Skull', 'Sought', 'Sovereign', 'Spirits', 'Spring', 'Star', 'Still', 'Stoic', 'Stone', 'Street', 'Streets', 'Strength', 'Supper', 'Teacher', 'Taverns', 'Thunder', 'Three', 'Thirty', 'Their', 'Tower', 'Travelers', 'Treatise', 'Tower', 'Twelve', 'Twin', 'True', 'Truth', 'Union', 'Valley', 'Word', 'Yours', 'Yourself']
 
@@ -142,6 +146,14 @@ function parseDivineNamesAndYalls(body, book, chapter) {
 	function processWord(thisWord, index) {
 		// console.log(beginning, thisWord, JSON.stringify(tags))
 		word = ""
+
+		if (tags.length > 0 && tags[tags.length-1][2] == "reftext") {
+			// console.log("found verse ", thisWord)
+			verse = thisWord
+			youCount = 0
+			return
+		}
+
 		if (Number.parseInt(thisWord) == thisWord) return
 
 		if (tags.length > 0 && (tags[tags.length-1][2] == "fn" || tags[0][2] == "fn")) {
@@ -158,17 +170,17 @@ function parseDivineNamesAndYalls(body, book, chapter) {
 			return
 		}
 
-		if (tags.length > 0 && tags[tags.length-1][2] == "reftext") {
-			verse = thisWord
-			return
-		}
-
-		/*
 		var thisWordLower = thisWord.toLowerCase()
-		if (thisWordLower == "you" || thisWordLower == "your" || thisWordLower == "yours" || thisWordLower == "yourselves") {
-			// console.log("'"+thisWord+"' found in ", book, chapter, verse, "Plural?", isPlural(book, chapter, verse))
+		if (thisWordLower == "you" || thisWordLower == "your" || thisWordLower == "yours") {
+			if (isPlural(book, chapter, verse, youCount)) {
+				replacements.push({
+					at: index - thisWord.length,
+					length: thisWord.length,
+					replacement: "<span class='youpl' data-word='" + thisWord + "'>" + thisWord + "</span>"
+				})
+			}
+			youCount++
 		}
-		*/
 
 		if (thisWord.substring(0, 1) == thisWord.substring(0, 1).toUpperCase()) {
 			if (beginning) {
