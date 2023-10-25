@@ -94,10 +94,10 @@ async function parseChapters() {
 
 		// Capitalized Divine Names
 		// console.log(newFilename, `'${book}', '${chapter}'`)
-		if (newFilename.startsWith("genesis") && chapter == 3) {
-			body = parseDivineNamesAndYalls(body, book, chapter)
-		}
-		// body = parseDivineNamesAndYalls(body, book, chapter)
+//		if (newFilename.startsWith("1-timothy")) {
+		//	body = parseDivineNamesAndYalls(body, book, chapter)
+	//	}
+		body = parseDivineNamesAndYalls(body, book, chapter)
 
 
 		writeFile(toDir + "/" + newFilename + ".html", body)
@@ -172,9 +172,12 @@ function parseDivineNamesAndYalls(body, book, chapter) {
 
 		var thisWordLower = thisWord.toLowerCase()
 		if (thisWordLower == "you" || thisWordLower == "your" || thisWordLower == "yours") {
-			var pl = isPlural(book, chapter, verse, youCount)
-			if (true) {
-				console.log("'"+thisWord+"' found in ", book, chapter, verse, "Plural?", (pl ? "y":"n"))
+			if (isPlural(book, chapter, verse, youCount)) {
+				replacements.push({
+					at: index - thisWord.length,
+					length: thisWord.length,
+					replacement: "<span class='youpl' data-word='" + thisWord + "'>" + thisWord + "</span>"
+				})
 			}
 			youCount++
 		}

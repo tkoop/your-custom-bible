@@ -6906,7 +6906,7 @@ var yours = [
   'song of solomon 2:7-0',
   'song of solomon 3:3-0',
   'song of solomon 3:5-0',
-  'song of solomon 4:15-0',
+//  'song of solomon 4:15-0',
   'song of solomon 5:8-0',
   'song of solomon 5:8-1',
   'song of solomon 5:9-2',
@@ -6977,8 +6977,8 @@ var yours = [
 
 
 function isPlural(book, chapter, verse, youCount) {
-  // return yours[book + " " + chapter + ":" + verse + "-" + youCount] != undefined
-  return yours.includes(`${book} ${chapter}:${verse}-${youCount}`)
+  var spacedBook = book.replaceAll("-", " ")
+  return yours.includes(`${spacedBook} ${chapter}:${verse}-${youCount}`)
 }
 
 export { isPlural }

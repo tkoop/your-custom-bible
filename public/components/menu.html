@@ -59,6 +59,19 @@
   </div>
 </div>
 
+<div style="display:flex">
+  <div>Plural You</div>
+  <div><select style="padding: 6px; border-radius: 6px; background-color: #c3c3ff;" id="you" onclick="event.stopPropagation()" onchange="fireEvent({name:'setSetting', setting:'you', value:this.options[this.selectedIndex].value}); event.stopPropagation()">
+    <option value="you">you</option>
+    <option value="youcoloured" style="color:purple">you (blue)</option>
+    <option value="youpl">you<b>(pl)</b></option>
+    <option value="youall">you all</option>
+    <option value="yall">y'all</option>
+    <option value="youguys">you guys</option>
+  </select>
+  </div>
+</div>
+
 <div>
   <div>Font Size</div>
   <div class="buttonHolder">
@@ -110,6 +123,10 @@ document.querySelectorAll("select#name option").forEach(op => {
 
 document.querySelectorAll("select#case option").forEach(op => {
   if (op.value == settings.case) op.selected = true
+})
+
+document.querySelectorAll("select#you option").forEach(op => {
+  if (op.value == settings.you) op.selected = true
 })
 
 document.querySelector("input[data-value=titles]").checked = settings.titles

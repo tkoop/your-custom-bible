@@ -12,6 +12,7 @@ var settings = {
   footnotes: false,
   references: false,
   verses: false,
+  you: "youpl",
 }
 
 
@@ -41,6 +42,7 @@ function loadSettingsFromLocalStorage() {
   settings.footnotes = localStorageSettings?.footnotes  ?? false
   settings.references = localStorageSettings?.references  ?? false
   settings.verses = localStorageSettings?.verses  ?? false
+  settings.you = localStorageSettings?.you  ?? "you"
   settings.browseHistory = JSON.parse(localStorage?.browseHistory ?? "[]")
 
   fireEvent({name:"settingsUpdated"})
@@ -59,6 +61,7 @@ function saveSettingsToLocalStorage() {
     footnotes: settings.footnotes,
     references: settings.references,
     verses: settings.verses,
+    you: settings.you,
   }
 
   localStorage.settings = JSON.stringify(localStorageSettings)
