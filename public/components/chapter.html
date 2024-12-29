@@ -1,206 +1,281 @@
 <script>
+	var currentBookIndex = 0;
+	var currentChapter = 1; // one based
 
-	var currentBookIndex = 0
-	var currentChapter = 1 // one based
-
-
-	registerEventListener(e=>e.name=="settingsUpdated", function(event) {
-		applySettings()
-	})
+	registerEventListener(
+		(e) => e.name == "settingsUpdated",
+		function (event) {
+			applySettings();
+		}
+	);
 
 	function matchYou(original, you, your, yours) {
-		var form = "?"
+		var form = "?";
 
 		// all lower case
-		if (original == "you") return you
-		if (original == "your") return your
-		if (original == "yours") return yours
+		if (original == "you") return you;
+		if (original == "your") return your;
+		if (original == "yours") return yours;
 
 		// first letter capital
-		if (original == "You") return you[0].toUpperCase() + you.substr(1)
-		if (original == "Your") return your[0].toUpperCase() + your.substr(1)
-		if (original == "Yours") return yours[0].toUpperCase() + yours.substr(1)
+		if (original == "You") return you[0].toUpperCase() + you.substr(1);
+		if (original == "Your") return your[0].toUpperCase() + your.substr(1);
+		if (original == "Yours") return yours[0].toUpperCase() + yours.substr(1);
 
 		// all capital
-		if (original == "YOU") return you.toUpperCase()
-		if (original == "YOUR") return your.toUpperCase()
-		if (original == "YOURS") return yours.toUpperCase()
+		if (original == "YOU") return you.toUpperCase();
+		if (original == "YOUR") return your.toUpperCase();
+		if (original == "YOURS") return yours.toUpperCase();
 
-		return original
+		return original;
 	}
 
 	function applySettings() {
 		// Titles
 		if (settings.titles) {
-			document.querySelectorAll(".hdg").forEach(el => el.style.display = null)
+			document
+				.querySelectorAll(".hdg")
+				.forEach((el) => (el.style.display = null));
 		} else {
-			document.querySelectorAll(".hdg").forEach(el => el.style.display = "none")
+			document
+				.querySelectorAll(".hdg")
+				.forEach((el) => (el.style.display = "none"));
 		}
 
 		// Verses
 		if (settings.verses) {
-			document.querySelectorAll(".reftext").forEach(el => el.style.display = null)
+			document
+				.querySelectorAll(".reftext")
+				.forEach((el) => (el.style.display = null));
 		} else {
-			document.querySelectorAll(".reftext").forEach(el => el.style.display = "none")
+			document
+				.querySelectorAll(".reftext")
+				.forEach((el) => (el.style.display = "none"));
 		}
 
 		// Cross references
 		if (settings.references) {
-			document.querySelectorAll(".cross1").forEach(el => el.style.display = null)
+			document
+				.querySelectorAll(".cross1")
+				.forEach((el) => (el.style.display = null));
 		} else {
-			document.querySelectorAll(".cross1").forEach(el => el.style.display = "none")
+			document
+				.querySelectorAll(".cross1")
+				.forEach((el) => (el.style.display = "none"));
 		}
 
 		// Footnotes
 		if (settings.footnotes) {
-			document.querySelectorAll(".fn").forEach(el => el.style.display = null)
+			document
+				.querySelectorAll(".fn")
+				.forEach((el) => (el.style.display = null));
 		} else {
-			document.querySelectorAll(".fn").forEach(el => el.style.display = "none")
+			document
+				.querySelectorAll(".fn")
+				.forEach((el) => (el.style.display = "none"));
 		}
 
 		// Spelling
-		document.querySelectorAll(".spell").forEach(el => el.style.display = "none")
-		document.querySelectorAll(".spell."+settings.spelling).forEach(el => el.style.display = "inline")
+		document
+			.querySelectorAll(".spell")
+			.forEach((el) => (el.style.display = "none"));
+		document
+			.querySelectorAll(".spell." + settings.spelling)
+			.forEach((el) => (el.style.display = "inline"));
 
 		// Case
-		if (settings.case == 'lower') {
-			document.querySelectorAll(".cap").forEach(el => el.style.display = "none")
-			document.querySelectorAll(".nocap").forEach(el => el.style.display = "inline")
+		if (settings.case == "lower") {
+			document
+				.querySelectorAll(".cap")
+				.forEach((el) => (el.style.display = "none"));
+			document
+				.querySelectorAll(".nocap")
+				.forEach((el) => (el.style.display = "inline"));
 		} else {
-			document.querySelectorAll(".cap").forEach(el => el.style.display = "inline")
-			document.querySelectorAll(".nocap").forEach(el => el.style.display = "none")
+			document
+				.querySelectorAll(".cap")
+				.forEach((el) => (el.style.display = "inline"));
+			document
+				.querySelectorAll(".nocap")
+				.forEach((el) => (el.style.display = "none"));
 		}
-		
+
 		// God's name
 		if (settings.name == "LORD") {
-			document.querySelectorAll(".lord").forEach(el => el.innerHTML = el.dataset.name)
-			document.querySelectorAll(".caplord").forEach(el => el.innerHTML = el.dataset.name)
+			document
+				.querySelectorAll(".lord")
+				.forEach((el) => (el.innerHTML = el.dataset.name));
+			document
+				.querySelectorAll(".caplord")
+				.forEach((el) => (el.innerHTML = el.dataset.name));
 		} else {
-			document.querySelectorAll(".lord").forEach(el => el.innerHTML = settings.name)
-			document.querySelectorAll(".caplord").forEach(el => el.innerHTML = settings.name.toUpperCase())
+			document
+				.querySelectorAll(".lord")
+				.forEach((el) => (el.innerHTML = settings.name));
+			document
+				.querySelectorAll(".caplord")
+				.forEach((el) => (el.innerHTML = settings.name.toUpperCase()));
 		}
 
 		// You plural
-		document.querySelectorAll(".youpl").forEach(el => {
-			if (settings.you == "you") el.innerHTML = matchYou(el.dataset.word, "you", "your", "yours")
-			if (settings.you == "youall") el.innerHTML = matchYou(el.dataset.word, "you all", "you all's", "you alls's")
-			if (settings.you == "yall") el.innerHTML = matchYou(el.dataset.word, "y'all", "y'all's", "y'alls's")
-			if (settings.you == "youguys") el.innerHTML = matchYou(el.dataset.word, "you guys", "you guy's", "you guys's")
-			if (settings.you == "youpl") el.innerHTML = matchYou(el.dataset.word, "you", "your", "yours") + "<sup>(pl)</sup>"
+		document.querySelectorAll(".youpl").forEach((el) => {
+			if (settings.you == "you")
+				el.innerHTML = matchYou(el.dataset.word, "you", "your", "yours");
+			if (settings.you == "youall")
+				el.innerHTML = matchYou(
+					el.dataset.word,
+					"you all",
+					"you all's",
+					"you alls's"
+				);
+			if (settings.you == "yall")
+				el.innerHTML = matchYou(
+					el.dataset.word,
+					"y'all",
+					"y'all's",
+					"y'alls's"
+				);
+			if (settings.you == "youguys")
+				el.innerHTML = matchYou(
+					el.dataset.word,
+					"you guys",
+					"you guy's",
+					"you guys's"
+				);
+			if (settings.you == "youpl")
+				el.innerHTML =
+					matchYou(el.dataset.word, "you", "your", "yours") + "<sup>(pl)</sup>";
 
-			if (settings.you == "youcoloured") 
-				el.innerHTML = "<span style='color:#00a7f9'>" + matchYou(el.dataset.word, "you", "your", "yours") + "</span>"
-		})
-
+			if (settings.you == "youcoloured")
+				el.innerHTML =
+					"<span style='color:#00a7f9'>" +
+					matchYou(el.dataset.word, "you", "your", "yours") +
+					"</span>";
+		});
 
 		if (document.querySelectorAll(".version")) {
-			document.querySelectorAll(".version").forEach(el => el.innerHTML = getVersion())
+			document
+				.querySelectorAll(".version")
+				.forEach((el) => (el.innerHTML = getVersion()));
 		}
 
-		document.getElementById("body").style.fontSize = settings.fontSize + "px"
+		document.getElementById("body").style.fontSize = settings.fontSize + "px";
 	}
 
-
-	applySettings()
-
+	applySettings();
 
 	function loadChapter(element) {
-		var book = element.dataset.book
-		var slug = element.dataset.slug
-		var chapter = element.dataset.chapter
-		loadThisChapter(book, slug, chapter)
+		var book = element.dataset.book;
+		var slug = element.dataset.slug;
+		var chapter = element.dataset.chapter;
+		loadThisChapter(book, slug, chapter);
 	}
-
 
 	function loadThisChapter(book, slug, chapter) {
-		var url = "./chapters/" + slug + "-" + chapter + ".html"
-		history.pushState(url, '')
+		var url = "./chapters/" + slug + "-" + chapter + ".html";
+		history.pushState(url, "");
 
-		loadURL(url)
+		loadURL(url);
 
-		fireEvent({name:"addBrowseHistory", data:{
-			name: book,
-			slug: slug,
-			chapter: chapter,
-			date: ((new Date()) + '').substr(0, 10)
-		}})
+		fireEvent({
+			name: "addBrowseHistory",
+			data: {
+				name: book,
+				slug: slug,
+				chapter: chapter,
+				date: (new Date() + "").substr(0, 10),
+			},
+		});
 
-		currentBookIndex = slugToIndex(slug)
-		currentChapter = chapter
-		window.scrollTo(0, 0)
+		currentBookIndex = slugToIndex(slug);
+		currentChapter = chapter;
+		window.scrollTo(0, 0);
 	}
-
 
 	function moveChapter(delta) {
-		currentChapter = parseInt(currentChapter) + parseInt(delta)
+		currentChapter = parseInt(currentChapter) + parseInt(delta);
 		if (currentChapter < 1) {
-			currentBookIndex--
+			currentBookIndex--;
 			if (currentBookIndex < 0) {
 				// went left from Genesis
-				currentBookIndex = books.length - 1
+				currentBookIndex = books.length - 1;
 			}
-			currentChapter = books[currentBookIndex].chapters
+			currentChapter = books[currentBookIndex].chapters;
 		}
 		if (currentChapter > books[currentBookIndex].chapters) {
-			currentBookIndex++
+			currentBookIndex++;
 			if (currentBookIndex >= books.length) {
 				// went right from Revelation
-				currentBookIndex = 0
+				currentBookIndex = 0;
 			}
-			currentChapter = 1
+			currentChapter = 1;
 		}
 
-		loadThisChapter(books[currentBookIndex].name, books[currentBookIndex].slug, currentChapter)
+		loadThisChapter(
+			books[currentBookIndex].name,
+			books[currentBookIndex].slug,
+			currentChapter
+		);
 	}
-
 
 	function titleCase(str) {
-		return str.toLowerCase().split(' ').map(function(word) {
-			return word.replace(word[0], word[0].toUpperCase());
-		}).join(' ');
+		return str
+			.toLowerCase()
+			.split(" ")
+			.map(function (word) {
+				return word.replace(word[0], word[0].toUpperCase());
+			})
+			.join(" ");
 	}
-
 
 	function slugToIndex(slug) {
 		for (var i = 0; i < books.length; i++) {
 			if (books[i].slug == slug) {
-				return i
+				return i;
 			}
 		}
-		return 0
+		return 0;
 	}
 
 	function loadURL(url, skipHistory) {
-		fireEvent({name:"showPage", page:"chapter", skipHistory:!!skipHistory})
+		var chapter = document.getElementById("chapter");
+		chapter.innerHTML = "";
 
-		fetch(url).then(function (response) {
-			return response.text()
-		}).then(function (text) {
-			var chapter = document.getElementById("chapter")
-			var title = url.substr(11, url.length-16)
-			title = titleCase(title.replaceAll("-", " "))
-			title = title.replace(" Of ", " of ")	// Song of Solomon
-			title = title + " (<span class='version'></span>)"
-			chapter.innerHTML = addArrows(text, title)
-			applySettings()
-		})
+		fireEvent({
+			name: "showPage",
+			page: "chapter",
+			skipHistory: !!skipHistory,
+		});
+
+		fetch(url)
+			.then(function (response) {
+				return response.text();
+			})
+			.then(function (text) {
+				var title = url.substr(11, url.length - 16);
+				title = titleCase(title.replaceAll("-", " "));
+				title = title.replace(" Of ", " of "); // Song of Solomon
+				title = title + " (<span class='version'></span>)";
+				chapter.innerHTML = addArrows(text, title);
+				applySettings();
+			});
 	}
 
 	function getVersion() {
-		var letter = settings.spelling.substr(0,1).toUpperCase()
-		if (letter == "G") letter = "B"
+		var letter = settings.spelling.substr(0, 1).toUpperCase();
+		if (letter == "G") letter = "B";
 
-		var nameLetter = settings.name[0]
-		if (settings.name == "G-d") nameLetter = "D"
-		if (settings.name == "YHWH") nameLetter = "W"
-		if (settings.name == "YHVH") nameLetter = "V"
+		var nameLetter = settings.name[0];
+		if (settings.name == "G-d") nameLetter = "D";
+		if (settings.name == "YHWH") nameLetter = "W";
+		if (settings.name == "YHVH") nameLetter = "V";
 
-		var upperLower = settings.case[0].toUpperCase()
+		var upperLower = settings.case[0].toUpperCase();
 
-		return "YCB-" + letter + nameLetter + upperLower
+		return "YCB-" + letter + nameLetter + upperLower;
 	}
 
-	function addArrows(html,  title) {
+	function addArrows(html, title) {
 		var arrows = `<div style="display: flex; justify-content: space-between;">
 			<svg data-cy="chapterLeft" onclick="moveChapter(-1)" style="color:#b9b9b9; cursor:pointer; width:34px;height:34px" viewBox="0 0 24 24">
 				<path fill="currentColor" d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" />
@@ -209,39 +284,38 @@
 			<svg data-cy="chapterRight" onclick="moveChapter(1)" style="color:#b9b9b9; cursor:pointer; width:34px;height:34px" viewBox="0 0 24 24">
 				<path fill="currentColor" d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" />
 			</svg>
-		</div>`
+		</div>`;
 
-		return arrows + html + "<div style='height:20px'></div>" + arrows
+		return arrows + html + "<div style='height:20px'></div>" + arrows;
 	}
 
 	function createLink(name, slug, chapter, includeBook) {
 		if (includeBook) {
-			return `<a href='#' style='white-space:nowrap' data-slug='${slug}' data-book='${name}' data-chapter='${chapter}' onclick='loadChapter(this); return false'>${name} ${chapter}</a>`
+			return `<a href='#' style='white-space:nowrap' data-slug='${slug}' data-book='${name}' data-chapter='${chapter}' onclick='loadChapter(this); return false'>${name} ${chapter}</a>`;
 		} else {
-			return `<a href='#' data-slug='${slug}' data-book='${name}' data-chapter='${chapter}' onclick='loadChapter(this); return false'>${chapter}</a>`
+			return `<a href='#' data-slug='${slug}' data-book='${name}' data-chapter='${chapter}' onclick='loadChapter(this); return false'>${chapter}</a>`;
 		}
 	}
 
 	books.forEach(function (book) {
 		var bookDiv = document.createElement("div");
-		bookDiv.innerHTML = "<div class='index-book'>" + book.name + "</div>"
-		var chapterLinks = "<div class='index-chapters' data-cy='"+book.name+"'>"
+		bookDiv.innerHTML = "<div class='index-book'>" + book.name + "</div>";
+		var chapterLinks =
+			"<div class='index-chapters' data-cy='" + book.name + "'>";
 		for (let i = 1; i <= book.chapters; i++) {
-			chapterLinks += createLink(book.name, book.slug, i) + " "
+			chapterLinks += createLink(book.name, book.slug, i) + " ";
 		}
-		chapterLinks += "</div>"
-		bookDiv.innerHTML += chapterLinks
-		document.getElementById("index").appendChild(bookDiv)
-	})
-
+		chapterLinks += "</div>";
+		bookDiv.innerHTML += chapterLinks;
+		document.getElementById("index").appendChild(bookDiv);
+	});
 
 	if (settings.browseHistory.length > 0) {
-		let history = settings.browseHistory[settings.browseHistory.length - 1]
+		let history = settings.browseHistory[settings.browseHistory.length - 1];
 
-		var url = "./chapters/" + history.slug + "-" + history.chapter + ".html"
-		loadURL(url)
-		currentChapter = history.chapter
-		currentBookIndex = slugToIndex(history.slug)
+		var url = "./chapters/" + history.slug + "-" + history.chapter + ".html";
+		loadURL(url);
+		currentChapter = history.chapter;
+		currentBookIndex = slugToIndex(history.slug);
 	}
-  
 </script>

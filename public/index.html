@@ -1,102 +1,126 @@
-<!DOCTYPE html><html>
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="encoding" content="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="theme-color" content="#ececb2ff" />
+		<title>Your Custom Bible</title>
+		<link rel="stylesheet" href="style.css?version=1" />
+		<link rel="icon" type="image/png" href="images/logo.png?version=1" />
+		<link rel="manifest" href="manifest.json?version=1" />
+	</head>
 
-<head>
-	<meta name="encoding" content="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="theme-color" content="#ececb2ff">
-	<title>Your Custom Bible</title>
-	<link rel="stylesheet" href="style.css?version=1" />
-	<link rel="icon" type="image/png" href="images/logo.png?version=1" />
-	<link rel="manifest" href="manifest.json?version=1">
-</head>
+	<body>
+		<div id="header">
+			<svg
+				id="menuIcon"
+				onclick="fireEvent({name:'menuIconClicked', eventObject:event})"
+				xmlns="http://www.w3.org/2000/svg"
+				xmlns:xlink="http://www.w3.org/1999/xlink"
+				version="1.1"
+				width="24"
+				height="24"
+				viewBox="0 0 24 24"
+			>
+				<path d="M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z" />
+			</svg>
 
-<body>
-	<div id="header">
-		<svg id="menuIcon" onclick="fireEvent({name:'menuIconClicked', eventObject:event})" xmlns="http://www.w3.org/2000/svg"
-			xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="24" height="24" viewBox="0 0 24 24">
-			<path d="M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z" />
-		</svg>
+			<div id="dropdown" style="text-align: left"></div>
 
-		<div id="dropdown" style="text-align:left"></div>
+			<img
+				onclick="fireEvent({name:'showPage', page:'index'})"
+				src="images/banner.png"
+				style="cursor: pointer; height: 88%; margin-top: -4px"
+			/>
+		</div>
 
-		<img onclick="fireEvent({name:'showPage', page:'index'})" src="images/banner.png" style="cursor: pointer; height: 88%; margin-top: -4px;">
-	</div>
+		<div id="body" style="font-family: 'sura', sans-serif">
+			<div id="index" class="page" style="display: block"></div>
+			<div id="history" class="page">History page</div>
+			<div id="about" class="page"></div>
+			<div id="chapter" class="page"></div>
+		</div>
+	</body>
 
-	<div id="body" style="font-family: 'sura', sans-serif;">
-		<div id="index" class="page" style="display:block"></div>
-		<div id="history" class="page">History page</div>
-		<div id="about" class="page"></div>
-		<div id="chapter" class="page"></div>
-	</div>
-</body>
+	<script src="framework.js"></script>
+	<script src="settings.js"></script>
+	<script src="books.js"></script>
 
-<script src="framework.js"></script>
-<script src="settings.js"></script>
-<script src="books.js"></script>
-
-<script>
-
-	async function loadComponents() {
-		await loadComponent("dropdown", "components/menu.html")
-		loadComponent("chapter", "components/chapter.html")
-		loadComponent("about", "components/about.html")
-		loadComponent("history", "components/history.html")
-	}
-	loadComponents()
-
-
-	window.addEventListener('popstate', (event) => {
-		if (event.state == null || event.state == "index") {
-			fireEvent({name:"showPage", page:"index", skipHistory:true})
-		} else if (event.state == "history") {
-			fireEvent({name:"showPage", page:"history", skipHistory:true})
-		} else {
-			loadURL(event.state, true)
+	<script>
+		async function loadComponents() {
+			await loadComponent("dropdown", "components/menu.html");
+			loadComponent("chapter", "components/chapter.html");
+			loadComponent("about", "components/about.html");
+			loadComponent("history", "components/history.html");
 		}
-	})
+		loadComponents();
 
-	function setDarkMode(goToDarkMode) {
-		if (goToDarkMode) {
-			document.body.classList.add("dark")
-		} else {
-			document.body.classList.remove("dark")
+		window.addEventListener("popstate", (event) => {
+			if (event.state == null || event.state == "index") {
+				fireEvent({ name: "showPage", page: "index", skipHistory: true });
+			} else if (event.state == "history") {
+				fireEvent({ name: "showPage", page: "history", skipHistory: true });
+			} else {
+				loadURL(event.state, true);
+			}
+		});
+
+		function setDarkMode(goToDarkMode) {
+			if (goToDarkMode) {
+				document.body.classList.add("dark");
+			} else {
+				document.body.classList.remove("dark");
+			}
 		}
-	}
-	setDarkMode(settings.darkMode)
+		setDarkMode(settings.darkMode);
 
-	registerEventListener(event=>event.name=="settingsUpdated", function(event) {
-		setDarkMode(settings.darkMode)
-	})
+		registerEventListener(
+			(event) => event.name == "settingsUpdated",
+			function (event) {
+				setDarkMode(settings.darkMode);
+			}
+		);
 
+		registerEventListener(
+			(event) => event.name == "showPage",
+			function (event) {
+				if (!event.skipHistory) {
+					if (event.page != "chapter") history.pushState(event.page, "");
+				}
+				document
+					.querySelectorAll(".page")
+					.forEach((e) => (e.style.display = "none"));
+				document.getElementById(event.page).style.display = "block";
+				window.scrollTo(0, 0);
+				return;
+			}
+		);
+	</script>
 
-	registerEventListener(event=>event.name=="showPage", function(event) {
-		if (!event.skipHistory) {
-			if (event.page != "chapter") history.pushState(event.page, '')
-		}
-		document.querySelectorAll(".page").forEach(e => e.style.display = "none")
-		document.getElementById(event.page).style.display = "block"
-		window.scrollTo(0, 0)
-		return
-	})
-
-</script>
-
-<script>
-	if (window.location.hostname != "localhost") {
-		if ('serviceWorker' in navigator) {
-			window.addEventListener('load', function () {
-				navigator.serviceWorker.register('./serviceWorker.js', {
-					scope: "./"
-				}).then(function (registration) {
-					console.log('ServiceWorker registered successfully, scope: ', registration.scope);
-				}, function (err) {
-					console.log('ServiceWorker registration failed: ', err);
+	<script>
+		if (window.location.hostname != "localhost") {
+			if ("serviceWorker" in navigator) {
+				window.addEventListener("load", function () {
+					navigator.serviceWorker
+						.register("./serviceWorker.js", {
+							scope: "./",
+						})
+						.then(
+							function (registration) {
+								console.log(
+									"ServiceWorker registered successfully, scope: ",
+									registration.scope
+								);
+							},
+							function (err) {
+								console.log("ServiceWorker registration failed: ", err);
+							}
+						);
+					window.IS_STANDALONE = window.matchMedia(
+						"(display-mode: standalone)"
+					).matches;
 				});
-				window.IS_STANDALONE = window.matchMedia('(display-mode: standalone)').matches;
-			});
+			}
 		}
-	}
-
-</script>
-
+	</script>
 </html>
