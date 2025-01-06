@@ -16,6 +16,17 @@ words["disheveled"] = {
 	us: "disheveled",
 };
 words["dishonor"] = { ca: "dishonour", gb: "dishonour", us: "dishonor" };
+words["dishonorable"] = {
+	ca: "dishonourable",
+	gb: "dishonourable",
+	us: "dishonorable",
+};
+words["dishonors"] = { ca: "dishonours", gb: "dishonours", us: "dishonors" };
+words["dishonored"] = {
+	ca: "dishonoured",
+	gb: "dishonoured",
+	us: "dishonored",
+};
 words["dishonored"] = {
 	ca: "dishonoured",
 	gb: "dishonoured",
