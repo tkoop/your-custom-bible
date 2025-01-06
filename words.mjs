@@ -5,6 +5,20 @@ words["baptize"] = { ca: "baptize", gb: "baptise", us: "baptize" };
 words["behavior"] = { ca: "behaviour", gb: "behaviour", us: "behavior" };
 words["canceled"] = { ca: "cancelled", gb: "cancelled", us: "canceled" };
 words["center"] = { ca: "centre", gb: "centre", us: "center" };
+words["color"] = { ca: "colour", gb: "colour", us: "color" };
+words["colors"] = { ca: "colours", gb: "colours", us: "colors" };
+words["colored"] = { ca: "coloured", gb: "coloured", us: "colored" };
+words["colorful"] = { ca: "colourful", gb: "colourful", us: "colorful" };
+words["dark-colored"] = {
+	ca: "dark-coloured",
+	gb: "dark-coloured",
+	us: "dark-colored",
+};
+words["multicolored"] = {
+	ca: "multicoloured",
+	gb: "multicoloured",
+	us: "multicolored",
+};
 words["clamor"] = { ca: "clamour", gb: "clamour", us: "clamor" };
 words["counseled"] = { ca: "counselled", gb: "counselled", us: "counseled" };
 words["counselor"] = { ca: "counsellor", gb: "counsellor", us: "counselor" };
@@ -42,6 +56,8 @@ words["endeavor"] = { ca: "endeavour", gb: "endeavour", us: "endeavor" };
 words["endeavors"] = { ca: "endeavours", gb: "endeavours", us: "endeavors" };
 words["enroll"] = { ca: "enrol", gb: "enrol", us: "enroll" };
 words["favor"] = { ca: "favour", gb: "favour", us: "favor" };
+words["favorable"] = { ca: "favourable", gb: "favourable", us: "favorable" };
+words["favorably"] = { ca: "favourably", gb: "favourably", us: "favorably" };
 words["favorite"] = { ca: "favourite", gb: "favourite", us: "favorite" };
 words["favoritism"] = {
 	ca: "favouritism",
@@ -89,6 +105,8 @@ words["marveled"] = { ca: "marvelled", gb: "marvelled", us: "marveled" };
 words["marveling"] = { ca: "marvelling", gb: "marvelling", us: "marveling" };
 words["marvelous"] = { ca: "marvellous", gb: "marvellous", us: "marvelous" };
 words["mobilize"] = { ca: "mobilize", gb: "mobilise", us: "mobilize" };
+words["mobilized"] = { ca: "mobilized", gb: "mobilised", us: "mobilized" };
+words["mobilizing"] = { ca: "mobilizing", gb: "mobilising", us: "mobilizing" };
 words["mustache"] = { ca: "moustache", gb: "moustache", us: "mustache" };
 words["nearsighted"] = {
 	ca: "near-sighted",
@@ -98,7 +116,76 @@ words["nearsighted"] = {
 words["neighbor"] = { ca: "neighbour", gb: "neighbour", us: "neighbor" };
 words["odor"] = { ca: "odour", gb: "odour", us: "odor" };
 words["offense"] = { ca: "offence", gb: "offence", us: "offense" };
+words["offensive"] = { ca: "offencive", gb: "offencive", us: "offensive" };
+words["offenses"] = { ca: "offences", gb: "offences", us: "offenses" };
 words["paneled"] = { ca: "panelled", gb: "panelled", us: "paneled" };
+
+words["do not practice"] = {
+	ca: "do not practise",
+	gb: "do not practise",
+	us: "do not practice",
+};
+
+words["to practice"] = {
+	ca: "to practise",
+	gb: "to practise",
+	us: "to practice",
+};
+
+words["or practice"] = {
+	ca: "or practise",
+	gb: "or practise",
+	us: "or practice",
+};
+
+words["practiced"] = {
+	ca: "practised",
+	gb: "practised",
+	us: "practiced",
+};
+
+words["practicing"] = {
+	ca: "practising",
+	gb: "practising",
+	us: "practicing",
+};
+
+words["practice these things"] = {
+	ca: "practise these things",
+	gb: "practise these things",
+	us: "practice these things",
+};
+
+words["who practices"] = {
+	ca: "who practises",
+	gb: "who practises",
+	us: "who practices",
+};
+
+words["to practice"] = {
+	ca: "to practise",
+	gb: "to practise",
+	us: "to practice",
+};
+
+words["do not practice"] = {
+	ca: "do not practise",
+	gb: "do not practise",
+	us: "do not practice",
+};
+
+words["does not practice"] = {
+	ca: "does not practise",
+	gb: "does not practise",
+	us: "does not practice",
+};
+
+words["practices lawlessness"] = {
+	ca: "practises lawlessness",
+	gb: "practises lawlessness",
+	us: "practices lawlessness",
+};
+
 words["pavement"] = { ca: "pavement", gb: "roadway", us: "pavement" };
 words["pretense"] = { ca: "pretence", gb: "pretence", us: "pretense" };
 words["realize"] = { ca: "realize", gb: "realise", us: "realize" };
