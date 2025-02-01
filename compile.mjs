@@ -27,6 +27,34 @@ function upperFirst(word) {
 	return word[0].toUpperCase() + word.substring(1);
 }
 
+function upperCaseWords(body) {
+	/*
+	"<span class='cap'>" +
+	thisWord +
+	"</span><span class='nocap'>" +
+	thisWord.toLowerCase() +
+	"</span><span class='bsb'>" +
+	thisWord +
+	"</span>",
+	*/
+
+	const heavenHtml =
+		"<span class='cap'>Heaven</span>" +
+		"<span class='nocap'>heaven</span>" +
+		"<span class='bsb'>heaven</span>";
+
+	body = body.replace(/\bheaven\b/g, heavenHtml);
+
+	const earthHtml =
+		"<span class='cap'>Earth</span>" +
+		"<span class='nocap'>earth</span>" +
+		"<span class='bsb'>earth</span>";
+
+	body = body.replace(/(?<!\bthe\s)\bearth\b/g, earthHtml);
+
+	return body;
+}
+
 async function parseChapters() {
 	console.log("Parsing BSB...");
 
@@ -143,6 +171,9 @@ async function parseChapters() {
 		//	}
 		body = parseDivineNamesAndYalls(body, book, chapter);
 
+		// Make upper case words that should be upper case
+		body = upperCaseWords(body);
+
 		writeFile(toDir + "/" + newFilename + ".html", body);
 	}
 
@@ -257,6 +288,8 @@ function parseDivineNamesAndYalls(body, book, chapter) {
 							thisWord +
 							"</span><span class='nocap'>" +
 							thisWord.toLowerCase() +
+							"</span><span class='bsb'>" +
+							thisWord +
 							"</span>",
 					});
 
