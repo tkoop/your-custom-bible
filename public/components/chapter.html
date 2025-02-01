@@ -91,13 +91,29 @@
 			document
 				.querySelectorAll(".nocap")
 				.forEach((el) => (el.style.display = "inline"));
-		} else {
+			document
+				.querySelectorAll(".bsb")
+				.forEach((el) => (el.style.display = "none"));
+		} else if (settings.case == "upper") {
 			document
 				.querySelectorAll(".cap")
 				.forEach((el) => (el.style.display = "inline"));
 			document
 				.querySelectorAll(".nocap")
 				.forEach((el) => (el.style.display = "none"));
+			document
+				.querySelectorAll(".bsb")
+				.forEach((el) => (el.style.display = "none"));
+		} else {
+			document
+				.querySelectorAll(".cap")
+				.forEach((el) => (el.style.display = "none"));
+			document
+				.querySelectorAll(".nocap")
+				.forEach((el) => (el.style.display = "none"));
+			document
+				.querySelectorAll(".bsb")
+				.forEach((el) => (el.style.display = "inline"));
 		}
 
 		// God's name
