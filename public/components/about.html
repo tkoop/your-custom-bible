@@ -1,30 +1,57 @@
 <h1>About</h1>
 
-<p>Your Custom Bible is based on the Berean Study Bible.  Since this translation is in the <a href="https://berean.bible/licensing.htm">public domain</a>, it allows us to customize it as we like.</p>
+<p>
+	Your Custom Bible is based on the Berean Study Bible. Since this translation
+	is in the <a href="https://berean.bible/licensing.htm">public domain</a>, it
+	allows us to customize it as we like.
+</p>
 
-<p>The rest of the software is licensed under the <a href="https://choosealicense.com/licenses/mit/">MIT license</a>.</p>
+<p>
+	The rest of the software is licensed under the
+	<a href="https://choosealicense.com/licenses/mit/">MIT license</a>.
+</p>
 
-<p><button class="standardButton" onclick="checkUpdates()">Check for Updates</button></p>
-
+<p>
+	<button class="standardButton" onclick="checkUpdates()">
+		Check for Updates
+	</button>
+</p>
 
 <script>
+	function checkUpdates() {
+		// Check if service workers are supported in the browser
+		if ("serviceWorker" in navigator) {
+			navigator.serviceWorker.getRegistrations().then(function (registrations) {
+				for (let registration of registrations) {
+					// Unregister each service worker
+					registration.unregister().then(function (boolean) {
+						// boolean is true if the service worker was successfully unregistered
+						console.log("Service Worker unregistered:", boolean);
+						alert(
+							"Service Worker unregistered: " + (boolean ? "true" : "false")
+						);
+					});
 
+					// Clear all caches associated with this registration
+					registration.active.caches.keys().then((cacheNames) => {
+						Promise.all(
+							cacheNames.map((cacheName) => {
+								return registration.active.caches.delete(cacheName);
+							})
+						).then(() => {
+							console.log("All caches deleted for this service worker.");
+							alert("All caches deleted for this service worker");
+						});
+					});
 
-function checkUpdates() {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(function(registrations) {
-      for(let registration of registrations) {
-        console.log("Calling unregister.") 
-        registration.unregister()
-      }
-      window.location.reload()
-    }).catch(function(err) {
-      console.log('Service Worker registration failed: ', err);
-    });
-  } else {
-    console.log("service workers not supported.")
-    window.location.reload()
-  }
-}
-
+					// Optionally, you might want to reload the page to ensure changes take effect immediately
+					alert("Service workers were dealth with. Now we need to restart.");
+					window.location.reload();
+				}
+			});
+		} else {
+			console.log("Service workers are not supported in this browser.");
+			alert("Service workers are not supported in this browser.");
+		}
+	}
 </script>
