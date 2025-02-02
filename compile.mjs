@@ -28,29 +28,23 @@ function upperFirst(word) {
 }
 
 function upperCaseWords(body) {
-	/*
-	"<span class='cap'>" +
-	thisWord +
-	"</span><span class='nocap'>" +
-	thisWord.toLowerCase() +
-	"</span><span class='bsb'>" +
-	thisWord +
-	"</span>",
-	*/
-
 	const heavenHtml =
-		"<span class='cap'>Heaven</span>" +
-		"<span class='nocap'>heaven</span>" +
+		"<span class='nocap'>Heaven</span>" +
+		"<span class='cap'>heaven</span>" +
 		"<span class='bsb'>heaven</span>";
-
 	body = body.replace(/\bheaven\b/g, heavenHtml);
 
 	const earthHtml =
+		"<span class='nocap'>Earth</span>" +
 		"<span class='cap'>Earth</span>" +
-		"<span class='nocap'>earth</span>" +
 		"<span class='bsb'>earth</span>";
-
 	body = body.replace(/(?<!\bthe\s)\bearth\b/g, earthHtml);
+
+	const hellHtml =
+		"<span class='nocap'>Hell</span>" +
+		"<span class='cap'>Hell</span>" +
+		"<span class='bsb'>hell</span>";
+	body = body.replace(/\bhell\b/g, hellHtml);
 
 	return body;
 }
