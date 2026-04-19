@@ -6,7 +6,7 @@
 		(e) => e.name == "settingsUpdated",
 		function (event) {
 			applySettings();
-		}
+		},
 	);
 
 	function matchYou(original, you, your, yours) {
@@ -142,21 +142,21 @@
 					el.dataset.word,
 					"you all",
 					"you all's",
-					"you alls's"
+					"you alls's",
 				);
 			if (settings.you == "yall")
 				el.innerHTML = matchYou(
 					el.dataset.word,
 					"y'all",
 					"y'all's",
-					"y'alls's"
+					"y'alls's",
 				);
 			if (settings.you == "youguys")
 				el.innerHTML = matchYou(
 					el.dataset.word,
 					"you guys",
 					"you guy's",
-					"you guys's"
+					"you guys's",
 				);
 			if (settings.you == "youpl")
 				el.innerHTML =
@@ -189,9 +189,11 @@
 
 	function loadThisChapter(book, slug, chapter) {
 		var url = "./chapters/" + slug + "-" + chapter + ".html";
-		history.pushState(url, "");
+		var bookObj = books.find((b) => b.slug === slug);
+		var hash = "#" + bookObj.abbr + "-" + chapter;
+		history.pushState(hash, "", hash);
 
-		loadURL(url);
+		updatePage(hash);
 
 		fireEvent({
 			name: "addBrowseHistory",
@@ -230,7 +232,7 @@
 		loadThisChapter(
 			books[currentBookIndex].name,
 			books[currentBookIndex].slug,
-			currentChapter
+			currentChapter,
 		);
 	}
 
@@ -257,35 +259,31 @@
 		var chapter = document.getElementById("chapter");
 		chapter.innerHTML = "";
 
-		fireEvent({
-			name: "showPage",
-			page: "chapter",
-			skipHistory: !!skipHistory,
-		});
-
 		fetch(url)
 			.then(function (response) {
 				return response.text();
 			})
 			.then(function (text) {
-				var title = url.substr(11, url.length - 16);
-				title = titleCase(title.replaceAll("-", " "));
+				var fileName = url.split("/").pop();
+				var withoutExt = fileName.slice(0, -5);
+				var parts = withoutExt.split("-");
+				var chapterNum = parts.pop();
+				var slug = parts.join("-");
+				var book = books.find((b) => b.slug === slug);
+				var title = book
+					? book.name + " " + chapterNum
+					: titleCase(slug.replaceAll("-", " "));
 				title = title.replace(" Of ", " of "); // Song of Solomon
 				title = title + " (<span class='version'></span>)";
 				chapter.innerHTML = addArrows(text, title);
 				applySettings();
 
-				if (!skipHistory) {
-					var fileName = url.split('/').pop();
-					var withoutExt = fileName.slice(0, -5);
-					var parts = withoutExt.split('-');
-					var chapterNum = parts.pop();
-					var slug = parts.join('-');
-					var book = books.find(b => b.slug === slug);
-					if (book) {
-						window.location.hash = book.abbr + '-' + chapterNum;
-					}
-				}
+				fireEvent({
+					name: "showPage",
+					page: "chapter",
+					hash: book ? book.abbr + "-" + chapterNum : "",
+					skipHistory: !!skipHistory,
+				});
 			});
 	}
 

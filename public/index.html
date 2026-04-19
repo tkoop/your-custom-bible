@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
 	<head>
 		<meta name="encoding" content="utf-8" />
@@ -13,12 +13,19 @@
 	<body>
 		<div id="header">
 			<div id="rightIcons">
-
-				<div id="dotIcon" onclick="console.log('firing'); fireEvent({name:'dotIconClicked', eventObject:event})">&#128906;</div>
+				<div
+					id="dotIcon"
+					onclick="
+						console.log('firing');
+						fireEvent({ name: 'dotIconClicked', eventObject: event });
+					"
+				>
+					&#128906;
+				</div>
 
 				<svg
 					id="menuIcon"
-					onclick="fireEvent({name:'menuIconClicked', eventObject:event})"
+					onclick="fireEvent({ name: 'menuIconClicked', eventObject: event })"
 					xmlns="http://www.w3.org/2000/svg"
 					xmlns:xlink="http://www.w3.org/1999/xlink"
 					version="1.1"
@@ -33,13 +40,13 @@
 			<div id="dropdown" style="text-align: left"></div>
 
 			<img
-				onclick="fireEvent({name:'showPage', page:'index'})"
+				onclick="fireEvent({ name: 'showPage', page: 'index' })"
 				src="images/banner.png"
 				style="cursor: pointer; height: 88%; margin-top: -4px"
 			/>
 		</div>
 
-		<div id="body" style="font-family: 'sura', sans-serif">
+		<div id="body" style="font-family: &quot;sura&quot;, sans-serif">
 			<div id="index" class="page" style="display: block"></div>
 			<div id="history" class="page">History page</div>
 			<div id="about" class="page"></div>
@@ -63,27 +70,44 @@
 		}
 		loadComponents().then(() => {
 			if (window.location.hash) {
-				var hash = window.location.hash.slice(1);
-				var parts = hash.split('-');
-				var abbr = parts[0].toUpperCase();
-				var chapter = parts.slice(1).join('-'); // in case chapter has -, but usually not
-				var book = books.find((b) => b.abbr.toUpperCase() === abbr);
-				if (book && chapter) {
-					var url = "chapters/" + book.slug + "-" + chapter + ".html";
-					loadURL(url);
-				}
+				history.replaceState(window.location.hash, "", window.location.hash);
+				updatePage(window.location.hash);
+			} else {
+				history.replaceState("#", "", "#");
+				updatePage("#");
 			}
 		});
 
 		window.addEventListener("popstate", (event) => {
-			if (event.state == null || event.state == "index") {
-				fireEvent({ name: "showPage", page: "index", skipHistory: true });
-			} else if (event.state == "history") {
-				fireEvent({ name: "showPage", page: "history", skipHistory: true });
-			} else {
-				loadURL(event.state, true);
-			}
+			updatePage(event.state);
 		});
+
+		function updatePage(state) {
+			if (state === "#") {
+				fireEvent({ name: "showPage", page: "index", skipHistory: true });
+			} else if (state === "#history") {
+				fireEvent({ name: "showPage", page: "history", skipHistory: true });
+			} else if (state === "#about") {
+				fireEvent({ name: "showPage", page: "about", skipHistory: true });
+			} else if (state && state.startsWith("#")) {
+				// chapter hash like #Gen-1
+				const hash = state.slice(1); // remove #
+				const parts = hash.split("-");
+				const abbr = parts[0].toUpperCase();
+				const chapter = parts.slice(1).join("-");
+				const book = books.find((b) => b.abbr.toUpperCase() === abbr);
+				if (book && chapter) {
+					const url = "chapters/" + book.slug + "-" + chapter + ".html";
+					loadURL(url, true);
+				} else {
+					// invalid hash, go to index
+					fireEvent({ name: "showPage", page: "index", skipHistory: true });
+				}
+			} else {
+				// fallback to index
+				fireEvent({ name: "showPage", page: "index", skipHistory: true });
+			}
+		}
 
 		function setDarkMode(goToDarkMode) {
 			if (goToDarkMode) {
@@ -98,14 +122,19 @@
 			(event) => event.name == "settingsUpdated",
 			function (event) {
 				setDarkMode(settings.darkMode);
-			}
+			},
 		);
 
 		registerEventListener(
 			(event) => event.name == "showPage",
 			function (event) {
 				if (!event.skipHistory) {
-					if (event.page != "chapter") history.pushState(event.page, "");
+					let hash;
+					if (event.page === "index") hash = "#";
+					else if (event.page === "history") hash = "#history";
+					else if (event.page === "about") hash = "#about";
+					else if (event.page === "chapter") hash = "#" + event.hash;
+					history.pushState(hash, "", hash);
 				}
 				document
 					.querySelectorAll(".page")
@@ -113,7 +142,7 @@
 				document.getElementById(event.page).style.display = "block";
 				window.scrollTo(0, 0);
 				return;
-			}
+			},
 		);
 	</script>
 
@@ -129,15 +158,15 @@
 							function (registration) {
 								console.log(
 									"ServiceWorker registered successfully, scope: ",
-									registration.scope
+									registration.scope,
 								);
 							},
 							function (err) {
 								console.log("ServiceWorker registration failed: ", err);
-							}
+							},
 						);
 					window.IS_STANDALONE = window.matchMedia(
-						"(display-mode: standalone)"
+						"(display-mode: standalone)",
 					).matches;
 				});
 			}

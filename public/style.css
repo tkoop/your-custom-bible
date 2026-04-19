@@ -44,6 +44,8 @@ body {
 	z-index: 1000;
 	border-radius: 12px;
 	background-color: #fffef8;
+	max-width: calc(100vw - 32px);
+	box-sizing: border-box;
 }
 
 .page {
