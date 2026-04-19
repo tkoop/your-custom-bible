@@ -274,6 +274,18 @@
 				title = title + " (<span class='version'></span>)";
 				chapter.innerHTML = addArrows(text, title);
 				applySettings();
+
+				if (!skipHistory) {
+					var fileName = url.split('/').pop();
+					var withoutExt = fileName.slice(0, -5);
+					var parts = withoutExt.split('-');
+					var chapterNum = parts.pop();
+					var slug = parts.join('-');
+					var book = books.find(b => b.slug === slug);
+					if (book) {
+						window.location.hash = book.abbr + '-' + chapterNum;
+					}
+				}
 			});
 	}
 
