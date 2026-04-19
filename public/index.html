@@ -12,18 +12,23 @@
 
 	<body>
 		<div id="header">
-			<svg
-				id="menuIcon"
-				onclick="fireEvent({name:'menuIconClicked', eventObject:event})"
-				xmlns="http://www.w3.org/2000/svg"
-				xmlns:xlink="http://www.w3.org/1999/xlink"
-				version="1.1"
-				width="24"
-				height="24"
-				viewBox="0 0 24 24"
-			>
-				<path d="M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z" />
-			</svg>
+			<div id="rightIcons">
+
+				<div id="dotIcon" onclick="console.log('firing'); fireEvent({name:'dotIconClicked', eventObject:event})">&#128906;</div>
+
+				<svg
+					id="menuIcon"
+					onclick="fireEvent({name:'menuIconClicked', eventObject:event})"
+					xmlns="http://www.w3.org/2000/svg"
+					xmlns:xlink="http://www.w3.org/1999/xlink"
+					version="1.1"
+					width="24"
+					height="24"
+					viewBox="0 0 24 24"
+				>
+					<path d="M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z" />
+				</svg>
+			</div>
 
 			<div id="dropdown" style="text-align: left"></div>
 
@@ -40,6 +45,8 @@
 			<div id="about" class="page"></div>
 			<div id="chapter" class="page"></div>
 		</div>
+
+		<div id="speedReader" class="modal" style="display: none"></div>
 	</body>
 
 	<script src="framework.js"></script>
@@ -49,11 +56,24 @@
 	<script>
 		async function loadComponents() {
 			await loadComponent("dropdown", "components/menu.html");
-			loadComponent("chapter", "components/chapter.html");
-			loadComponent("about", "components/about.html");
-			loadComponent("history", "components/history.html");
+			await loadComponent("chapter", "components/chapter.html");
+			await loadComponent("about", "components/about.html");
+			await loadComponent("history", "components/history.html");
+			await loadComponent("speedReader", "components/speedReader.html");
 		}
-		loadComponents();
+		loadComponents().then(() => {
+			if (window.location.hash) {
+				var hash = window.location.hash.slice(1);
+				var parts = hash.split('-');
+				var abbr = parts[0].toUpperCase();
+				var chapter = parts.slice(1).join('-'); // in case chapter has -, but usually not
+				var book = books.find((b) => b.abbr.toUpperCase() === abbr);
+				if (book && chapter) {
+					var url = "chapters/" + book.slug + "-" + chapter + ".html";
+					loadURL(url);
+				}
+			}
+		});
 
 		window.addEventListener("popstate", (event) => {
 			if (event.state == null || event.state == "index") {

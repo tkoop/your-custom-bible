@@ -1,0 +1,136 @@
+<div id="speedWord" style="font-size: 48px; text-align: center; color: black;">&nbsp;</div>
+
+<button id="pausePlayBtn" style="font-size: 32px; display: block; margin: 20px auto 0; padding: 10px 20px; cursor: pointer; border-radius: 10px;">&#x23F8;</button>
+
+<div id="currentVerse" style="margin-top:12px; text-align:center; font-size: 18px; align-self: center;">Verse 1</div>
+
+<div style="display: flex; justify-content: center; gap: 10px; margin-top: 0px;">
+	<button id="prevVerseBtn" style="font-size: 24px; padding: 5px 10px; cursor: pointer; border-radius: 5px; color: black;">&#171;</button>
+	<button id="nextVerseBtn" style="font-size: 24px; padding: 5px 10px; cursor: pointer; border-radius: 5px; color: black;">&#187;</button>
+</div>
+
+<script>
+	console.log("loaded menu component");
+
+	let index, words, isPaused, timeoutId, btn, verseStarts, reftexts;
+
+	function nextWord() {
+		if (isPaused || index >= words.length || document.getElementById("speedReader").style.display == "none") {
+			timeoutId = null;
+			return;
+		}
+		document.getElementById("speedWord").innerText = words[index];
+		const currentVerseStart = verseStarts.filter(v => v <= index).pop();
+		if (currentVerseStart !== undefined) {
+			const verseIndex = verseStarts.indexOf(currentVerseStart);
+			const verseNum = reftexts[verseIndex].textContent.trim();
+			document.getElementById("currentVerse").innerText = "Verse " + verseNum;
+		}
+		const prevWord = words[index];
+		index++;
+		let delay = 200;
+		if (prevWord) {
+			if (prevWord.includes(',')) delay += 100;
+			if (prevWord.includes('.') || prevWord.includes('!') || prevWord.includes('?')) delay += 300;
+		}
+		timeoutId = setTimeout(nextWord, delay);
+	}
+
+	document.addEventListener("click", () => {
+		if (event.target.closest("#dotIcon")) {
+			return;
+		}
+
+		if (event.target.closest("#speedReader")) {
+			return;
+		}
+
+		document.getElementById("speedReader").style.display = "none";
+	});
+
+	registerEventListener(
+		(e) => e.name == "dotIconClicked",
+		function (event) {
+			if (document.getElementById("speedReader").style.display == "block") {
+				document.getElementById("speedReader").style.display = "none";
+				return;
+			}
+			document.getElementById("speedReader").style.display = "block";
+			startReading();
+		}
+	);
+
+	function startReading() {
+		const chapterElement = document.getElementById("chapter");
+		if (!chapterElement) return;
+		const text = chapterElement.innerText;
+		words = text.split(/\s+/).filter(word => word.length > 0);
+		
+		reftexts = chapterElement.querySelectorAll('.reftext');
+		verseStarts = [];
+		let pos = 0;
+		for (let i = 0; i < reftexts.length; i++) {
+			let verse = reftexts[i].textContent.trim();
+			let indexInText = text.indexOf(verse, pos);
+			if (indexInText !== -1) {
+				let before = text.substring(0, indexInText);
+				let wordCount = before.split(/\s+/).filter(w => w.length > 0).length;
+				verseStarts.push(wordCount);
+				pos = indexInText + verse.length;
+			}
+		}
+		
+		const reader = document.getElementById("speedReader");
+		
+		// Find the longest word to set fixed width
+		const longestWord = words.reduce((longest, current) => current.length > longest.length ? current : longest, '');
+		const tempDiv = document.createElement('div');
+		tempDiv.style.fontSize = '48px';
+		tempDiv.style.fontFamily = 'inherit';
+		tempDiv.style.position = 'absolute';
+		tempDiv.style.visibility = 'hidden';
+		tempDiv.innerText = longestWord;
+		document.body.appendChild(tempDiv);
+		const wordWidth = tempDiv.offsetWidth;
+		document.body.removeChild(tempDiv);
+		reader.style.width = (wordWidth + 40) + 'px'; // 40px for padding
+		
+		isPaused = false;
+		timeoutId = null;
+		btn = document.getElementById("pausePlayBtn");
+		btn.addEventListener('click', () => {
+			isPaused = !isPaused;
+			btn.innerHTML = isPaused ? '&#x25B6;' : '&#x2016;';
+			if (!isPaused && !timeoutId) {
+				nextWord();
+			}
+		});
+		
+		const prevBtn = document.getElementById("prevVerseBtn");
+		const nextBtn = document.getElementById("nextVerseBtn");
+		prevBtn.addEventListener('click', () => {
+			if (timeoutId) clearTimeout(timeoutId);
+			let prevVerses = verseStarts.filter(v => v < index);
+			if (prevVerses.length >= 2) {
+				index = prevVerses[prevVerses.length - 2];
+			} else if (prevVerses.length === 1) {
+				index = prevVerses[0];
+			}
+			if (!isPaused) nextWord();
+		});
+		nextBtn.addEventListener('click', () => {
+			if (timeoutId) clearTimeout(timeoutId);
+			for (let i = 0; i < verseStarts.length; i++) {
+				if (verseStarts[i] > index) {
+					index = verseStarts[i];
+					if (!isPaused) nextWord();
+					break;
+				}
+			}
+		});
+		
+		index = 0;
+		nextWord(); // Start reading
+	}
+
+</script>

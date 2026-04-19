@@ -17,11 +17,33 @@ body {
 	padding: 0px;
 }
 
-#menuIcon {
+#rightIcons {
+	display: flex;
+	gap: 12px;
+	align-items: center;
 	position: absolute;
 	right: 0px;
 	margin-right: 8px;
+}
+
+#menuIcon {
 	cursor: pointer;
+}
+
+#dotIcon {
+	cursor: pointer;
+}
+
+.modal {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	box-shadow: 0 0 20px 0px #cbcbcb;
+	padding: 20px;
+	z-index: 1000;
+	border-radius: 12px;
+	background-color: #fffef8;
 }
 
 .page {
@@ -138,6 +160,11 @@ address {
 
 body, body #header, body #dropdown, body a {
 	transition: color 1s, background-color 1s;
+}
+
+body.dark .modal {
+	background-color:black;
+	color: #eaeaea;
 }
 
 body.dark {
