@@ -36,10 +36,30 @@
 			padding: 5px 10px;
 			cursor: pointer;
 			border-radius: 5px;
-			color: black;
 		"
 	>
-		&#171;
+		<svg
+			width="24"
+			height="24"
+			viewBox="0 0 24 24"
+			fill="none"
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<path
+				d="M21.9997 16.437C21.9997 17.567 21.9997 18.1321 21.7714 18.4091C21.5731 18.6497 21.2739 18.7841 20.9623 18.7724C20.6036 18.759 20.1813 18.3836 19.3367 17.6329L14.345 13.1958C13.8797 12.7822 13.6471 12.5754 13.5614 12.3312C13.4861 12.1168 13.4861 11.8831 13.5614 11.6687C13.6471 11.4245 13.8797 11.2177 14.345 10.8041L19.3367 6.36706C20.1813 5.61631 20.6036 5.24093 20.9623 5.22751C21.2739 5.21584 21.5731 5.35021 21.7714 5.59086C21.9997 5.86787 21.9997 6.43288 21.9997 7.56291V16.437Z"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			/>
+			<path
+				d="M10.9997 16.437C10.9997 17.567 10.9997 18.1321 10.7714 18.4091C10.5731 18.6497 10.2739 18.7841 9.96228 18.7724C9.60359 18.759 9.1813 18.3836 8.3367 17.6329L3.34502 13.1958C2.87973 12.7822 2.64709 12.5754 2.56135 12.3312C2.48606 12.1168 2.48606 11.8831 2.56135 11.6687C2.64709 11.4245 2.87973 11.2177 3.34502 10.8041L8.3367 6.36706C9.1813 5.61631 9.60359 5.24093 9.96228 5.22751C10.2739 5.21584 10.5731 5.35021 10.7714 5.59086C10.9997 5.86787 10.9997 6.43288 10.9997 7.56291V16.437Z"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			/>
+		</svg>
 	</button>
 	<button
 		id="nextVerseBtn"
@@ -48,15 +68,43 @@
 			padding: 5px 10px;
 			cursor: pointer;
 			border-radius: 5px;
-			color: black;
 		"
 	>
-		&#187;
+		<svg
+			width="24"
+			height="24"
+			viewBox="0 0 24 24"
+			fill="none"
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<path
+				d="M13 16.437C13 17.567 13 18.1321 13.2283 18.4091C13.4266 18.6497 13.7258 18.7841 14.0374 18.7724C14.3961 18.759 14.8184 18.3836 15.663 17.6329L20.6547 13.1958C21.12 12.7822 21.3526 12.5754 21.4383 12.3312C21.5136 12.1168 21.5136 11.8831 21.4383 11.6687C21.3526 11.4245 21.12 11.2177 20.6547 10.8041L15.663 6.36706C14.8184 5.61631 14.3961 5.24093 14.0374 5.22751C13.7258 5.21584 13.4266 5.35021 13.2283 5.59086C13 5.86787 13 6.43288 13 7.56291V16.437Z"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			/>
+			<path
+				d="M2 16.437C2 17.567 2 18.1321 2.22827 18.4091C2.42657 18.6497 2.72579 18.7841 3.0374 18.7724C3.39609 18.759 3.81839 18.3836 4.66298 17.6329L9.65466 13.1958C10.12 12.7822 10.3526 12.5754 10.4383 12.3312C10.5136 12.1168 10.5136 11.8831 10.4383 11.6687C10.3526 11.4245 10.12 11.2177 9.65466 10.8041L4.66298 6.36706C3.81839 5.61631 3.39609 5.24093 3.0374 5.22751C2.72579 5.21584 2.42657 5.35021 2.22827 5.59086C2 5.86787 2 6.43288 2 7.56291V16.437Z"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			/>
+		</svg>
 	</button>
 </div>
 
 <script>
 	console.log("loaded menu component");
+
+	const playSvg = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+		<path d="M5 4.98951C5 4.01835 5 3.53277 5.20249 3.2651C5.37889 3.03191 5.64852 2.88761 5.9404 2.87018C6.27544 2.85017 6.67946 3.11953 7.48752 3.65823L18.0031 10.6686C18.6708 11.1137 19.0046 11.3363 19.1209 11.6168C19.2227 11.8621 19.2227 12.1377 19.1209 12.383C19.0046 12.6635 18.6708 12.886 18.0031 13.3312L7.48752 20.3415C6.67946 20.8802 6.27544 21.1496 5.9404 21.1296C5.64852 21.1122 5.37889 20.9679 5.20249 20.7347C5 20.467 5 19.9814 5 19.0103V4.98951Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+	</svg>`;
+
+	const pauseSvg = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+		<path d="M9.5 15V9M14.5 15V9M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+	</svg>`;
 
 	let index,
 		words,
@@ -76,9 +124,10 @@
 		controlsInitialized = true;
 
 		btn = document.getElementById("pausePlayBtn");
-		btn.onclick = () => {
+		btn.onclick = (event) => {
+			event.stopPropagation();
 			isPaused = !isPaused;
-			btn.innerHTML = isPaused ? "&#x25B6;" : "&#x2016;";
+			btn.innerHTML = isPaused ? playSvg : pauseSvg;
 			if (isPaused && timeoutId) {
 				clearTimeout(timeoutId);
 				timeoutId = null;
@@ -91,20 +140,26 @@
 		prevBtn = document.getElementById("prevVerseBtn");
 		nextBtn = document.getElementById("nextVerseBtn");
 
-		prevBtn.addEventListener("click", () => {
+		prevBtn.addEventListener("click", (event) => {
+			event.stopPropagation();
 			if (timeoutId) clearTimeout(timeoutId);
-			if (currentVerseIndex > 0) {
+			if (index > verseStarts[currentVerseIndex]) {
+				// Go to start of current verse
+				index = verseStarts[currentVerseIndex];
+			} else if (currentVerseIndex > 0) {
+				// Go to previous verse
 				currentVerseIndex -= 1;
 				index = verseStarts[currentVerseIndex];
-				currentVerseEnd = verseStarts[currentVerseIndex + 1]
-					? verseStarts[currentVerseIndex + 1] - 1
-					: words.length - 1;
 			}
+			currentVerseEnd = verseStarts[currentVerseIndex + 1]
+				? verseStarts[currentVerseIndex + 1] - 1
+				: words.length - 1;
 			updateDisplay();
 			if (!isPaused) nextWord();
 		});
 
-		nextBtn.addEventListener("click", () => {
+		nextBtn.addEventListener("click", (event) => {
+			event.stopPropagation();
 			if (timeoutId) clearTimeout(timeoutId);
 			if (currentVerseIndex < verseStarts.length - 1) {
 				currentVerseIndex += 1;
