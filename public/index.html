@@ -5,7 +5,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="theme-color" content="#6366f1" />
 		<title>Your Custom Bible</title>
-		<link rel="stylesheet" href="style.css?version=1" />
+		<link rel="stylesheet" href="style.css?version=2" />
 		<link rel="icon" type="image/png" href="images/logo.png?version=1" />
 		<link rel="manifest" href="manifest.json?version=1" />
 	</head>
@@ -62,7 +62,7 @@
 
 			<img
 				onclick="fireEvent({ name: 'showPage', page: 'index' })"
-				src="images/banner.png"
+				src="images/banner.png?version=1"
 				style="cursor: pointer; height: 88%; margin-top: -4px"
 			/>
 		</div>
@@ -77,17 +77,17 @@
 		<div id="speedReader" class="modal" style="display: none"></div>
 	</body>
 
-	<script src="framework.js"></script>
-	<script src="settings.js"></script>
-	<script src="books.js"></script>
+	<script src="framework.js?version=1"></script>
+	<script src="settings.js?version=1"></script>
+	<script src="books.js?version=1"></script>
 
 	<script>
 		async function loadComponents() {
-			await loadComponent("dropdown", "components/menu.html");
-			await loadComponent("chapter", "components/chapter.html");
-			await loadComponent("about", "components/about.html");
-			await loadComponent("history", "components/history.html");
-			await loadComponent("speedReader", "components/speedReader.html");
+			await loadComponent("dropdown", "components/menu.html?version=1");
+			await loadComponent("chapter", "components/chapter.html?version=1");
+			await loadComponent("about", "components/about.html?version=1");
+			await loadComponent("history", "components/history.html?version=1");
+			await loadComponent("speedReader", "components/speedReader.html?version=1");
 		}
 		loadComponents().then(() => {
 			if (window.location.hash) {
@@ -173,7 +173,7 @@
 			if ("serviceWorker" in navigator) {
 				window.addEventListener("load", function () {
 					navigator.serviceWorker
-						.register("./serviceWorker.js", {
+						.register("./serviceWorker.js?version=1", {
 							scope: "./",
 						})
 						.then(
