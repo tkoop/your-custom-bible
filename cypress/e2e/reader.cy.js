@@ -5,7 +5,7 @@ describe('template spec', () => {
   })
 
   it('page back and forth', () => {
-    cy.contains("Genesis")
+    cy.contains("Genesis").click()
     cy.contains("50").click()
 
     // Chapter 50

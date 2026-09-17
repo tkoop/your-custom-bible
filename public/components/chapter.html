@@ -302,17 +302,21 @@
 	}
 
 	function addArrows(html, title) {
-		var arrows = `<div style="display: flex; justify-content: space-between;">
-			<svg data-cy="chapterLeft" onclick="moveChapter(-1)" style="color:#b9b9b9; cursor:pointer; width:34px;height:34px" viewBox="0 0 24 24">
-				<path fill="currentColor" d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" />
-			</svg>
-			<div id="chapterTitle">${title}</div>
-			<svg data-cy="chapterRight" onclick="moveChapter(1)" style="color:#b9b9b9; cursor:pointer; width:34px;height:34px" viewBox="0 0 24 24">
-				<path fill="currentColor" d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" />
-			</svg>
+		var arrows = `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+			<button data-cy="chapterLeft" onclick="moveChapter(-1)" style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; box-shadow: var(--shadow-sm); color: var(--text-secondary);" onmouseover="this.style.borderColor='var(--primary)'; this.style.color='var(--primary)'; this.style.transform='translateY(-1px)'; this.style.boxShadow='var(--shadow)';" onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text-secondary)'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)';">
+				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path d="M15.41 16.58L10.83 12L15.41 7.41L14 6L8 12L14 18L15.41 16.58Z" fill="currentColor"/>
+				</svg>
+			</button>
+			<div id="chapterTitle" style="font-size: 1.25rem; font-weight: 600; color: var(--text-primary);">${title}</div>
+			<button data-cy="chapterRight" onclick="moveChapter(1)" style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; box-shadow: var(--shadow-sm); color: var(--text-secondary);" onmouseover="this.style.borderColor='var(--primary)'; this.style.color='var(--primary)'; this.style.transform='translateY(-1px)'; this.style.boxShadow='var(--shadow)';" onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text-secondary)'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)';">
+				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path d="M8.59 16.58L13.17 12L8.59 7.41L10 6L16 12L10 18L8.59 16.58Z" fill="currentColor"/>
+				</svg>
+			</button>
 		</div>`;
 
-		return arrows + html + "<div style='height:20px'></div>" + arrows;
+		return arrows + html + "<div style='height:32px'></div>" + arrows;
 	}
 
 	function createLink(name, slug, chapter, includeBook) {
@@ -323,11 +327,26 @@
 		}
 	}
 
+	function toggleBookChapters(bookEl) {
+		var chapters = bookEl.nextElementSibling;
+		var isOpen = chapters.style.display == "flex";
+		chapters.style.display = isOpen ? "none" : "flex";
+		bookEl.classList.toggle("open", !isOpen);
+	}
+
 	books.forEach(function (book) {
 		var bookDiv = document.createElement("div");
-		bookDiv.innerHTML = "<div class='index-book'>" + book.name + "</div>";
+		bookDiv.className = "index-book-row";
+		bookDiv.innerHTML =
+			"<div class='index-book' data-book='" +
+			book.name +
+			"' onclick='toggleBookChapters(this)'>" +
+			book.name +
+			"</div>";
 		var chapterLinks =
-			"<div class='index-chapters' data-cy='" + book.name + "'>";
+			"<div class='index-chapters' data-cy='" +
+			book.name +
+			"' style='display:none'>";
 		for (let i = 1; i <= book.chapters; i++) {
 			chapterLinks += createLink(book.name, book.slug, i) + " ";
 		}
