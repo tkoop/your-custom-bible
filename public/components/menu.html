@@ -66,7 +66,7 @@
 	<div>Spelling</div>
 	<div>
 		<select
-			style="padding: 6px; border-radius: 6px; background-color: #c3c3ff"
+			style="padding: 6px; border-radius: 6px"
 			id="spelling"
 			onclick="event.stopPropagation()"
 			onchange="fireEvent({name:'setSetting', setting:'spelling', value:this.options[this.selectedIndex].value}); event.stopPropagation()"
@@ -82,7 +82,7 @@
 	<div>Case</div>
 	<div>
 		<select
-			style="padding: 6px; border-radius: 6px; background-color: #c3c3ff"
+			style="padding: 6px; border-radius: 6px"
 			id="case"
 			onclick="event.stopPropagation()"
 			onchange="fireEvent({name:'setSetting', setting:'case', value:this.options[this.selectedIndex].value}); event.stopPropagation()"
@@ -98,7 +98,7 @@
 	<div>God's Name</div>
 	<div>
 		<select
-			style="padding: 6px; border-radius: 6px; background-color: #c3c3ff"
+			style="padding: 6px; border-radius: 6px"
 			id="name"
 			onclick="event.stopPropagation()"
 			onchange="fireEvent({name:'setSetting', setting:'name', value:this.options[this.selectedIndex].value}); event.stopPropagation()"
@@ -121,7 +121,7 @@
 	<div>Plural You</div>
 	<div>
 		<select
-			style="padding: 6px; border-radius: 6px; background-color: #c3c3ff"
+			style="padding: 6px; border-radius: 6px"
 			id="you"
 			onclick="event.stopPropagation()"
 			onchange="fireEvent({name:'setSetting', setting:'you', value:this.options[this.selectedIndex].value}); event.stopPropagation()"
@@ -167,6 +167,8 @@
 		</button>
 	</div>
 </div>
+
+<hr class="menu-divider" />
 
 <div onclick="fireEvent({name:'showPage', page:'about'})">About</div>
 
