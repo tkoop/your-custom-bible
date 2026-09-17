@@ -3,7 +3,7 @@
 	<head>
 		<meta name="encoding" content="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<meta name="theme-color" content="#ececb2ff" />
+		<meta name="theme-color" content="#6366f1" />
 		<title>Your Custom Bible</title>
 		<link rel="stylesheet" href="style.css?version=1" />
 		<link rel="icon" type="image/png" href="images/logo.png?version=1" />
@@ -68,7 +68,7 @@
 		</div>
 
 		<div id="body" style="font-family: &quot;sura&quot;, sans-serif">
-			<div id="index" class="page" style="display: block"></div>
+			<div id="index" class="page" style="display: flex"></div>
 			<div id="history" class="page">History page</div>
 			<div id="about" class="page"></div>
 			<div id="chapter" class="page"></div>
@@ -160,7 +160,8 @@
 				document
 					.querySelectorAll(".page")
 					.forEach((e) => (e.style.display = "none"));
-				document.getElementById(event.page).style.display = "block";
+				var page = document.getElementById(event.page);
+				page.style.display = event.page === "index" ? "flex" : "block";
 				window.scrollTo(0, 0);
 				return;
 			},

@@ -6,6 +6,7 @@ describe('template spec', () => {
   })
 
   it('titles', () => {
+    cy.contains("Genesis").click()
     cy.contains("50").click()
     cy.contains("Mourning and Burial for Jacob").should("not.be.visible")
 
@@ -22,6 +23,7 @@ describe('template spec', () => {
   })
 
   it('verses', () => {
+    cy.contains("Genesis").click()
     cy.contains("50").click()
     cy.contains("Then Joseph fell")
     cy.get(".reftext").contains("7").should("not.be.visible")
@@ -39,6 +41,7 @@ describe('template spec', () => {
 
 
   it('references', () => {
+    cy.contains("Genesis").click()
     cy.contains("46").click()
     cy.contains("So Israel set out")
     cy.contains("probably including Joseph’s grandsons").should("not.be.visible")
@@ -58,6 +61,7 @@ describe('template spec', () => {
   })
 
   it("spelling", () => {
+    cy.contains("2 Peter").click()
     cy.get("[data-cy='2 Peter']").contains("1").click()
     cy.contains("Grace and peace be multiplied to you")
 
@@ -79,6 +83,7 @@ describe('template spec', () => {
   
 
   it("case", () => {
+    cy.contains("Proverbs").click()
     cy.get("[data-cy='Proverbs']").contains("21").click()
     cy.contains("The king’s heart is a waterway in the hand of")
 
@@ -102,6 +107,7 @@ describe('template spec', () => {
 
 
   it.only("God's name", () => {
+    cy.contains("Proverbs").click()
     cy.get("[data-cy='Proverbs']").contains("21").click()
     cy.contains("The king’s heart is a waterway in the hand of")
 

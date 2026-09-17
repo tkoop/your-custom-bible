@@ -6,8 +6,11 @@ describe('template spec', () => {
 
   it('start', () => {
     cy.contains("Genesis")
-    cy.contains("50")
     cy.contains("Exodus")
+    cy.get("[data-cy='Genesis']").should("not.be.visible")
+    cy.contains("Genesis").click()
+    cy.get("[data-cy='Genesis']").should("be.visible")
+    cy.contains("50")
     cy.get("img[src='images/banner.png']").should("be.visible")
   })
 
@@ -18,7 +21,7 @@ describe('template spec', () => {
     cy.get("div#dropdown").should("be.visible")
     cy.get("div#dropdown").contains("Index").click()
 
-    cy.contains("Genesis")
+    cy.contains("Genesis").click()
     cy.contains("50")
     cy.contains("Exodus")
   })
