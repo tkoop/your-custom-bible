@@ -11,7 +11,7 @@ describe('template spec', () => {
     cy.contains("Genesis").click()
     cy.get("[data-cy='Genesis']").should("be.visible")
     cy.contains("50")
-    cy.get("img[src='images/banner.png']").should("be.visible")
+    cy.get(".brand-title").should("contain", "Your Custom Bible")
   })
 
   it("index page", () => {

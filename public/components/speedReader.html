@@ -1,43 +1,15 @@
-<div id="speedWord" style="font-size: 48px; text-align: center; color: black">
-	&nbsp;
-</div>
+<div id="speedWord">&nbsp;</div>
 
-<button
-	id="pausePlayBtn"
-	style="
-		font-size: 32px;
-		display: block;
-		margin: 20px auto 0;
-		padding: 10px 20px;
-		cursor: pointer;
-		border-radius: 10px;
-	"
->
+<button id="pausePlayBtn" class="sr-button">
 	&#x23F8;
 </button>
 
-<div
-	id="currentVerse"
-	style="
-		margin-top: 12px;
-		text-align: center;
-		font-size: 18px;
-		align-self: center;
-	"
->
+<div id="currentVerse">
 	Verse 1
 </div>
 
-<div style="display: flex; justify-content: center; gap: 10px; margin-top: 0px">
-	<button
-		id="prevVerseBtn"
-		style="
-			font-size: 24px;
-			padding: 5px 10px;
-			cursor: pointer;
-			border-radius: 5px;
-		"
-	>
+<div class="sr-verse-buttons">
+	<button id="prevVerseBtn" class="sr-button">
 		<svg
 			width="24"
 			height="24"
@@ -61,15 +33,7 @@
 			/>
 		</svg>
 	</button>
-	<button
-		id="nextVerseBtn"
-		style="
-			font-size: 24px;
-			padding: 5px 10px;
-			cursor: pointer;
-			border-radius: 5px;
-		"
-	>
+	<button id="nextVerseBtn" class="sr-button">
 		<svg
 			width="24"
 			height="24"
@@ -214,7 +178,9 @@
 		index++;
 		let delay = 200;
 		if (prevWord) {
-			if (prevWord.includes(",")) delay += 100;
+			if (prevWord.includes(",")) delay += 120;
+			if (prevWord.includes(";")) delay += 270;
+			if (prevWord.includes("—")) delay += 150;
 			if (
 				prevWord.includes(".") ||
 				prevWord.includes("!") ||
@@ -249,6 +215,13 @@
 		},
 	);
 
+	function splitWords(str) {
+		return str
+			.replace(/\s*(—)\s*/g, "$1 ")
+			.split(/\s+/)
+			.filter((word) => word.length > 0);
+	}
+
 	function startReading() {
 		const chapterElement = document.getElementById("chapter");
 		if (!chapterElement) return;
@@ -276,16 +249,13 @@
 			const range = document.createRange();
 			range.setStart(chapterClone, 0);
 			range.setEndBefore(el);
-			const wordsBefore = range
-				.toString()
-				.split(/\s+/)
-				.filter((word) => word.length > 0).length;
+			const wordsBefore = splitWords(range.toString()).length;
 			verseStarts.push(wordsBefore);
 			el.remove();
 		});
 
 		const text = chapterClone.innerText;
-		words = text.split(/\s+/).filter((word) => word.length > 0);
+		words = splitWords(text);
 
 		reftexts = chapterElement.querySelectorAll(".reftext");
 

@@ -302,21 +302,21 @@
 	}
 
 	function addArrows(html, title) {
-		var arrows = `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-			<button data-cy="chapterLeft" onclick="moveChapter(-1)" style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; box-shadow: var(--shadow-sm); color: var(--text-secondary);" onmouseover="this.style.borderColor='var(--primary)'; this.style.color='var(--primary)'; this.style.transform='translateY(-1px)'; this.style.boxShadow='var(--shadow)';" onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text-secondary)'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)';">
+		var arrows = `<div class="chapter-nav">
+			<button data-cy="chapterLeft" onclick="moveChapter(-1)" aria-label="Previous chapter">
 				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 					<path d="M15.41 16.58L10.83 12L15.41 7.41L14 6L8 12L14 18L15.41 16.58Z" fill="currentColor"/>
 				</svg>
 			</button>
-			<div id="chapterTitle" style="font-size: 1.25rem; font-weight: 600; color: var(--text-primary);">${title}</div>
-			<button data-cy="chapterRight" onclick="moveChapter(1)" style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; box-shadow: var(--shadow-sm); color: var(--text-secondary);" onmouseover="this.style.borderColor='var(--primary)'; this.style.color='var(--primary)'; this.style.transform='translateY(-1px)'; this.style.boxShadow='var(--shadow)';" onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text-secondary)'; this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)';">
+			<div id="chapterTitle"><span class="title-rule"></span><span class="title-text">${title}</span><span class="title-rule"></span></div>
+			<button data-cy="chapterRight" onclick="moveChapter(1)" aria-label="Next chapter">
 				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 					<path d="M8.59 16.58L13.17 12L8.59 7.41L10 6L16 12L10 18L8.59 16.58Z" fill="currentColor"/>
 				</svg>
 			</button>
 		</div>`;
 
-		return arrows + html + "<div style='height:32px'></div>" + arrows;
+		return arrows + html + "<div style='height:32px'></div>" + arrows.replace("chapter-nav", "chapter-nav bottom");
 	}
 
 	function createLink(name, slug, chapter, includeBook) {
@@ -334,7 +334,22 @@
 		bookEl.classList.toggle("open", !isOpen);
 	}
 
-	books.forEach(function (book) {
+	function makeTestamentSection(title) {
+		var section = document.createElement("div");
+		section.className = "index-section";
+		section.innerHTML =
+			"<div class='index-section-title'>" +
+			title +
+			"</div><div class='index-books'></div>";
+		return section;
+	}
+
+	var oldTestament = makeTestamentSection("The Old Testament");
+	var newTestament = makeTestamentSection("The New Testament");
+	var oldBooks = oldTestament.querySelector(".index-books");
+	var newBooks = newTestament.querySelector(".index-books");
+
+	books.forEach(function (book, idx) {
 		var bookDiv = document.createElement("div");
 		bookDiv.className = "index-book-row";
 		bookDiv.innerHTML =
@@ -352,8 +367,11 @@
 		}
 		chapterLinks += "</div>";
 		bookDiv.innerHTML += chapterLinks;
-		document.getElementById("index").appendChild(bookDiv);
+		(idx < 39 ? oldBooks : newBooks).appendChild(bookDiv);
 	});
+
+	document.getElementById("index").appendChild(oldTestament);
+	document.getElementById("index").appendChild(newTestament);
 
 	if (settings.browseHistory.length > 0) {
 		let history = settings.browseHistory[settings.browseHistory.length - 1];

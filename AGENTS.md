@@ -32,6 +32,7 @@ Files involved (all referenced from `public/index.html`):
 - Components fetched via `loadComponent()`: `components/menu.html`,
   `components/chapter.html`, `components/about.html`,
   `components/history.html`, `components/speedReader.html`
+- Fonts referenced from `style.css` via `@font-face`: files under `fonts/`
 - `serviceWorker.js` (bump its `?version=` too when its logic changes)
 
 If a change does not touch any cached file (e.g. only tests or docs), no bump
