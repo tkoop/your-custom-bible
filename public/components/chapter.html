@@ -169,6 +169,15 @@
 					"</span>";
 		});
 
+		// You singular
+		document.querySelectorAll(".yousg").forEach((el) => {
+			if (settings.you == "youpl")
+				el.innerHTML =
+					matchYou(el.dataset.word, "you", "your", "yours") + "<sup>(sg)</sup>";
+			else
+				el.innerHTML = matchYou(el.dataset.word, "you", "your", "yours");
+		});
+
 		if (document.querySelectorAll(".version")) {
 			document
 				.querySelectorAll(".version")
