@@ -339,8 +339,19 @@
 	function toggleBookChapters(bookEl) {
 		var chapters = bookEl.nextElementSibling;
 		var isOpen = chapters.style.display == "flex";
-		chapters.style.display = isOpen ? "none" : "flex";
-		bookEl.classList.toggle("open", !isOpen);
+		if (isOpen) {
+			chapters.style.display = "none";
+			bookEl.classList.toggle("open", !isOpen);
+			return;
+		}
+		document.querySelectorAll(".index-chapters").forEach((el) => {
+			el.style.display = "none";
+		});
+		document.querySelectorAll(".index-book.open").forEach((el) => {
+			el.classList.remove("open");
+		});
+		chapters.style.display = "flex";
+		bookEl.classList.add("open");
 	}
 
 	function makeTestamentSection(title) {
