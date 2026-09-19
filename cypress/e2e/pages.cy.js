@@ -45,7 +45,7 @@ describe('template spec', () => {
     cy.get("div#dropdown").contains("About").click()
 
     cy.contains("Genesis").should("not.be.visible")
-    cy.contains("is based on the Berean Study Bible")
+    cy.contains("is based on the Berean Standard Bible")
   })
 
 })
