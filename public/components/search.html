@@ -1,0 +1,158 @@
+<h1>Search</h1>
+
+<input
+	id="searchInput"
+	type="search"
+	placeholder="Search the entire Bible..."
+	autocomplete="off"
+	spellcheck="false"
+/>
+<div id="searchStatus" class="search-status"></div>
+<div id="searchResults" class="search-results"></div>
+
+<script>
+	var searchIndex = null;
+	var searchIndexLoading = null;
+	var bookNames = {};
+
+	books.forEach((b) => (bookNames[b.slug] = b.name));
+
+	registerEventListener(
+		(e) => e.name == "showPage" && e.page == "search",
+		function (event) {
+			var input = document.getElementById("searchInput");
+			if (input) input.focus();
+		}
+	);
+
+	function loadSearchIndex() {
+		if (searchIndex) return Promise.resolve(searchIndex);
+		if (searchIndexLoading) return searchIndexLoading;
+		searchIndexLoading = fetch("search.json?version=2")
+			.then((r) => r.json())
+			.then((data) => {
+				searchIndex = data;
+				return data;
+			})
+			.catch((err) => {
+				searchIndexLoading = null;
+				throw err;
+			});
+		return searchIndexLoading;
+	}
+
+	var debounceTimer = null;
+	var inputEl = document.getElementById("searchInput");
+	inputEl.addEventListener("input", function (event) {
+		clearTimeout(debounceTimer);
+		debounceTimer = setTimeout(function () {
+			runSearch(event.target.value);
+		}, 250);
+	});
+	inputEl.addEventListener("keydown", function (event) {
+		if (event.key === "Enter") {
+			clearTimeout(debounceTimer);
+			runSearch(event.target.value);
+		}
+	});
+
+	function runSearch(query) {
+		query = query.trim().toLowerCase();
+		var status = document.getElementById("searchStatus");
+		var box = document.getElementById("searchResults");
+		box.innerHTML = "";
+		status.textContent = "";
+
+		if (!query) return;
+
+		status.textContent = "Searching...";
+		loadSearchIndex()
+			.then(function () {
+				var t0 = performance.now();
+				var hits = [];
+				for (var i = 0; i < searchIndex.length; i++) {
+					var rec = searchIndex[i];
+					if (rec[3].toLowerCase().indexOf(query) >= 0) hits.push(rec);
+				}
+				var ms = Math.round(performance.now() - t0);
+				status.textContent =
+					hits.length +
+					" match" +
+					(hits.length == 1 ? "" : "es") +
+					" \u00b7 " +
+					ms +
+					" ms";
+				renderResults(box, hits, query);
+			})
+			.catch(function () {
+				status.textContent = "Could not load the search index.";
+			});
+	}
+
+	function renderResults(box, hits, query) {
+		var MAX_RESULTS = 200;
+		var frag = document.createDocumentFragment();
+
+		for (var i = 0; i < hits.length && i < MAX_RESULTS; i++) {
+			var rec = hits[i];
+			var row = document.createElement("div");
+			row.className = "search-result";
+
+			var ref = document.createElement("span");
+			ref.className = "search-ref";
+			ref.textContent = bookNames[rec[0]] + " " + rec[1] + ":" + rec[2];
+
+			var text = document.createElement("span");
+			text.className = "search-text";
+			text.appendChild(highlight(rec[3], query));
+
+			row.appendChild(ref);
+			row.appendChild(text);
+			row.onclick = (function (rec) {
+				return function () {
+					openVerse(rec);
+				};
+			})(rec);
+			frag.appendChild(row);
+		}
+
+		box.appendChild(frag);
+
+		if (hits.length > MAX_RESULTS) {
+			var status = document.getElementById("searchStatus");
+			var more = document.createElement("span");
+			more.className = "search-more";
+			more.textContent =
+				"  Showing first " + MAX_RESULTS + " of " + hits.length + ".";
+			status.appendChild(more);
+		}
+	}
+
+	function highlight(text, query) {
+		var lower = text.toLowerCase();
+		var frag = document.createDocumentFragment();
+		var pos = 0;
+		var idx;
+		while ((idx = lower.indexOf(query, pos)) >= 0) {
+			if (idx > pos)
+				frag.appendChild(document.createTextNode(text.substring(pos, idx)));
+			var mark = document.createElement("mark");
+			mark.appendChild(
+				document.createTextNode(text.substring(idx, idx + query.length))
+			);
+			frag.appendChild(mark);
+			pos = idx + query.length;
+		}
+		if (pos < text.length)
+			frag.appendChild(document.createTextNode(text.substring(pos)));
+		if (frag.childNodes.length == 0) frag.appendChild(document.createTextNode(text));
+		return frag;
+	}
+
+	function openVerse(rec) {
+		var book = books.find((b) => b.slug === rec[0]);
+		if (!book) return;
+		window.scrollVerse = rec[2];
+		loadThisChapter(book.name, book.slug, rec[1]);
+	}
+</script>

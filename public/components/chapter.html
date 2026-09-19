@@ -287,12 +287,25 @@
 				chapter.innerHTML = addArrows(text, title);
 				applySettings();
 
-				fireEvent({
-					name: "showPage",
-					page: "chapter",
-					hash: book ? book.abbr + "-" + chapterNum : "",
-					skipHistory: !!skipHistory,
-				});
+fireEvent({
+				name: "showPage",
+				page: "chapter",
+				hash: book ? book.abbr + "-" + chapterNum : "",
+				skipHistory: !!skipHistory,
+			});
+
+			// If we arrived here from a search result, scroll to that verse.
+			if (window.scrollVerse) {
+				var verseNum = window.scrollVerse;
+				window.scrollVerse = null;
+				var verseEl = document.getElementById("v" + verseNum);
+				var scrollTarget = (verseEl && verseEl.closest("p")) || verseEl;
+				if (scrollTarget) {
+					setTimeout(function () {
+						scrollTarget.scrollIntoView({ block: "center" });
+					}, 0);
+				}
+			}
 			});
 	}
 
