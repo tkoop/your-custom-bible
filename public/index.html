@@ -5,7 +5,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="theme-color" content="#34507a" />
 		<title>Your Custom Bible</title>
-		<link rel="stylesheet" href="style.css?version=4" />
+		<link rel="stylesheet" href="style.css?version=5" />
 		<link rel="icon" type="image/png" href="images/logo.png?version=4" />
 		<link rel="manifest" href="manifest.json?version=2" />
 	</head>
@@ -73,9 +73,10 @@
 		</div>
 
 		<div id="body">
-			<div id="index" class="page" style="display: flex"></div>
-			<div id="history" class="page">History page</div>
-			<div id="about" class="page"></div>
+<div id="index" class="page" style="display: flex"></div>
+		<div id="history" class="page">History page</div>
+		<div id="search" class="page"></div>
+		<div id="about" class="page"></div>
 			<div id="chapter" class="page"></div>
 		</div>
 
@@ -88,10 +89,11 @@
 
 	<script>
 		async function loadComponents() {
-			await loadComponent("dropdown", "components/menu.html?version=2");
-			await loadComponent("chapter", "components/chapter.html?version=5");
+			await loadComponent("dropdown", "components/menu.html?version=3");
+			await loadComponent("chapter", "components/chapter.html?version=6");
 			await loadComponent("about", "components/about.html?version=2");
 			await loadComponent("history", "components/history.html?version=1");
+			await loadComponent("search", "components/search.html?version=1");
 			await loadComponent("speedReader", "components/speedReader.html?version=5");
 		}
 		loadComponents().then(() => {
@@ -113,6 +115,8 @@
 				fireEvent({ name: "showPage", page: "index", skipHistory: true });
 			} else if (state === "#history") {
 				fireEvent({ name: "showPage", page: "history", skipHistory: true });
+			} else if (state === "#search") {
+				fireEvent({ name: "showPage", page: "search", skipHistory: true });
 			} else if (state === "#about") {
 				fireEvent({ name: "showPage", page: "about", skipHistory: true });
 			} else if (state && state.startsWith("#")) {
@@ -158,6 +162,7 @@
 					let hash;
 					if (event.page === "index") hash = "#";
 					else if (event.page === "history") hash = "#history";
+					else if (event.page === "search") hash = "#search";
 					else if (event.page === "about") hash = "#about";
 					else if (event.page === "chapter") hash = "#" + event.hash;
 					history.pushState(hash, "", hash);

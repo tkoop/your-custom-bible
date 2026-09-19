@@ -15,6 +15,8 @@ Parse those files, renaming them to be their book and chapter name like "1-chron
 */
 
 import { readdir, writeFile, open } from "node:fs/promises";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { parse } from "node-html-parser"; // https://www.npmjs.com/package/node-html-parser
 import { words } from "./words.mjs";
 import { isPlural, isSingular } from "./pluralYous.mjs";
@@ -24,6 +26,84 @@ parseChapters();
 
 function upperFirst(word) {
 	return word[0].toUpperCase() + word.substring(1);
+}
+
+function addVerseIds(body) {
+	return body.replace(
+		/<span class="reftext">(\d+)<\/span>/g,
+		'<span class="reftext" id="v$1">$1</span>'
+	);
+}
+
+const VOID_TAGS = new Set(["br", "img", "hr", "input", "meta", "link"]);
+
+// Extract the canonical (BSB) text of each verse from a compiled chapter body.
+// Returns an array of [verseNumber, text].
+function extractVerseTexts(body) {
+	var main = body;
+
+	// Cut off the footnotes block.
+	var fnIdx = main.indexOf('<div class="fn">');
+	if (fnIdx >= 0) main = main.substring(0, fnIdx);
+
+	// Drop headings and cross references entirely.
+	main = main.replace(/<p class="hdg">[\s\S]*?<\/p>/g, " ");
+	main = main.replace(/<p class="subhdg">[\s\S]*?<\/p>/g, " ");
+	main = main.replace(/<span class="cross1">[\s\S]*?<\/span>/g, " ");
+
+	// Mark verse boundaries with a sentinel (the source contains no \u0001).
+	main = main.replace(
+		/<span class="reftext">(\d+)<\/span>/g,
+		"\u0001$1\u0002"
+	);
+
+	// Walk the tags, suppressing spans that hold alternate display variants
+	// (cap/nocap, footnotes, spelling variants other than the BSB "us" form).
+	var suppressClasses = ["cap", "nocap", "fn", "reftext", "hdg", "subhdg"];
+	var out = "";
+	var tagRe = /<(\/)?([A-Za-z0-9]+)([^>]*)>/g;
+	var m;
+	var last = 0;
+	var stack = [];
+	var skip = 0;
+	while ((m = tagRe.exec(main)) !== null) {
+		if (skip === 0) out += main.substring(last, m.index);
+		last = m.index + m[0].length;
+		var closing = !!m[1];
+		var tagName = m[2].toLowerCase();
+		var attrs = m[3];
+		var selfClosing = /\/\s*>$/.test(m[0]);
+
+		if (selfClosing || VOID_TAGS.has(tagName)) continue;
+
+		if (closing) {
+			skip -= stack.pop() || 0;
+			continue;
+		}
+
+		var cm = attrs.match(/class=['"]([^'"]*)['"]/);
+		var classes = cm ? cm[1].split(/\s+/) : [];
+		var repress = classes.some((c) => suppressClasses.includes(c));
+		if (!repress && classes.includes("spell")) {
+			repress = classes.includes("ca") || classes.includes("gb");
+		}
+		stack.push(repress ? 1 : 0);
+		skip += repress ? 1 : 0;
+	}
+	if (skip === 0) out += main.substring(last);
+
+	// Split out the verses.
+	var verses = [];
+	var parts = out.split("\u0001");
+	for (var i = 1; i < parts.length; i++) {
+		var sec = parts[i];
+		var end = sec.indexOf("\u0002");
+		if (end < 0) break;
+		var num = parseInt(sec.substring(0, end), 10);
+		var text = sec.substring(end + 1).replace(/\s+/g, " ").trim();
+		if (text) verses.push([num, text]);
+	}
+	return verses;
 }
 
 function upperCaseWords(body) {
@@ -56,6 +136,8 @@ async function parseChapters() {
 	const filenames = await readdir(fromDir);
 
 	var foundWords = {};
+
+	var searchRecords = [];
 
 	for (const filename of filenames) {
 		const fromFile = await open(fromDir + "/" + filename);
@@ -167,8 +249,36 @@ async function parseChapters() {
 		// Make upper case words that should be upper case
 		body = upperCaseWords(body);
 
+		// Collect canonical verse text for the search index
+		var verseTexts = extractVerseTexts(body);
+		for (const [verseNum, text] of verseTexts) {
+			searchRecords.push([book, parseInt(chapter, 10), verseNum, text]);
+		}
+
+		// Add per-verse anchors so search results can scroll to a verse
+		body = addVerseIds(body);
+
 		writeFile(toDir + "/" + newFilename + ".html", body);
 	}
+
+	console.log("Writing search.json with " + searchRecords.length + " verses...");
+
+	// Sort into canonical Bible order (Genesis -> Revelation), using the slug
+	// order from books.js as the source of truth.
+	var booksSrc = readFileSync(join("public", "books.js"), "utf8");
+	var bookOrder = [...booksSrc.matchAll(/slug:\s*"([^"]+)"/g)].map(function (m) {
+		return m[1];
+	});
+	var bookRank = new Map(bookOrder.map(function (slug, i) {
+		return [slug, i];
+	}));
+	searchRecords.sort(function (a, b) {
+		if (a[0] !== b[0]) return bookRank.get(a[0]) - bookRank.get(b[0]);
+		if (a[1] !== b[1]) return a[1] - b[1];
+		return a[2] - b[2];
+	});
+
+	writeFile("public/search.json", JSON.stringify(searchRecords));
 
 	// console.log("Cap words: " + Object.keys(reportedAllows).sort().map(w=>w+":"+reportedAllows[w]).join(", "))
 	// console.log("Cap words: " + Object.keys(reportedAllows).sort())
