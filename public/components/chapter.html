@@ -31,6 +31,9 @@
 	}
 
 	function applySettings() {
+		// Words of Christ (red letter)
+		document.body.classList.toggle("woc-off", !settings.woc);
+
 		// Titles
 		if (settings.titles) {
 			document
