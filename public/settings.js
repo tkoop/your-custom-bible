@@ -10,6 +10,7 @@ var settings = {
 	references: false,
 	verses: false,
 	you: "youpl",
+	woc: false,
 };
 
 registerEventListener(
@@ -43,6 +44,7 @@ function loadSettingsFromLocalStorage() {
 	settings.references = localStorageSettings?.references ?? false;
 	settings.verses = localStorageSettings?.verses ?? false;
 	settings.you = localStorageSettings?.you ?? "youpl";
+	settings.woc = localStorageSettings?.woc ?? false;
 	settings.browseHistory = JSON.parse(localStorage?.browseHistory ?? "[]");
 
 	fireEvent({ name: "settingsUpdated" });
@@ -61,6 +63,7 @@ function saveSettingsToLocalStorage() {
 		references: settings.references,
 		verses: settings.verses,
 		you: settings.you,
+		woc: settings.woc,
 	};
 
 	localStorage.settings = JSON.stringify(localStorageSettings);
