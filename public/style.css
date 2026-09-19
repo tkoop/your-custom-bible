@@ -87,6 +87,7 @@
 	--radius: 10px;
 	--radius-lg: 14px;
 	--radius-xl: 18px;
+	--woc: #a01a1a;
 }
 
 /* ---------- Dark theme: "Candlelight" ---------- */
@@ -106,6 +107,7 @@ body.dark {
 	--secondary: #d8bb6e;
 	--gold: #d8bb6e;
 	--gold-light: #8f7a3f;
+	--woc: #e05252;
 	--shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.35);
 	--shadow: 0 6px 16px -6px rgb(0 0 0 / 0.5);
 	--shadow-lg: 0 12px 28px -8px rgb(0 0 0 / 0.55);
@@ -129,6 +131,7 @@ body.dark {
 		--secondary: #d8bb6e;
 		--gold: #d8bb6e;
 		--gold-light: #8f7a3f;
+		--woc: #e05252;
 		--shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.35);
 		--shadow: 0 6px 16px -6px rgb(0 0 0 / 0.5);
 		--shadow-lg: 0 12px 28px -8px rgb(0 0 0 / 0.55);
@@ -175,6 +178,16 @@ body input {
 
 button {
 	font-family: inherit;
+}
+
+/* Words of Christ (red letter). The colour is turned off while the setting is
+   disabled via a body-level .woc-off class. */
+.woc {
+	color: var(--woc);
+}
+
+body.woc-off .woc {
+	color: inherit;
 }
 
 :focus-visible {

@@ -128,6 +128,86 @@ function upperCaseWords(body) {
 	return body;
 }
 
+// ---------- Words of Christ (red letter) ----------
+
+// The BSB epub marks Christ's direct speech with a bare <span> (no class).
+// This pass turns those spans into <span class="woc"> so the runtime can
+// render them in red when the "Words of Christ" setting is on. Quoted speech
+// that spills past the closing </span> (e.g. Matthew 16:28 ends in its own
+// paragraph) keeps its red marking by colouring the continuation block.
+
+function addWocClass(tag) {
+	if (/class=/.test(tag)) {
+		return tag.replace(
+			/class=(["'])(.*?)\1/,
+			(_, quote, value) => "class=" + quote + value + " woc" + quote
+		);
+	}
+	return tag.replace(/\s*>$/, ' class="woc">');
+}
+
+const WOC_BLOCK_TAGS = new Set(["p", "div"]);
+
+function markWordsOfChrist(body, book, chapter) {
+	var out = "";
+	var i = 0;
+	var stack = []; // open tags, each {tag, bare}
+	var quoteDepth = 0; // unclosed " quotes inside the current woc span
+	var continuing = false; // quoted speech continues past its </span>
+
+	while (i < body.length) {
+		var ch = body[i];
+
+		if (ch == "<") {
+			var end = body.indexOf(">", i);
+			if (end < 0) {
+				out += body.slice(i);
+				break;
+			}
+			var raw = body.slice(i, end + 1);
+			var inner = body.slice(i + 1, end);
+			var closing = inner[0] == "/";
+			if (closing) inner = inner.slice(1);
+			var selfClosing = /\/\s*$/.test(inner);
+			var tagName = inner.trim().split(/[\s\/]/)[0].toLowerCase();
+
+			if (closing) {
+				var el = stack.pop();
+				if (el && el.bare && quoteDepth > 0) continuing = true;
+				out += raw;
+			} else if (selfClosing || VOID_TAGS.has(tagName)) {
+				out += raw;
+			} else {
+				var bare = tagName == "span" && inner.indexOf("=") < 0;
+				stack.push({ tag: tagName, bare });
+				if (bare) {
+					quoteDepth = 0;
+					out += raw.replace("<span>", '<span class="woc">');
+				} else if (continuing && WOC_BLOCK_TAGS.has(tagName)) {
+					out += addWocClass(raw);
+				} else {
+					out += raw;
+				}
+			}
+			i = end + 1;
+			continue;
+		}
+
+		if (ch == "“") {
+			quoteDepth++;
+		} else if (ch == "”") {
+			if (quoteDepth > 0) {
+				quoteDepth--;
+				if (quoteDepth == 0) continuing = false;
+			}
+		}
+		out += ch;
+		i++;
+	}
+
+	return out;
+}
+
 async function parseChapters() {
 	console.log("Parsing BSB...");
 
@@ -257,6 +337,9 @@ async function parseChapters() {
 
 		// Add per-verse anchors so search results can scroll to a verse
 		body = addVerseIds(body);
+
+		// Words of Christ (red letter)
+		body = markWordsOfChrist(body, book, chapter);
 
 		writeFile(toDir + "/" + newFilename + ".html", body);
 	}

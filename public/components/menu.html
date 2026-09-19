@@ -64,6 +64,21 @@
 	</div>
 </div>
 
+<div
+	style="display: flex"
+	onclick="var i = this.querySelector('input').click(); event.stopPropagation()"
+>
+	<div>Words of Christ in Red</div>
+	<div>
+		<input
+			type="checkbox"
+			data-value="woc"
+			onchange="fireEvent({name:'setSetting', setting:'woc', value:this.checked})"
+			onclick="event.stopPropagation()"
+		/>
+	</div>
+</div>
+
 <div style="display: flex">
 	<div>Spelling</div>
 	<div>
@@ -217,4 +232,6 @@
 	document.querySelector("input[data-value=references]").checked =
 		settings.references;
 	document.querySelector("input[data-value=verses]").checked = settings.verses;
+
+	document.querySelector("input[data-value=woc]").checked = settings.woc;
 </script>
