@@ -395,9 +395,10 @@ function parseDivineNamesAndYalls(body, book, chapter) {
 	var word = "";
 	var youCount = 0;
 	var youWrap = null; // set when a you-word also needs cap/nocap/bsb variants
+	var prevCh = ""; // last text character (not inside a tag)
 
 	// prettier-ignore
-	var badCapitalWords = ["Offspring", "Alpha", "Omega", "End", "Beginning", "Lamb", "Amen", "Witness", "Originator", "Living", "Spirit", "He", "His", "Us", "Our", "Most", "High", "Chief", "Creator", "Man", "Oak", "You", "Me", "Him", "Almighty", "My", "Your", "Garden", "Overseer", "One", "Judge", "Wilderness", "Himself", "The", "Will", "Provide", "Myself", "Bring", "Book", "Feast", "Unleavened", "Bread", "Ten", "Commandments", "Covenant", "Ark", "Desert", "Feast", "Most", "Holy", "Place", "Is", "My", "Banner", "Law", "Meeting", "Mine", "Name", "Place", "Presence", "Tent", "Testimony", "Weeks", "Baby", "Baptist", "Beginning", "Being", "Beloved", "Branch", "Blessed", "Blood", "Breach", "Broad", "Brook", "Brothers", "Canal", "City", "Chosen", "Corner", "Days", "Day", "Dawn", "Daughter", "Destiny", "Destroy", "Eastern", "Dwelling", "Dung", "Dove", "Diviners", "Divine", "Distant", "Elevin", "Everlasting", "Excellency", "Fair", "Faithful", "Fast", "Father", "Favor", "Fear", "Field", "First", "Freedmen", "Fountain", "Forum", "Fortune", "Forsaken", "Forest", "Fool", "Folly", "Fish", "Gate", "Glory", "Goats", "Greater", "Great", "Inspection", "Land", "Light", "Life", "Magesty", "Lower", "Lawgiver", "Launderer", "Last", "Lion", "Lily", "Lilies", "Majestic", "Majesty", "Maker", "Messenger", "Messiah", "Mighty", "Middle", "Moon", "Moons", "Monument", "Morning", "Mountain", "Mysteries", "New", "Oaks", "Not", "Ovens", "Out", "Prophets", "Province", "Pool", "Prophet", "Prophets", "Protector", "Rabbi", "Righteous", "Righteousness", "Rock", "Rocks", "Root", "Salvation", "Salt", "Savior", "Saviour", "Scripture", "Scriptures", "Sea", "Second", "Seer", "Seers", "Serpent", "Servant", "Seven", "Sheep", "Shepherd", "Shepherds", "Son", "Song", "Songs", "Slaughter", "Skull", "Sought", "Sovereign", "Spirits", "Spring", "Star", "Still", "Stoic", "Stone", "Street", "Streets", "Strength", "Supper", "Teacher", "Taverns", "Thunder", "Three", "Thirty", "Their", "Tower", "Travelers", "Treatise", "Tower", "Twelve", "Twin", "True", "Truth", "Union", "Valley", "Word", "Yours", "Yourself"]
+	var badCapitalWords = ["King", "Anointed", "Offspring", "Alpha", "Omega", "End", "Beginning", "Lamb", "Amen", "Witness", "Originator", "Living", "Spirit", "He", "His", "Us", "Our", "Most", "High", "Chief", "Creator", "Man", "Oak", "You", "Me", "Him", "Almighty", "My", "Your", "Garden", "Overseer", "One", "Judge", "Wilderness", "Himself", "The", "Will", "Provide", "Myself", "Bring", "Book", "Feast", "Unleavened", "Bread", "Ten", "Commandments", "Covenant", "Ark", "Desert", "Feast", "Most", "Holy", "Place", "Is", "My", "Banner", "Law", "Meeting", "Mine", "Name", "Place", "Presence", "Tent", "Testimony", "Weeks", "Baby", "Baptist", "Beginning", "Being", "Beloved", "Branch", "Blessed", "Blood", "Breach", "Broad", "Brook", "Brothers", "Canal", "City", "Chosen", "Corner", "Days", "Day", "Dawn", "Daughter", "Destiny", "Destroy", "Eastern", "Dwelling", "Dung", "Dove", "Diviners", "Divine", "Distant", "Elevin", "Everlasting", "Excellency", "Fair", "Faithful", "Fast", "Father", "Favor", "Fear", "Field", "First", "Freedmen", "Fountain", "Forum", "Fortune", "Forsaken", "Forest", "Fool", "Folly", "Fish", "Gate", "Glory", "Goats", "Greater", "Great", "Inspection", "Land", "Light", "Life", "Magesty", "Lower", "Lawgiver", "Launderer", "Last", "Lion", "Lily", "Lilies", "Majestic", "Majesty", "Maker", "Messenger", "Messiah", "Mighty", "Middle", "Moon", "Moons", "Monument", "Morning", "Mountain", "Mysteries", "New", "Oaks", "Not", "Ovens", "Out", "Prophets", "Province", "Pool", "Prophet", "Prophets", "Protector", "Rabbi", "Righteous", "Righteousness", "Rock", "Rocks", "Root", "Salvation", "Salt", "Savior", "Saviour", "Scripture", "Scriptures", "Sea", "Second", "Seer", "Seers", "Serpent", "Servant", "Seven", "Sheep", "Shepherd", "Shepherds", "Son", "Song", "Songs", "Slaughter", "Skull", "Sought", "Sovereign", "Spirits", "Spring", "Star", "Still", "Stoic", "Stone", "Street", "Streets", "Strength", "Supper", "Teacher", "Taverns", "Thunder", "Three", "Thirty", "Their", "Tower", "Travelers", "Treatise", "Tower", "Twelve", "Twin", "True", "Truth", "Union", "Valley", "Word", "Yours", "Yourself"]
 
 	var replacements = []; // each item in array is an object with keys:
 	// "at" (index in string to start replacing),
@@ -408,6 +409,16 @@ function parseDivineNamesAndYalls(body, book, chapter) {
 		// console.log(beginning, thisWord, JSON.stringify(tags))
 		word = "";
 		youWrap = null;
+
+		var nextWordIsName = false;
+		if (thisWord == "King") {
+			var nwm = body
+				.substring(index)
+				.match(/[\s\u00A0]*([A-Za-z]+)/);
+			nextWordIsName =
+				nwm &&
+				nwm[1].substring(0, 1) == nwm[1].substring(0, 1).toUpperCase();
+		}
 
 		if (tags.length > 0 && tags[tags.length - 1][2] == "reftext") {
 			// console.log("found verse ", thisWord)
@@ -487,7 +498,7 @@ function parseDivineNamesAndYalls(body, book, chapter) {
 				beginning = false;
 			} else {
 				// Capital not at beginning of sentence. Alert!
-				if (badCapitalWords.includes(thisWord)) {
+				if (badCapitalWords.includes(thisWord) && !nextWordIsName) {
 					var youInner;
 					if (youWrap)
 						youInner =
@@ -553,8 +564,17 @@ function parseDivineNamesAndYalls(body, book, chapter) {
 			if (ch == ">") {
 				// console.log("end tag word: " + word)
 				if (closingTag && word == "p") {
-					// inHeading = false
-					beginning = true; // we just came across a <p> or </p> tag
+					var closedTag = tags[tags.length - 1] || [];
+					if (
+						closedTag.indexOf("hdg") >= 0 ||
+						closedTag.indexOf("subhdg") >= 0 ||
+						closedTag.indexOf("acrostic") >= 0 ||
+						closedTag.indexOf("selah") >= 0
+					) {
+						beginning = true;
+					} else if (!beginning && ".?!:".indexOf(prevCh) >= 0) {
+						beginning = true;
+					}
 				}
 				// if (closingTag && word == "span") {
 				// 	inRefText = false
@@ -596,6 +616,7 @@ function parseDivineNamesAndYalls(body, book, chapter) {
 			continue;
 		}
 
+		if (ch != "<") prevCh = ch;
 		if (ch == "<") {
 			if (word != "") processWord(word, index);
 			tags.push([]); // Yes, but maybe it's a closing tag, so we'll pop it if it is a closing tag
