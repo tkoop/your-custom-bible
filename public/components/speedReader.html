@@ -192,7 +192,11 @@
 	}
 
 	document.addEventListener("click", () => {
-		if (event.target.closest("#dotIcon")) {
+		if (event.target.closest("#dropdown")) {
+			return;
+		}
+
+		if (event.target.closest("#settingsDropdown")) {
 			return;
 		}
 

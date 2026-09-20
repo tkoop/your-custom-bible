@@ -1,7 +1,7 @@
 var settings = {
 	browseHistory: [],
 	fontSize: 16,
-	darkMode: false,
+	mode: "auto",
 	spelling: "ca",
 	name: "Yahweh",
 	case: "upper",
@@ -35,7 +35,9 @@ function loadSettingsFromLocalStorage() {
 	var localStorageSettings = JSON.parse(localStorage?.settings ?? "{}");
 
 	settings.fontSize = localStorageSettings?.fontSize ?? 16;
-	settings.darkMode = localStorageSettings.mode == "dark";
+	settings.mode =
+		localStorageSettings?.mode ??
+		(localStorageSettings?.darkMode ? "dark" : "auto");
 	settings.spelling = localStorageSettings?.spelling ?? "ca";
 	settings.name = localStorageSettings?.name ?? "Yaweh";
 	settings.case = localStorageSettings?.case ?? "lower";
@@ -54,7 +56,7 @@ loadSettingsFromLocalStorage();
 function saveSettingsToLocalStorage() {
 	var localStorageSettings = {
 		fontSize: settings.fontSize,
-		darkMode: settings.darkMode,
+		mode: settings.mode,
 		spelling: settings.spelling,
 		name: settings.name,
 		case: settings.case,

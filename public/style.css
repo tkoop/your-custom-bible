@@ -114,31 +114,6 @@ body.dark {
 	--shadow-xl: 0 20px 45px -12px rgb(0 0 0 / 0.65);
 }
 
-@media (prefers-color-scheme: dark) {
-	body:not(.dark) {
-		--background: #19140e;
-		--surface: #251e14;
-		--surface-soft: #2d261a;
-		--border-light: #2c2519;
-		--border: #403527;
-		--text-primary: #ece2cc;
-		--text-secondary: #b7a783;
-		--text-muted: #88785c;
-		--primary: #9fb6d4;
-		--primary-dark: #7e97bc;
-		--primary-light: #c7d5ea;
-		--accent-soft: #2a333f;
-		--secondary: #d8bb6e;
-		--gold: #d8bb6e;
-		--gold-light: #8f7a3f;
-		--woc: #e05252;
-		--shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.35);
-		--shadow: 0 6px 16px -6px rgb(0 0 0 / 0.5);
-		--shadow-lg: 0 12px 28px -8px rgb(0 0 0 / 0.55);
-		--shadow-xl: 0 20px 45px -12px rgb(0 0 0 / 0.65);
-	}
-}
-
 /* ---------- Base ---------- */
 * {
 	box-sizing: border-box;
@@ -307,23 +282,23 @@ a:hover {
 }
 
 #menuIcon,
-#dotIcon {
+#gearIcon {
 	cursor: pointer;
 	color: var(--text-secondary);
 	transition: color 0.2s ease, transform 0.2s ease;
 }
 
 #menuIcon:hover,
-#dotIcon:hover {
+#gearIcon:hover {
 	color: var(--primary);
 	transform: scale(1.05);
 }
 
 /* ---------- Dropdown menu ---------- */
-#dropdown {
+#dropdown,
+#settingsDropdown {
 	position: absolute;
-	top: 20px;
-	right: 16px;
+	top: 78px;
 	background-color: var(--surface);
 	z-index: 1000;
 	box-shadow: var(--shadow-xl);
@@ -332,10 +307,22 @@ a:hover {
 	border-radius: var(--radius-lg);
 	border: 1px solid var(--border);
 	min-width: 300px;
+	max-height: calc(100vh - 90px);
+	max-height: calc(100dvh - 90px);
+	overflow-y: auto;
 	color: var(--text-primary);
 }
 
-#dropdown > div {
+#dropdown {
+	right: 16px;
+}
+
+#settingsDropdown {
+	right: 54px;
+}
+
+#dropdown > div,
+#settingsDropdown > div {
 	padding: 10px 14px;
 	cursor: pointer;
 	display: flex;
@@ -348,7 +335,8 @@ a:hover {
 	font-size: 0.95rem;
 }
 
-#dropdown > div:hover {
+#dropdown > div:hover,
+#settingsDropdown > div:hover {
 	background-color: var(--surface-soft);
 }
 
@@ -358,13 +346,15 @@ a:hover {
 	margin: 6px 4px;
 }
 
-#dropdown .buttonHolder {
+#dropdown .buttonHolder,
+#settingsDropdown .buttonHolder {
 	display: flex;
 	justify-content: flex-end;
 	gap: 8px;
 }
 
-#dropdown button {
+#dropdown button,
+#settingsDropdown button {
 	border: 1px solid var(--border);
 	background: var(--surface);
 	color: var(--text-primary);
@@ -376,13 +366,22 @@ a:hover {
 	transition: all 0.2s ease;
 }
 
-#dropdown button:hover {
+#dropdown button:hover,
+#settingsDropdown button:hover {
 	background: var(--primary);
 	color: #fff;
 	border-color: var(--primary);
 }
 
-#dropdown select {
+#dropdown .buttonHolder button.selected,
+#settingsDropdown .buttonHolder button.selected {
+	background: var(--primary-dark);
+	color: #fff;
+	border-color: var(--primary-dark);
+}
+
+#dropdown select,
+#settingsDropdown select {
 	padding: 7px 10px;
 	border-radius: var(--radius-sm);
 	border: 1px solid var(--border);
@@ -394,17 +393,20 @@ a:hover {
 	transition: all 0.2s ease;
 }
 
-#dropdown select:hover {
+#dropdown select:hover,
+#settingsDropdown select:hover {
 	border-color: var(--primary);
 }
 
-#dropdown select:focus {
+#dropdown select:focus,
+#settingsDropdown select:focus {
 	outline: none;
 	border-color: var(--primary);
 	box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
-#dropdown input[type="checkbox"] {
+#dropdown input[type="checkbox"],
+#settingsDropdown input[type="checkbox"] {
 	width: 18px;
 	height: 18px;
 	cursor: pointer;
@@ -729,6 +731,15 @@ div.fn > b {
 	text-transform: uppercase;
 	letter-spacing: 0.22em;
 	margin-bottom: 0.4rem;
+}
+
+/* The epub's footnote block contains empty spacer <p class="calibre2">s (inline
+   height). They inherit .calibre2's tall padding — squash them flat. */
+div.fn p.calibre2 {
+	padding: 0;
+	margin: 0;
+	height: 0 !important;
+	overflow: hidden;
 }
 
 .cross1 {

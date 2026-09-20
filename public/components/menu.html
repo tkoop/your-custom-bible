@@ -4,186 +4,7 @@
 
 <div onclick="fireEvent({name:'showPage', page:'search'})">Search</div>
 
-<div
-	style="display: flex"
-	onclick="var i = this.querySelector('input').click(); event.stopPropagation()"
->
-	<div>Titles</div>
-	<div>
-		<input
-			type="checkbox"
-			data-value="titles"
-			onchange="fireEvent({name:'setSetting', setting:'titles', value:this.checked})"
-			onclick="event.stopPropagation()"
-		/>
-	</div>
-</div>
-
-<div
-	style="display: flex"
-	onclick="var i = this.querySelector('input').click(); event.stopPropagation()"
->
-	<div>Verses</div>
-	<div>
-		<input
-			type="checkbox"
-			data-value="verses"
-			onchange="fireEvent({name:'setSetting', setting:'verses', value:this.checked})"
-			onclick="event.stopPropagation()"
-		/>
-	</div>
-</div>
-
-<div
-	style="display: flex"
-	onclick="var i = this.querySelector('input').click(); event.stopPropagation()"
->
-	<div>References</div>
-	<div>
-		<input
-			type="checkbox"
-			data-value="references"
-			onchange="fireEvent({name:'setSetting', setting:'references', value:this.checked})"
-			onclick="event.stopPropagation()"
-		/>
-	</div>
-</div>
-
-<div
-	style="display: flex"
-	onclick="var i = this.querySelector('input').click(); event.stopPropagation()"
->
-	<div>Footnotes</div>
-	<div>
-		<input
-			type="checkbox"
-			data-value="footnotes"
-			onchange="fireEvent({name:'setSetting', setting:'footnotes', value:this.checked})"
-			onclick="event.stopPropagation()"
-		/>
-	</div>
-</div>
-
-<div
-	style="display: flex"
-	onclick="var i = this.querySelector('input').click(); event.stopPropagation()"
->
-	<div>Words of Christ in Red</div>
-	<div>
-		<input
-			type="checkbox"
-			data-value="woc"
-			onchange="fireEvent({name:'setSetting', setting:'woc', value:this.checked})"
-			onclick="event.stopPropagation()"
-		/>
-	</div>
-</div>
-
-<div style="display: flex">
-	<div>Spelling</div>
-	<div>
-		<select
-			style="padding: 6px; border-radius: 6px"
-			id="spelling"
-			onclick="event.stopPropagation()"
-			onchange="fireEvent({name:'setSetting', setting:'spelling', value:this.options[this.selectedIndex].value}); event.stopPropagation()"
-		>
-			<option value="ca">Canadian</option>
-			<option value="gb">British</option>
-			<option value="us">USA</option>
-		</select>
-	</div>
-</div>
-
-<div style="display: flex">
-	<div>Case</div>
-	<div>
-		<select
-			style="padding: 6px; border-radius: 6px"
-			id="case"
-			onclick="event.stopPropagation()"
-			onchange="fireEvent({name:'setSetting', setting:'case', value:this.options[this.selectedIndex].value}); event.stopPropagation()"
-		>
-			<option value="lower">Mostly lower case</option>
-			<option value="upper">Upper case</option>
-			<option value="bsb">BSB</option>
-		</select>
-	</div>
-</div>
-
-<div style="display: flex">
-	<div>God's Name</div>
-	<div>
-		<select
-			style="padding: 6px; border-radius: 6px"
-			id="name"
-			onclick="event.stopPropagation()"
-			onchange="fireEvent({name:'setSetting', setting:'name', value:this.options[this.selectedIndex].value}); event.stopPropagation()"
-		>
-			<option value="Yahweh">Yahweh</option>
-			<option value="LORD">LORD</option>
-			<option value="Jehovah">Jehovah</option>
-			<option value="YHWH">YHWH</option>
-			<option value="YHVH">YHVH</option>
-			<option value="HaShem">HaShem</option>
-			<option value="Adonai">Adonai</option>
-			<option value="Elohim">Elohim</option>
-			<option value="G-d">G-d</option>
-			<option value="God">God</option>
-		</select>
-	</div>
-</div>
-
-<div style="display: flex">
-	<div>Plural You</div>
-	<div>
-		<select
-			style="padding: 6px; border-radius: 6px"
-			id="you"
-			onclick="event.stopPropagation()"
-			onchange="fireEvent({name:'setSetting', setting:'you', value:this.options[this.selectedIndex].value}); event.stopPropagation()"
-		>
-			<option value="you">you</option>
-			<option value="youcoloured" style="color: purple">you (blue)</option>
-			<option value="youpl">you<b>(pl)</b></option>
-			<option value="youall">you all</option>
-			<option value="yall">y'all</option>
-			<option value="youguys">you guys</option>
-		</select>
-	</div>
-</div>
-
-<div>
-	<div>Font Size</div>
-	<div class="buttonHolder">
-		<button
-			onclick="fireEvent({name:'setSetting', setting:'fontSize', value:settings.fontSize * 1.1}); event.stopPropagation()"
-		>
-			+
-		</button>
-		<button
-			onclick="fireEvent({name:'setSetting', setting:'fontSize', value:settings.fontSize / 1.1}); event.stopPropagation()"
-		>
-			-
-		</button>
-	</div>
-</div>
-
-<div>
-	<div>Mode</div>
-	<div class="buttonHolder">
-		<button
-			onclick="fireEvent({name:'setSetting', setting:'darkMode', value:true}); event.stopPropagation()"
-		>
-			Dark
-		</button>
-		<button
-			onclick="fireEvent({name:'setSetting', setting:'darkMode', value:false}); event.stopPropagation()"
-		>
-			Light
-		</button>
-	</div>
-</div>
+<div id="speedReadItem" style="display:none" onclick="fireEvent({name:'dotIconClicked'})">Speed Read</div>
 
 <hr class="menu-divider" />
 
@@ -193,45 +14,27 @@
 	registerEventListener(
 		(e) => e.name == "menuIconClicked",
 		function (event) {
-			showDropDown(event.eventObject);
+			event.eventObject.stopPropagation();
+			document.getElementById("settingsDropdown").style.display = "none";
+			const dd = document.getElementById("dropdown");
+			dd.style.display = dd.style.display === "block" ? "none" : "block";
 		}
 	);
-
-	function showDropDown(event) {
-		event.stopPropagation();
-		document.getElementById("dropdown").style.display = "block";
-	}
 
 	function hideDropDown() {
 		document.getElementById("dropdown").style.display = "none";
 	}
 
-	window.addEventListener("click", (event) => {
+	window.addEventListener("click", () => {
 		hideDropDown();
+		document.getElementById("settingsDropdown").style.display = "none";
 	});
 
-	document.querySelectorAll("select#spelling option").forEach((op) => {
-		if (op.value == settings.spelling) op.selected = true;
-	});
-
-	document.querySelectorAll("select#name option").forEach((op) => {
-		if (op.value == settings.name) op.selected = true;
-	});
-
-	document.querySelectorAll("select#case option").forEach((op) => {
-		if (op.value == settings.case) op.selected = true;
-	});
-
-	document.querySelectorAll("select#you option").forEach((op) => {
-		if (op.value == settings.you) op.selected = true;
-	});
-
-	document.querySelector("input[data-value=titles]").checked = settings.titles;
-	document.querySelector("input[data-value=footnotes]").checked =
-		settings.footnotes;
-	document.querySelector("input[data-value=references]").checked =
-		settings.references;
-	document.querySelector("input[data-value=verses]").checked = settings.verses;
-
-	document.querySelector("input[data-value=woc]").checked = settings.woc;
+	registerEventListener(
+		(e) => e.name == "showPage",
+		function (event) {
+			document.getElementById("speedReadItem").style.display =
+				event.page === "chapter" ? "flex" : "none";
+		}
+	);
 </script>
