@@ -31,9 +31,18 @@
 		return original;
 	}
 
+	var chronoIconSvg =
+	'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+
 	function applySettings() {
 		// Words of Christ (red letter)
 		document.body.classList.toggle("woc-off", !settings.woc);
+
+		// Chronological order indicator on chapter nav arrows
+		document.body.classList.toggle(
+			"chrono-nav",
+			settings.order == "chronological",
+		);
 
 		// Titles
 		if (settings.titles) {
@@ -354,12 +363,14 @@ fireEvent({
 				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 					<path d="M15.41 16.58L10.83 12L15.41 7.41L14 6L8 12L14 18L15.41 16.58Z" fill="currentColor"/>
 				</svg>
+				<span class="chrono-corner">${chronoIconSvg}</span>
 			</button>
 			<div id="chapterTitle"><span class="title-rule"></span><span class="title-text">${title}</span><span class="title-rule"></span></div>
 			<button data-cy="chapterRight" onclick="moveChapter(1)" aria-label="Next chapter">
 				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 					<path d="M8.59 16.58L13.17 12L8.59 7.41L10 6L16 12L10 18L8.59 16.58Z" fill="currentColor"/>
 				</svg>
+				<span class="chrono-corner">${chronoIconSvg}</span>
 			</button>
 		</div>`;
 
@@ -405,23 +416,27 @@ fireEvent({
 	var order = settings.order;
 
 	function applyOrderToUI() {
-		order = settings.order;
 		document
 			.querySelectorAll(".index-order-button")
 			.forEach((b) => b.classList.toggle("active", b.id == "order-" + order));
 		var canonical = document.getElementById("canonicalSections");
 		var chrono = document.getElementById("chronoSections");
+		var alpha = document.getElementById("alphabeticalSections");
 		if (canonical) canonical.style.display = order == "canonical" ? "flex" : "none";
 		if (chrono) chrono.style.display = order == "chronological" ? "flex" : "none";
+		if (alpha) alpha.style.display = order == "alphabetical" ? "flex" : "none";
 	}
 
 	function setBibleOrder(newOrder) {
-		if (settings.order != newOrder) {
-			fireEvent({
-				name: "setSetting",
-				setting: "order",
-				value: newOrder,
-			});
+		order = newOrder;
+		if (newOrder == "canonical" || newOrder == "chronological") {
+			if (settings.order != newOrder) {
+				fireEvent({
+					name: "setSetting",
+					setting: "order",
+					value: newOrder,
+				});
+			}
 		}
 		applyOrderToUI();
 	}
@@ -429,7 +444,10 @@ fireEvent({
 	registerEventListener(
 		(e) => e.name == "settingsUpdated",
 		function (event) {
-			if (settings.order != order) applyOrderToUI();
+			if (order != "alphabetical" && settings.order != order) {
+				order = settings.order;
+				applyOrderToUI();
+			}
 		}
 	);
 
@@ -450,7 +468,10 @@ fireEvent({
 		}
 
 		picker.appendChild(orderButton("Canonical", "canonical"));
-		picker.appendChild(orderButton("Chronological", "chronological"));
+		var chronoButton = orderButton("Chronological", "chronological");
+		chronoButton.innerHTML = "Chronological " + chronoIconSvg;
+		picker.appendChild(chronoButton);
+		picker.appendChild(orderButton("Alphabetical", "alphabetical"));
 		return picker;
 	}
 
@@ -650,9 +671,41 @@ fireEvent({
 			setBibleOrder(order);
 		});
 
+	var alphabeticalSections = document.createElement("div");
+	alphabeticalSections.id = "alphabeticalSections";
+	alphabeticalSections.className = "index-sections";
+
+	var sortedBooks = books.slice().sort(function (a, b) {
+		return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+	});
+
+	sortedBooks.forEach(function (book) {
+		var bookDiv = document.createElement("div");
+		bookDiv.className = "index-book-row";
+		bookDiv.innerHTML =
+			"<div class='index-book' data-book='" +
+			book.name +
+			"' data-cy='alpha-" +
+			book.name +
+			"' onclick='toggleBookChapters(this)'>" +
+			book.name +
+			"</div>";
+		var chapterLinks =
+			"<div class='index-chapters' data-cy='alphaChapters-" +
+			book.name +
+			"' style='display:none'>";
+		for (let i = 1; i <= book.chapters; i++) {
+			chapterLinks += createLink(book.name, book.slug, i) + " ";
+		}
+		chapterLinks += "</div>";
+		bookDiv.innerHTML += chapterLinks;
+		alphabeticalSections.appendChild(bookDiv);
+	});
+
 	document.getElementById("index").appendChild(makeOrderPicker());
 	document.getElementById("index").appendChild(canonicalSections);
 	document.getElementById("index").appendChild(chronoSections);
+	document.getElementById("index").appendChild(alphabeticalSections);
 	setBibleOrder(order);
 
 	if (settings.browseHistory.length > 0) {

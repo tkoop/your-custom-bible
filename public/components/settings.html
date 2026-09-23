@@ -2,7 +2,25 @@
 	style="display: flex"
 	onclick="var i = this.querySelector('input').click(); event.stopPropagation()"
 >
-	<div>Chronological</div>
+	<div
+		class="chrono-label"
+		style="display: flex; align-items: center; gap: 6px"
+	>Chronological
+		<svg
+			width="15"
+			height="15"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="2.2"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+			aria-hidden="true"
+		>
+			<circle cx="12" cy="12" r="9"></circle>
+			<path d="M12 7v5l3 2"></path>
+		</svg>
+	</div>
 	<div>
 		<input
 			type="checkbox"

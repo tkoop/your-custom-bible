@@ -449,6 +449,9 @@ a:hover {
 	cursor: pointer;
 	transition: all 0.2s ease;
 	box-shadow: var(--shadow-sm);
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
 }
 
 .index-order-button:hover {
@@ -642,6 +645,20 @@ div.index-chapters a:active {
 	box-shadow: var(--shadow-sm);
 	color: var(--text-secondary);
 	flex-shrink: 0;
+	position: relative;
+}
+
+.chapter-nav button .chrono-corner {
+	display: none;
+	position: absolute;
+	bottom: 3px;
+	right: 3px;
+	color: var(--gold);
+	pointer-events: none;
+}
+
+body.chrono-nav .chapter-nav button .chrono-corner {
+	display: flex;
 }
 
 .chapter-nav button:hover {
