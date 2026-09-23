@@ -1,6 +1,7 @@
 <script>
 	var currentBookIndex = 0;
 	var currentChapter = 1; // one based
+	var chronoSequence = [];
 
 	registerEventListener(
 		(e) => e.name == "settingsUpdated",
@@ -223,6 +224,27 @@
 	}
 
 	function moveChapter(delta) {
+		if (settings.order == "chronological" && chronoSequence.length > 0) {
+			var pos = -1;
+			for (var i = 0; i < chronoSequence.length; i++) {
+				if (
+					chronoSequence[i].slug == books[currentBookIndex].slug &&
+					chronoSequence[i].chapter == currentChapter
+				) {
+					pos = i;
+					break;
+				}
+			}
+			if (pos == -1) {
+				pos = 0;
+			} else {
+				pos = (pos + delta + chronoSequence.length) % chronoSequence.length;
+			}
+			var target = chronoSequence[pos];
+			loadThisChapter(target.name, target.slug, target.chapter);
+			return;
+		}
+
 		currentChapter = parseInt(currentChapter) + parseInt(delta);
 		if (currentChapter < 1) {
 			currentBookIndex--;
@@ -380,6 +402,62 @@ fireEvent({
 		return section;
 	}
 
+	var order = settings.order;
+
+	function applyOrderToUI() {
+		order = settings.order;
+		document
+			.querySelectorAll(".index-order-button")
+			.forEach((b) => b.classList.toggle("active", b.id == "order-" + order));
+		var canonical = document.getElementById("canonicalSections");
+		var chrono = document.getElementById("chronoSections");
+		if (canonical) canonical.style.display = order == "canonical" ? "flex" : "none";
+		if (chrono) chrono.style.display = order == "chronological" ? "flex" : "none";
+	}
+
+	function setBibleOrder(newOrder) {
+		if (settings.order != newOrder) {
+			fireEvent({
+				name: "setSetting",
+				setting: "order",
+				value: newOrder,
+			});
+		}
+		applyOrderToUI();
+	}
+
+	registerEventListener(
+		(e) => e.name == "settingsUpdated",
+		function (event) {
+			if (settings.order != order) applyOrderToUI();
+		}
+	);
+
+	function makeOrderPicker() {
+		var picker = document.createElement("div");
+		picker.className = "index-order";
+
+		function orderButton(label, order) {
+			var button = document.createElement("button");
+			button.type = "button";
+			button.className = "index-order-button";
+			button.id = "order-" + order;
+			button.textContent = label;
+			button.onclick = function () {
+				setBibleOrder(order);
+			};
+			return button;
+		}
+
+		picker.appendChild(orderButton("Canonical", "canonical"));
+		picker.appendChild(orderButton("Chronological", "chronological"));
+		return picker;
+	}
+
+	var canonicalSections = document.createElement("div");
+	canonicalSections.id = "canonicalSections";
+	canonicalSections.className = "index-sections";
+
 	var oldTestament = makeTestamentSection("The Old Testament");
 	var newTestament = makeTestamentSection("The New Testament");
 	var oldBooks = oldTestament.querySelector(".index-books");
@@ -406,8 +484,176 @@ fireEvent({
 		(idx < 39 ? oldBooks : newBooks).appendChild(bookDiv);
 	});
 
-	document.getElementById("index").appendChild(oldTestament);
-	document.getElementById("index").appendChild(newTestament);
+	canonicalSections.appendChild(oldTestament);
+	canonicalSections.appendChild(newTestament);
+
+	var chronoSections = document.createElement("div");
+	chronoSections.id = "chronoSections";
+	chronoSections.className = "index-sections";
+
+	var eraTitles = [
+		"From Creation to the Law",
+		"The Conquest and the Judges",
+		"The United Kingdom",
+		"From the Divided Kingdom to the Restoration",
+		"The Life of Christ",
+		"The Early Church",
+	];
+	var chronoSectionsMap = eraTitles.map(makeTestamentSection);
+	var chronoBooks = chronoSectionsMap.map(function (section) {
+		return section.querySelector(".index-books");
+	});
+
+	function otEraIndex(entry) {
+		var name = entry.book;
+		var first = entry.chapter[0];
+		switch (name) {
+			case "Genesis":
+				return first == 1 ? 0 : 1;
+			case "Job":
+				return 1;
+			case "Exodus":
+			case "Leviticus":
+			case "Numbers":
+			case "Deuteronomy":
+				return 2;
+			case "Psalm":
+			case "Psalms":
+				if (first == 90) return 2;
+				if (entry.chapter.indexOf(74) != -1) return 6;
+				return 4;
+			case "Joshua":
+			case "Judges":
+			case "Ruth":
+				return 3;
+			case "1 Samuel":
+			case "2 Samuel":
+			case "1 Chronicles":
+				return 4;
+			case "2 Chronicles":
+				return first <= 9 ? 4 : 5;
+			case "1 Kings":
+				return first <= 11 ? 4 : 5;
+			case "2 Kings":
+				return first <= 23 ? 5 : 6;
+			case "Proverbs":
+			case "Ecclesiastes":
+			case "Song of Solomon":
+				return 4;
+			case "Obadiah":
+			case "Joel":
+			case "Amos":
+			case "Jonah":
+			case "Hosea":
+			case "Isaiah":
+			case "Micah":
+			case "Nahum":
+			case "Zephaniah":
+			case "Habakkuk":
+				return 5;
+			case "Jeremiah":
+				return first <= 47 ? 5 : 6;
+			case "Ezekiel":
+			case "Daniel":
+			case "Lamentations":
+				return 6;
+			case "Ezra":
+			case "Haggai":
+			case "Zechariah":
+			case "Esther":
+			case "Nehemiah":
+			case "Malachi":
+				return 7;
+			default:
+				return 0;
+		}
+	}
+
+	function chronicleSectionIndex(book, entry) {
+		var idx = books.indexOf(book);
+		if (idx < 39) {
+			var otGroup = [0, 0, 0, 1, 2, 3, 3, 3];
+			return otGroup[otEraIndex(entry)];
+		}
+		if (idx <= 42) return 4;
+		return 5;
+	}
+
+	function chronoBook(name) {
+		var canonicalName = name == "Psalm" ? "Psalms" : name;
+		return books.find((b) => b.name == canonicalName);
+	}
+
+	function formatChapterList(chapters) {
+		chapters.sort((a, b) => a - b);
+		if (chapters.length == 1) return "" + chapters[0];
+		var groups = [];
+		var start = chapters[0];
+		var end = chapters[0];
+		for (var i = 1; i < chapters.length; i++) {
+			if (chapters[i] == end + 1) {
+				end = chapters[i];
+			} else {
+				groups.push(start == end ? start : start + "-" + end);
+				start = chapters[i];
+				end = chapters[i];
+			}
+		}
+		groups.push(start == end ? start : start + "-" + end);
+		return groups.join(", ");
+	}
+
+	fetch("chronoChapters.json?version=1")
+		.then(function (response) {
+			return response.json();
+		})
+		.then(function (entries) {
+			entries.forEach(function (entry, idx) {
+				var book = chronoBook(entry.book);
+				if (!book) {
+					console.warn("ChronoChapters: unknown book " + entry.book);
+					return;
+				}
+				var label =
+					book.name == "Psalms" && entry.chapter.length >= 100
+						? "Psalms (most)"
+						: book.name + " " + formatChapterList(entry.chapter);
+				var row = document.createElement("div");
+				row.className = "index-book-row";
+				row.innerHTML =
+					"<div class='index-book' data-book='" +
+					book.name +
+					"' data-cy='chrono-" +
+					idx +
+					"' onclick='toggleBookChapters(this)'>" +
+					label +
+					"</div>";
+				var chapterLinks =
+					"<div class='index-chapters' data-cy='chronoChapters-" +
+					idx +
+					"' style='display:none'>";
+				entry.chapter.forEach(function (chapter) {
+					chapterLinks += createLink(book.name, book.slug, chapter) + " ";
+					chronoSequence.push({
+						name: book.name,
+						slug: book.slug,
+						chapter: chapter,
+					});
+				});
+				chapterLinks += "</div>";
+				row.innerHTML += chapterLinks;
+				chronoBooks[chronicleSectionIndex(book, entry)].appendChild(row);
+			});
+			chronoSectionsMap.forEach(function (section) {
+				chronoSections.appendChild(section);
+			});
+			setBibleOrder(order);
+		});
+
+	document.getElementById("index").appendChild(makeOrderPicker());
+	document.getElementById("index").appendChild(canonicalSections);
+	document.getElementById("index").appendChild(chronoSections);
+	setBibleOrder(order);
 
 	if (settings.browseHistory.length > 0) {
 		let history = settings.browseHistory[settings.browseHistory.length - 1];

@@ -421,6 +421,47 @@ a:hover {
 	font-family: 'sourceSansPro', 'Segoe UI', system-ui, sans-serif;
 }
 
+.index-sections {
+	display: flex;
+	flex-wrap: wrap;
+	align-content: flex-start;
+	flex-basis: 100%;
+	gap: 14px;
+}
+
+.index-order {
+	flex-basis: 100%;
+	display: flex;
+	justify-content: center;
+	gap: 10px;
+	margin: 6px 0 14px;
+}
+
+.index-order-button {
+	font-family: 'sourceSansPro', 'Segoe UI', system-ui, sans-serif;
+	font-size: 0.95rem;
+	font-weight: 600;
+	padding: 9px 22px;
+	border: 1px solid var(--border);
+	border-radius: 999px;
+	background-color: var(--surface);
+	color: var(--text-primary);
+	cursor: pointer;
+	transition: all 0.2s ease;
+	box-shadow: var(--shadow-sm);
+}
+
+.index-order-button:hover {
+	border-color: var(--primary);
+	color: var(--primary);
+}
+
+.index-order-button.active {
+	background-color: var(--secondary);
+	border-color: var(--secondary);
+	color: #fff;
+}
+
 .index-section {
 	flex-basis: 100%;
 }
