@@ -292,6 +292,41 @@
 			.join(" ");
 	}
 
+	function totalChapterCount() {
+		var total = 0;
+		for (var i = 0; i < books.length; i++) total += books[i].chapters;
+		return total;
+	}
+
+	// Day 0 = March 13, 2025 = Genesis 1. One chapter per day, wrapping.
+	function todaysChapterIndex(date) {
+		var d = date ? new Date(date) : new Date();
+		d.setHours(0, 0, 0, 0);
+		var anchor = new Date(2025, 2, 13);
+		anchor.setHours(0, 0, 0, 0);
+		var days = Math.round((d - anchor) / 86400000);
+		var total = totalChapterCount();
+		return ((days % total) + total) % total;
+	}
+
+	function chapterIndexToBookAndChapter(idx) {
+		var total = totalChapterCount();
+		if (idx >= total || idx < 0) idx = 0;
+		for (var i = 0; i < books.length; i++) {
+			if (idx < books[i].chapters) {
+				return { book: books[i], chapter: idx + 1 };
+			}
+			idx -= books[i].chapters;
+		}
+		var last = books[books.length - 1];
+		return { book: last, chapter: last.chapters };
+	}
+
+	function goToTodaysChapter() {
+		var target = chapterIndexToBookAndChapter(todaysChapterIndex());
+		loadThisChapter(target.book.name, target.book.slug, target.chapter);
+	}
+
 	function slugToIndex(slug) {
 		for (var i = 0; i < books.length; i++) {
 			if (books[i].slug == slug) {
