@@ -449,6 +449,9 @@ a:hover {
 	cursor: pointer;
 	transition: all 0.2s ease;
 	box-shadow: var(--shadow-sm);
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
 }
 
 .index-order-button:hover {
@@ -642,6 +645,20 @@ div.index-chapters a:active {
 	box-shadow: var(--shadow-sm);
 	color: var(--text-secondary);
 	flex-shrink: 0;
+	position: relative;
+}
+
+.chapter-nav button .chrono-corner {
+	display: none;
+	position: absolute;
+	bottom: 3px;
+	right: 3px;
+	color: var(--gold);
+	pointer-events: none;
+}
+
+body.chrono-nav .chapter-nav button .chrono-corner {
+	display: flex;
 }
 
 .chapter-nav button:hover {
@@ -683,6 +700,121 @@ div.index-chapters a:active {
 	#chapterTitle .title-rule {
 		display: none;
 	}
+}
+
+/* ---------- Page turning ---------- */
+#chapter.page-turn {
+	height: calc(100vh - 96px);
+	height: calc(100dvh - 96px);
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+#chapter.page-turn .chapter-nav.bottom,
+#chapter.page-turn #chapterSpacer {
+	display: none;
+}
+
+#chapter.page-turn > .chapter-nav {
+	flex: 0 0 auto;
+}
+
+.page-turn-viewport {
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow: hidden;
+	position: relative;
+}
+
+.page-turn-viewport #chapterText {
+	height: 100%;
+	column-fill: auto;
+	-webkit-column-fill: auto;
+	transition: transform 0.28s ease;
+}
+
+.page-turn-viewport.no-anim #chapterText {
+	transition: none;
+}
+
+.page-turn-controls {
+	flex: 0 0 auto;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 14px;
+	padding: 12px 16px 14px;
+}
+
+.page-turn-btn {
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: 50%;
+	width: 40px;
+	height: 40px;
+	padding: 0;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--text-secondary);
+	box-shadow: var(--shadow-sm);
+	flex-shrink: 0;
+	transition: all 0.2s ease;
+}
+
+.page-turn-btn:hover {
+	border-color: var(--primary);
+	color: var(--primary);
+	transform: translateY(-1px);
+	box-shadow: var(--shadow);
+}
+
+.page-turn-btn:disabled {
+	opacity: 0.35;
+	cursor: default;
+	pointer-events: none;
+}
+
+#pageTurnDots {
+	display: flex;
+	align-items: center;
+	flex-wrap: nowrap;
+	overflow: hidden;
+	gap: 7px;
+	max-width: 55%;
+	min-height: 12px;
+}
+
+.page-turn-dot {
+	flex: 0 0 8px;
+	width: 8px;
+	height: 8px;
+	padding: 0;
+	border: none;
+	border-radius: 50%;
+	background: var(--border);
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.page-turn-dot:hover {
+	background: var(--gold);
+}
+
+.page-turn-dot.active {
+	background: var(--primary);
+	transform: scale(1.2);
+}
+
+.page-turn-count {
+	font-family: 'sourceSansPro', sans-serif;
+	font-size: 0.85rem;
+	color: var(--text-muted);
+	white-space: nowrap;
+	min-width: 3.5em;
+	text-align: center;
 }
 
 /* ---------- Scripture typography ---------- */

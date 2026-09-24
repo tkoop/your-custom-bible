@@ -12,6 +12,7 @@ var settings = {
 	you: "youpl",
 	woc: false,
 	order: "canonical",
+	pageturning: false,
 };
 
 registerEventListener(
@@ -52,6 +53,7 @@ function loadSettingsFromLocalStorage() {
 	settings.order =
 		localStorageSettings?.order ??
 		(localStorage.bibleOrder == "chronological" ? "chronological" : "canonical");
+	settings.pageturning = localStorageSettings?.pageturning ?? false;
 
 	fireEvent({ name: "settingsUpdated" });
 }
@@ -71,6 +73,7 @@ function saveSettingsToLocalStorage() {
 		you: settings.you,
 		woc: settings.woc,
 		order: settings.order,
+		pageturning: settings.pageturning,
 	};
 
 	localStorage.settings = JSON.stringify(localStorageSettings);

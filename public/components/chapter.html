@@ -31,9 +31,18 @@
 		return original;
 	}
 
+	var chronoIconSvg =
+	'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+
 	function applySettings() {
 		// Words of Christ (red letter)
 		document.body.classList.toggle("woc-off", !settings.woc);
+
+		// Chronological order indicator on chapter nav arrows
+		document.body.classList.toggle(
+			"chrono-nav",
+			settings.order == "chronological",
+		);
 
 		// Titles
 		if (settings.titles) {
@@ -189,6 +198,8 @@
 		}
 
 		document.getElementById("body").style.fontSize = settings.fontSize + "px";
+
+		setupPageTurn();
 	}
 
 	applySettings();
@@ -319,17 +330,36 @@ fireEvent({
 				skipHistory: !!skipHistory,
 			});
 
+			// The page element is only laid out once the showPage event above has
+			// made it visible, so measure the page dimensions now.
+			if (pageTurning.enabled) {
+				recalcPages();
+			}
+
 			// If we arrived here from a search result, scroll to that verse.
 			if (window.scrollVerse) {
 				var verseNum = window.scrollVerse;
 				window.scrollVerse = null;
-				var verseEl = document.getElementById("v" + verseNum);
-				var scrollTarget = (verseEl && verseEl.closest("p")) || verseEl;
-				if (scrollTarget) {
+				if (pageTurning.enabled) {
+					var pendingVerse = verseNum;
 					setTimeout(function () {
-						scrollTarget.scrollIntoView({ block: "center" });
+						jumpToPageWithVerse(pendingVerse);
 					}, 0);
+				} else {
+					var verseEl = document.getElementById("v" + verseNum);
+					var scrollTarget = (verseEl && verseEl.closest("p")) || verseEl;
+					if (scrollTarget) {
+						setTimeout(function () {
+							scrollTarget.scrollIntoView({ block: "center" });
+						}, 0);
+					}
 				}
+			}
+
+			if (document.fonts && document.fonts.ready) {
+				document.fonts.ready.then(function () {
+					if (pageTurning.enabled) recalcPages();
+				});
 			}
 			});
 	}
@@ -354,17 +384,245 @@ fireEvent({
 				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 					<path d="M15.41 16.58L10.83 12L15.41 7.41L14 6L8 12L14 18L15.41 16.58Z" fill="currentColor"/>
 				</svg>
+				<span class="chrono-corner">${chronoIconSvg.replaceAll('"', "'")}</span>
 			</button>
 			<div id="chapterTitle"><span class="title-rule"></span><span class="title-text">${title}</span><span class="title-rule"></span></div>
 			<button data-cy="chapterRight" onclick="moveChapter(1)" aria-label="Next chapter">
 				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 					<path d="M8.59 16.58L13.17 12L8.59 7.41L10 6L16 12L10 18L8.59 16.58Z" fill="currentColor"/>
 				</svg>
-			</button>
+				<span class="chrono-corner">${chronoIconSvg}</span>
+		</button>
 		</div>`;
 
-		return arrows + html + "<div style='height:32px'></div>" + arrows.replace("chapter-nav", "chapter-nav bottom");
+		return (
+			arrows +
+			"<div id='chapterText'>" +
+			html +
+			"</div><div id='chapterSpacer' style='height:32px'></div>" +
+			arrows.replace("chapter-nav", "chapter-nav bottom")
+		);
 	}
+
+	var pageTurning = {
+		enabled: false,
+		page: 0, // zero based
+		pageCount: 1,
+		pageGap: 8,
+	};
+
+	var pageTurnArrows = {
+		left:
+			'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15.41 16.58L10.83 12L15.41 7.41L14 6L8 12L14 18L15.41 16.58Z" fill="currentColor"/></svg>',
+		right:
+			'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.59 16.58L13.17 12L8.59 7.41L10 6L16 12L10 18L8.59 16.58Z" fill="currentColor"/></svg>',
+	};
+
+	function isChapterLoaded() {
+		var chapter = document.getElementById("chapter");
+		return chapter && !!chapter.querySelector("#chapterText");
+	}
+
+	function setupPageTurn() {
+		if (!isChapterLoaded()) return;
+		if (settings.pageturning) {
+			enablePageTurn();
+		} else {
+			disablePageTurn();
+		}
+	}
+
+	function enablePageTurn() {
+		var chapter = document.getElementById("chapter");
+		var textWrap = document.getElementById("chapterText");
+		var spacer = document.getElementById("chapterSpacer");
+		if (!chapter || !textWrap || !spacer) return;
+
+		// The .page-turn class lives on #chapter and survives innerHTML resets,
+		// so only treat the mode as already set up if the existing viewport is
+		// connected to the current chapter content.
+		var viewport = document.getElementById("pageTurnViewport");
+		if (viewport && viewport.contains(textWrap)) {
+			recalcPages();
+			return;
+		}
+
+		var viewport = document.createElement("div");
+		viewport.id = "pageTurnViewport";
+		viewport.className = "page-turn-viewport";
+
+		var controls = document.createElement("div");
+		controls.id = "pageTurnControls";
+		controls.className = "page-turn-controls";
+		controls.innerHTML =
+			'<button id="pageTurnLeft" class="page-turn-btn" aria-label="Previous page" onclick="turnPage(-1)">' +
+			pageTurnArrows.left +
+			"</button>" +
+			'<div id="pageTurnDots" class="page-turn-dots"></div>' +
+			'<div id="pageTurnCount" class="page-turn-count" aria-live="polite"></div>' +
+			'<button id="pageTurnRight" class="page-turn-btn" aria-label="Next page" onclick="turnPage(1)">' +
+			pageTurnArrows.right +
+			"</button>";
+
+		chapter.classList.add("page-turn");
+		chapter.style.display = "flex";
+		viewport.appendChild(textWrap);
+		chapter.insertBefore(viewport, spacer);
+		chapter.appendChild(controls);
+
+		pageTurning.enabled = true;
+		pageTurning.page = 0;
+		recalcPages();
+	}
+
+	function disablePageTurn() {
+		var chapter = document.getElementById("chapter");
+		if (!chapter) return;
+		var viewport = document.getElementById("pageTurnViewport");
+		var controls = document.getElementById("pageTurnControls");
+		var textWrap = document.getElementById("chapterText");
+		var spacer = document.getElementById("chapterSpacer");
+
+		chapter.classList.remove("page-turn");
+		chapter.style.display = "block";
+		if (viewport && textWrap && spacer) {
+			chapter.insertBefore(textWrap, spacer);
+			viewport.remove();
+		}
+		if (controls) controls.remove();
+		pageTurning.enabled = false;
+	}
+
+	function recalcPages() {
+		if (!pageTurning.enabled) return;
+		var viewport = document.getElementById("pageTurnViewport");
+		var textWrap = document.getElementById("chapterText");
+		if (!viewport || !textWrap) return;
+
+		var width = viewport.clientWidth;
+		var height = viewport.clientHeight;
+		if (!width || !height) return;
+
+		var gap = pageTurning.pageGap;
+		var step = width + gap;
+
+		viewport.classList.add("no-anim");
+		textWrap.style.height = height + "px";
+		textWrap.style.columnWidth = width + "px";
+		textWrap.style.columnGap = gap + "px";
+		textWrap.style.columnFill = "auto";
+		textWrap.style.webkitColumnFill = "auto";
+		textWrap.style.transform = "";
+
+		var scrollWidth = textWrap.scrollWidth;
+		if (scrollWidth < width) scrollWidth = width;
+		var pageCount = Math.max(1, Math.round((scrollWidth - width) / step) + 1);
+		pageTurning.pageCount = pageCount;
+		if (pageTurning.page > pageCount - 1) pageTurning.page = pageCount - 1;
+		if (pageTurning.page < 0) pageTurning.page = 0;
+
+		applyPageTransform(false);
+		renderPageTurnIndicator();
+
+		var viewportEl = viewport;
+		requestAnimationFrame(function () {
+			viewportEl.classList.remove("no-anim");
+		});
+	}
+
+	function applyPageTransform(animate) {
+		if (!pageTurning.enabled) return;
+		var viewport = document.getElementById("pageTurnViewport");
+		var textWrap = document.getElementById("chapterText");
+		if (!viewport || !textWrap) return;
+		var step = viewport.clientWidth + pageTurning.pageGap;
+		viewport.classList.toggle("no-anim", !animate);
+		textWrap.style.transform =
+			"translateX(" + -pageTurning.page * step + "px)";
+	}
+
+	function renderPageTurnIndicator() {
+		var dots = document.getElementById("pageTurnDots");
+		var count = document.getElementById("pageTurnCount");
+		if (!dots) return;
+		var leftBtn = document.getElementById("pageTurnLeft");
+		var rightBtn = document.getElementById("pageTurnRight");
+		dots.innerHTML = "";
+		var total = pageTurning.pageCount;
+		var frag = document.createDocumentFragment();
+		for (var i = 0; i < total; i++) {
+			var dot = document.createElement("button");
+			dot.type = "button";
+			dot.className =
+				"page-turn-dot" + (i === pageTurning.page ? " active" : "");
+			dot.setAttribute("aria-label", "Go to page " + (i + 1));
+			if (i === pageTurning.page)
+				dot.setAttribute("aria-current", "true");
+			dot.setAttribute("data-page", i);
+			dot.onclick = (function (n) {
+				return function () {
+					goToPage(n);
+				};
+			})(i);
+			frag.appendChild(dot);
+		}
+		dots.appendChild(frag);
+		if (count) {
+			count.textContent =
+				pageTurning.page + 1 + " / " + pageTurning.pageCount;
+		}
+		if (leftBtn) leftBtn.disabled = pageTurning.page === 0;
+		if (rightBtn) rightBtn.disabled = pageTurning.page >= total - 1;
+	}
+
+	function goToPage(n) {
+		if (!pageTurning.enabled) return;
+		n = Math.max(0, Math.min(n, pageTurning.pageCount - 1));
+		if (n === pageTurning.page) return;
+		pageTurning.page = n;
+		applyPageTransform(true);
+		renderPageTurnIndicator();
+	}
+
+	function turnPage(delta) {
+		if (!pageTurning.enabled) return;
+		goToPage(pageTurning.page + delta);
+	}
+
+	function jumpToPageWithVerse(verseNum) {
+		if (!pageTurning.enabled) return;
+		var el = document.getElementById("v" + verseNum);
+		var textWrap = document.getElementById("chapterText");
+		var viewport = document.getElementById("pageTurnViewport");
+		if (!el || !textWrap || !viewport) return;
+		var step = viewport.clientWidth + pageTurning.pageGap;
+		var relLeft = el.getBoundingClientRect().left - textWrap.getBoundingClientRect().left;
+		var page = Math.max(0, Math.floor(relLeft / step));
+		goToPage(page);
+	}
+
+	window.addEventListener("resize", function () {
+		if (pageTurning.enabled) recalcPages();
+	});
+
+	if (window.visualViewport) {
+		window.visualViewport.addEventListener("resize", function () {
+			if (pageTurning.enabled) recalcPages();
+		});
+	}
+
+	window.addEventListener("keydown", function (event) {
+		if (!pageTurning.enabled) return;
+		var tag = (document.activeElement && document.activeElement.tagName) || "";
+		if (/INPUT|TEXTAREA|SELECT/.test(tag)) return;
+		if (event.key === "ArrowRight" || event.key === "PageDown") {
+			event.preventDefault();
+			goToPage(pageTurning.page + 1);
+		} else if (event.key === "ArrowLeft" || event.key === "PageUp") {
+			event.preventDefault();
+			goToPage(pageTurning.page - 1);
+		}
+	});
 
 	function createLink(name, slug, chapter, includeBook) {
 		if (includeBook) {
@@ -405,23 +663,27 @@ fireEvent({
 	var order = settings.order;
 
 	function applyOrderToUI() {
-		order = settings.order;
 		document
 			.querySelectorAll(".index-order-button")
 			.forEach((b) => b.classList.toggle("active", b.id == "order-" + order));
 		var canonical = document.getElementById("canonicalSections");
 		var chrono = document.getElementById("chronoSections");
+		var alpha = document.getElementById("alphabeticalSections");
 		if (canonical) canonical.style.display = order == "canonical" ? "flex" : "none";
 		if (chrono) chrono.style.display = order == "chronological" ? "flex" : "none";
+		if (alpha) alpha.style.display = order == "alphabetical" ? "flex" : "none";
 	}
 
 	function setBibleOrder(newOrder) {
-		if (settings.order != newOrder) {
-			fireEvent({
-				name: "setSetting",
-				setting: "order",
-				value: newOrder,
-			});
+		order = newOrder;
+		if (newOrder == "canonical" || newOrder == "chronological") {
+			if (settings.order != newOrder) {
+				fireEvent({
+					name: "setSetting",
+					setting: "order",
+					value: newOrder,
+				});
+			}
 		}
 		applyOrderToUI();
 	}
@@ -429,7 +691,10 @@ fireEvent({
 	registerEventListener(
 		(e) => e.name == "settingsUpdated",
 		function (event) {
-			if (settings.order != order) applyOrderToUI();
+			if (order != "alphabetical" && settings.order != order) {
+				order = settings.order;
+				applyOrderToUI();
+			}
 		}
 	);
 
@@ -451,6 +716,7 @@ fireEvent({
 
 		picker.appendChild(orderButton("Canonical", "canonical"));
 		picker.appendChild(orderButton("Chronological", "chronological"));
+		picker.appendChild(orderButton("Alphabetical", "alphabetical"));
 		return picker;
 	}
 
@@ -650,9 +916,41 @@ fireEvent({
 			setBibleOrder(order);
 		});
 
+	var alphabeticalSections = document.createElement("div");
+	alphabeticalSections.id = "alphabeticalSections";
+	alphabeticalSections.className = "index-sections";
+
+	var sortedBooks = books.slice().sort(function (a, b) {
+		return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+	});
+
+	sortedBooks.forEach(function (book) {
+		var bookDiv = document.createElement("div");
+		bookDiv.className = "index-book-row";
+		bookDiv.innerHTML =
+			"<div class='index-book' data-book='" +
+			book.name +
+			"' data-cy='alpha-" +
+			book.name +
+			"' onclick='toggleBookChapters(this)'>" +
+			book.name +
+			"</div>";
+		var chapterLinks =
+			"<div class='index-chapters' data-cy='alphaChapters-" +
+			book.name +
+			"' style='display:none'>";
+		for (let i = 1; i <= book.chapters; i++) {
+			chapterLinks += createLink(book.name, book.slug, i) + " ";
+		}
+		chapterLinks += "</div>";
+		bookDiv.innerHTML += chapterLinks;
+		alphabeticalSections.appendChild(bookDiv);
+	});
+
 	document.getElementById("index").appendChild(makeOrderPicker());
 	document.getElementById("index").appendChild(canonicalSections);
 	document.getElementById("index").appendChild(chronoSections);
+	document.getElementById("index").appendChild(alphabeticalSections);
 	setBibleOrder(order);
 
 	if (settings.browseHistory.length > 0) {

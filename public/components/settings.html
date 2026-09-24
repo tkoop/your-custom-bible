@@ -2,7 +2,24 @@
 	style="display: flex"
 	onclick="var i = this.querySelector('input').click(); event.stopPropagation()"
 >
-	<div>Chronological</div>
+	<div
+		style="display: flex; align-items: center; gap: 6px"
+	>Chronological
+		<svg
+			width="15"
+			height="15"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="2.2"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+			aria-hidden="true"
+		>
+			<circle cx="12" cy="12" r="9"></circle>
+			<path d="M12 7v5l3 2"></path>
+		</svg>
+	</div>
 	<div>
 		<input
 			type="checkbox"
@@ -83,6 +100,21 @@
 			type="checkbox"
 			data-value="woc"
 			onchange="fireEvent({name:'setSetting', setting:'woc', value:this.checked})"
+			onclick="event.stopPropagation()"
+		/>
+	</div>
+</div>
+
+<div
+	style="display: flex"
+	onclick="var i = this.querySelector('input').click(); event.stopPropagation()"
+>
+	<div>Page Turning</div>
+	<div>
+		<input
+			type="checkbox"
+			data-value="pageturning"
+			onchange="fireEvent({name:'setSetting', setting:'pageturning', value:this.checked})"
 			onclick="event.stopPropagation()"
 		/>
 	</div>
@@ -247,6 +279,8 @@
 		settings.references;
 	document.querySelector("input[data-value=verses]").checked = settings.verses;
 	document.querySelector("input[data-value=woc]").checked = settings.woc;
+	document.querySelector("input[data-value=pageturning]").checked =
+		settings.pageturning;
 	document.querySelector("input[data-value=order]").checked =
 		settings.order == "chronological";
 
