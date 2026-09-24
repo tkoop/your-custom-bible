@@ -59,6 +59,10 @@ describe("page turning", () => {
 		cy.get("#pageTurnViewport").should("not.exist");
 		cy.get("#pageTurnControls").should("not.exist");
 		cy.get("#chapterText").should("exist");
+		cy.get("#chapterText")
+			.invoke("css", "column-width")
+			.should("eq", "auto");
+		cy.get("#chapterText").invoke("css", "transform").should("eq", "none");
 		cy.get(".chapter-nav.bottom").should("be.visible");
 	});
 

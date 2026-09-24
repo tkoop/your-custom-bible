@@ -492,6 +492,7 @@ fireEvent({
 			viewport.remove();
 		}
 		if (controls) controls.remove();
+		if (textWrap) textWrap.removeAttribute("style");
 		pageTurning.enabled = false;
 	}
 
