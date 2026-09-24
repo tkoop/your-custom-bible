@@ -90,6 +90,32 @@ describe("bible order picker", () => {
     cy.get("#alphabeticalSections").should("not.be.visible");
   });
 
+  it("shows the chronological clock icon in the right places", () => {
+    // index picker button has the clock icon after the word
+    cy.get("#order-chronological svg").should("exist");
+
+    // gear menu shows the icon after "Chronological"
+    cy.get("#settingsDropdown").should("contain", "Chronological");
+    cy.get("#gearIcon").click();
+    cy.get("#settingsDropdown .chrono-label svg").should("exist");
+    cy.get("#gearIcon").click();
+
+    // canonical mode: no clock icon on the nav arrows
+    cy.contains("Genesis").click();
+    cy.get("[data-cy='Genesis']").contains("1").click();
+    cy.get("body").should("not.have.class", "chrono-nav");
+    cy.get(".chapter-nav .chrono-corner").should("not.be.visible");
+
+    // chronological mode: clock icon appears in the arrow corners
+    cy.get("#brand").click();
+    cy.contains(".index-order-button", "Chronological").click();
+    cy.get("body").should("have.class", "chrono-nav");
+    cy.get("[data-cy='chrono-0']").click();
+    cy.get("[data-cy='chronoChapters-0']").contains("10").click();
+    cy.get("#chapter").should("contain", "Genesis 10 (YCB-CYL)");
+    cy.get(".chapter-nav .chrono-corner").should("be.visible");
+  });
+
   it("chapter arrows follow chronological order", () => {
     cy.contains(".index-order-button", "Chronological").click();
     cy.get("[data-cy='chrono-0']").click();
