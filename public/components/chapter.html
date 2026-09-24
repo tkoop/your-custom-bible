@@ -223,7 +223,8 @@
 				name: book,
 				slug: slug,
 				chapter: chapter,
-				date: (new Date() + "").substr(0, 10),
+				date: todayDateString(),
+				finished: false,
 			},
 		});
 
@@ -320,6 +321,7 @@
 				title = title + " (<span class='version'></span>)";
 				chapter.innerHTML = addArrows(text, title);
 				applySettings();
+				setTimeout(chapterFinishedCheck, 100);
 
 fireEvent({
 				name: "showPage",
@@ -707,6 +709,40 @@ fireEvent({
 	document.getElementById("index").appendChild(chronoSections);
 	document.getElementById("index").appendChild(alphabeticalSections);
 	setBibleOrder(order);
+
+	function markCurrentChapterFinished() {
+		var bookObj = books[currentBookIndex];
+		if (!bookObj) return;
+		for (var i = settings.browseHistory.length - 1; i >= 0; i--) {
+			var entry = settings.browseHistory[i];
+			if (
+				entry.slug == bookObj.slug &&
+				parseInt(entry.chapter) == parseInt(currentChapter)
+			) {
+				if (!entry.finished) {
+					entry.finished = true;
+					saveSettingsToLocalStorage();
+				}
+				return;
+			}
+		}
+	}
+
+	function chapterFinishedCheck() {
+		var chapterEl = document.getElementById("chapter");
+		if (!chapterEl || getComputedStyle(chapterEl).display == "none") return;
+		// only once the chapter has fully rendered (footer nav present)
+		if (!chapterEl.querySelector(".chapter-nav.bottom")) return;
+		if (
+			window.innerHeight + window.scrollY >=
+			document.documentElement.scrollHeight - 80
+		) {
+			markCurrentChapterFinished();
+		}
+	}
+
+	window.addEventListener("scroll", chapterFinishedCheck, { passive: true });
+	window.addEventListener("resize", chapterFinishedCheck, { passive: true });
 
 	if (settings.browseHistory.length > 0) {
 		let history = settings.browseHistory[settings.browseHistory.length - 1];

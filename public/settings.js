@@ -32,6 +32,33 @@ registerEventListener(
 	}
 );
 
+function todayDateString() {
+	var d = new Date();
+	return (
+		d.getFullYear() +
+		"-" +
+		String(d.getMonth() + 1).padStart(2, "0") +
+		"-" +
+		String(d.getDate()).padStart(2, "0")
+	);
+}
+
+function normalizeDateString(date) {
+	if (typeof date == "string" && /^\d{4}-\d{2}-\d{2}$/.test(date)) return date;
+	// legacy format like "Wed Sep 23" (no year, stored by older builds)
+	var parsed = new Date(Date.parse(date));
+	if (isNaN(parsed.getTime())) return date;
+	var d = new Date(parsed);
+	d.setFullYear(new Date().getFullYear());
+	return (
+		d.getFullYear() +
+		"-" +
+		String(d.getMonth() + 1).padStart(2, "0") +
+		"-" +
+		String(d.getDate()).padStart(2, "0")
+	);
+}
+
 function loadSettingsFromLocalStorage() {
 	var localStorageSettings = JSON.parse(localStorage?.settings ?? "{}");
 
@@ -49,6 +76,19 @@ function loadSettingsFromLocalStorage() {
 	settings.you = localStorageSettings?.you ?? "youpl";
 	settings.woc = localStorageSettings?.woc ?? false;
 	settings.browseHistory = JSON.parse(localStorage?.browseHistory ?? "[]");
+
+	// normalize legacy date strings and persist the cleanup if anything changed
+	var migrated = false;
+	settings.browseHistory.forEach(function (entry) {
+		if (entry && entry.date) {
+			var normalized = normalizeDateString(entry.date);
+			if (normalized != entry.date) {
+				entry.date = normalized;
+				migrated = true;
+			}
+		}
+	});
+	if (migrated) saveSettingsToLocalStorage();
 	settings.order =
 		localStorageSettings?.order ??
 		(localStorage.bibleOrder == "chronological" ? "chronological" : "canonical");
