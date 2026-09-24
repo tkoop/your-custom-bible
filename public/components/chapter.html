@@ -225,7 +225,8 @@
 				name: book,
 				slug: slug,
 				chapter: chapter,
-				date: (new Date() + "").substr(0, 10),
+				date: todayDateString(),
+				finished: false,
 			},
 		});
 
@@ -322,6 +323,7 @@
 				title = title + " (<span class='version'></span>)";
 				chapter.innerHTML = addArrows(text, title);
 				applySettings();
+				setTimeout(chapterFinishedCheck, 100);
 
 fireEvent({
 				name: "showPage",
@@ -384,7 +386,7 @@ fireEvent({
 				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 					<path d="M15.41 16.58L10.83 12L15.41 7.41L14 6L8 12L14 18L15.41 16.58Z" fill="currentColor"/>
 				</svg>
-				<span class="chrono-corner">${chronoIconSvg.replaceAll('"', "'")}</span>
+<span class="chrono-corner">${chronoIconSvg}</span>
 			</button>
 			<div id="chapterTitle"><span class="title-rule"></span><span class="title-text">${title}</span><span class="title-rule"></span></div>
 			<button data-cy="chapterRight" onclick="moveChapter(1)" aria-label="Next chapter">
@@ -392,7 +394,7 @@ fireEvent({
 					<path d="M8.59 16.58L13.17 12L8.59 7.41L10 6L16 12L10 18L8.59 16.58Z" fill="currentColor"/>
 				</svg>
 				<span class="chrono-corner">${chronoIconSvg}</span>
-		</button>
+			</button>
 		</div>`;
 
 		return (
@@ -715,7 +717,9 @@ fireEvent({
 		}
 
 		picker.appendChild(orderButton("Canonical", "canonical"));
-		picker.appendChild(orderButton("Chronological", "chronological"));
+		var chronoButton = orderButton("Chronological", "chronological");
+		chronoButton.innerHTML = "Chronological " + chronoIconSvg;
+		picker.appendChild(chronoButton);
 		picker.appendChild(orderButton("Alphabetical", "alphabetical"));
 		return picker;
 	}
@@ -952,6 +956,40 @@ fireEvent({
 	document.getElementById("index").appendChild(chronoSections);
 	document.getElementById("index").appendChild(alphabeticalSections);
 	setBibleOrder(order);
+
+	function markCurrentChapterFinished() {
+		var bookObj = books[currentBookIndex];
+		if (!bookObj) return;
+		for (var i = settings.browseHistory.length - 1; i >= 0; i--) {
+			var entry = settings.browseHistory[i];
+			if (
+				entry.slug == bookObj.slug &&
+				parseInt(entry.chapter) == parseInt(currentChapter)
+			) {
+				if (!entry.finished) {
+					entry.finished = true;
+					saveSettingsToLocalStorage();
+				}
+				return;
+			}
+		}
+	}
+
+	function chapterFinishedCheck() {
+		var chapterEl = document.getElementById("chapter");
+		if (!chapterEl || getComputedStyle(chapterEl).display == "none") return;
+		// only once the chapter has fully rendered (footer nav present)
+		if (!chapterEl.querySelector(".chapter-nav.bottom")) return;
+		if (
+			window.innerHeight + window.scrollY >=
+			document.documentElement.scrollHeight - 80
+		) {
+			markCurrentChapterFinished();
+		}
+	}
+
+	window.addEventListener("scroll", chapterFinishedCheck, { passive: true });
+	window.addEventListener("resize", chapterFinishedCheck, { passive: true });
 
 	if (settings.browseHistory.length > 0) {
 		let history = settings.browseHistory[settings.browseHistory.length - 1];

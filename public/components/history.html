@@ -5,6 +5,7 @@
 
 function recreateHistory() {
   let html = "<h2>History</h2>"
+  html += "<p style='font-style:italic;font-size:0.85em'>* = finished to the end of the chapter</p>"
   let previousDate = null
   let dateString = null
   
@@ -24,7 +25,7 @@ function recreateHistory() {
         })
         html += "</p><h3>" + dateString + "</h3><p>"
       }
-      html += createLink(settings.browseHistory[i].name, settings.browseHistory[i].slug, settings.browseHistory[i].chapter, true) + ", "
+      html += createLink(settings.browseHistory[i].name, settings.browseHistory[i].slug, settings.browseHistory[i].chapter, true) + (settings.browseHistory[i].finished ? "*" : "") + ", "
     }
   }
   if (html.substr(html.length - 2) == ', ') {
