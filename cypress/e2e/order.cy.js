@@ -56,6 +56,40 @@ describe("bible order picker", () => {
     cy.get("#order-canonical").should("have.class", "active");
   });
 
+  it("alphabetical view has no headings and does not persist", () => {
+    cy.contains(".index-order-button", "Alphabetical").click();
+    cy.get("#alphabeticalSections").should("be.visible");
+    cy.get("#canonicalSections").should("not.be.visible");
+    cy.get("#chronoSections").should("not.be.visible");
+
+    // alphabetical list has no headings
+    cy.get("#alphabeticalSections .index-section-title").should("not.exist");
+
+    // first pill alphabetically is "1 Chronicles"
+    cy.get("#alphabeticalSections .index-book").first().should("contain", "1 Chronicles");
+
+    // open a book and read a chapter
+    cy.get("[data-cy='alpha-Revelation']").click();
+    cy.get("[data-cy='alphaChapters-Revelation']").contains("1").click();
+    cy.get("#chapter").should("contain", "Revelation 1 (YCB-CYL)");
+
+    // the view stays alphabetical until reload
+    cy.get("#brand").click();
+    cy.contains(".index-order-button.active", "Alphabetical");
+
+    // the saved order setting is untouched (still canonical)
+    cy.get("#settingsDropdown").should("contain", "Chronological");
+    cy.get("#gearIcon").click();
+    cy.get("input[data-value=order]").should("not.be.checked");
+    cy.get("#gearIcon").click();
+
+    // reload falls back to the saved canonical order
+    cy.reload();
+    cy.contains(".index-order-button.active", "Canonical");
+    cy.get("#canonicalSections").should("be.visible");
+    cy.get("#alphabeticalSections").should("not.be.visible");
+  });
+
   it("chapter arrows follow chronological order", () => {
     cy.contains(".index-order-button", "Chronological").click();
     cy.get("[data-cy='chrono-0']").click();
