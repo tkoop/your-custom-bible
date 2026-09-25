@@ -121,6 +121,21 @@
 	</div>
 </div>
 
+<div
+	style="display: flex"
+	onclick="var i = this.querySelector('input').click(); event.stopPropagation()"
+>
+	<div>Word study links</div>
+	<div>
+		<input
+			type="checkbox"
+			data-value="wordStudyLinks"
+			onchange="fireEvent({name:'setSetting', setting:'wordStudyLinks', value:this.checked})"
+			onclick="event.stopPropagation()"
+		/>
+	</div>
+</div>
+
 <div style="display: flex">
 	<div>Spelling</div>
 	<div>
@@ -282,6 +297,8 @@
 	document.querySelector("input[data-value=woc]").checked = settings.woc;
 	document.querySelector("input[data-value=pageturning]").checked =
 		settings.pageturning;
+	document.querySelector("input[data-value=wordStudyLinks]").checked =
+		settings.wordStudyLinks;
 	document.querySelector("input[data-value=order]").checked =
 		settings.order == "chronological";
 
