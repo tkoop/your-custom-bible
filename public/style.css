@@ -415,7 +415,6 @@ a:hover {
 
 /* ---------- Index: book picker ---------- */
 #index {
-	display: flex;
 	flex-wrap: wrap;
 	gap: 14px;
 	font-family: 'sourceSansPro', 'Segoe UI', system-ui, sans-serif;
@@ -592,6 +591,129 @@ div.index-chapters a:active {
 	transform: translateY(0);
 }
 
+/* ---------- Home page ---------- */
+.home-cards {
+	max-width: 46rem;
+	margin: 0 auto;
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+	padding: 8px 4px;
+}
+
+.home-card {
+	background-color: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-lg);
+	box-shadow: var(--shadow);
+	padding: 20px 24px;
+}
+
+.home-card h2 {
+	margin: 0 0 12px;
+	font-family: 'sourceSansPro', 'Segoe UI', system-ui, sans-serif;
+	font-size: 1.05rem;
+	font-weight: 700;
+	color: var(--primary);
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+.home-today-chapter {
+	margin: 4px 0 14px;
+	font-family: 'EB Garamond', Georgia, serif;
+	font-size: 1.6rem;
+	color: var(--text-primary);
+}
+
+.home-button {
+	display: inline-block;
+	border: 1px solid var(--primary);
+	background-color: var(--primary);
+	border-radius: 999px;
+	padding: 10px 22px;
+	cursor: pointer;
+	font-family: 'sourceSansPro', sans-serif;
+	font-size: 0.95rem;
+	font-weight: 600;
+	color: #fff;
+	transition: all 0.2s ease;
+	box-shadow: var(--shadow-sm);
+}
+
+.home-button:hover {
+	background-color: var(--primary-dark);
+	transform: translateY(-1px);
+	box-shadow: var(--shadow);
+}
+
+.home-continue {
+	line-height: 1.6;
+}
+
+.home-continue a {
+	color: var(--primary);
+	font-weight: 600;
+	text-decoration: none;
+	border-bottom: 1px solid var(--border);
+}
+
+.home-continue a:hover {
+	border-color: var(--primary);
+}
+
+.home-history-link {
+	display: inline-block;
+	margin-top: 12px;
+	font-family: 'sourceSansPro', sans-serif;
+	font-size: 0.9rem;
+	font-weight: 600;
+	color: var(--primary);
+	text-decoration: none;
+	border-bottom: 1px solid var(--border);
+}
+
+.home-history-link:hover {
+	border-color: var(--primary);
+}
+
+.home-empty {
+	font-family: 'sourceSansPro', sans-serif;
+	font-size: 0.92rem;
+	color: var(--text-muted);
+	font-style: italic;
+	margin: 0;
+}
+
+.home-search-row {
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.home-search-row input {
+	flex: 1;
+	min-width: 200px;
+	padding: 10px 14px;
+	font-size: 0.95rem;
+	font-family: 'sourceSansPro', sans-serif;
+	color: var(--text-primary);
+	background-color: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	box-shadow: var(--shadow-sm);
+}
+
+.home-search-row input:focus {
+	outline: none;
+	border-color: var(--primary);
+	box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.home-card .index-order {
+	margin: 4px 0 14px;
+}
+
 /* ---------- Buttons ---------- */
 .standardButton {
 	display: inline-block;
@@ -706,7 +828,6 @@ body.chrono-nav .chapter-nav button .chrono-corner {
 #chapter.page-turn {
 	height: calc(100vh - 96px);
 	height: calc(100dvh - 96px);
-	display: flex;
 	flex-direction: column;
 	overflow: hidden;
 }

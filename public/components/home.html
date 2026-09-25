@@ -1,0 +1,126 @@
+<div class="home-cards">
+	<section class="home-card" data-cy="homeChapterOfDay">
+		<h2>Chapter of the Day</h2>
+		<p id="homeTodayChapter" class="home-today-chapter"></p>
+		<button
+			type="button"
+			class="home-button"
+			data-cy="homeTodayButton"
+			onclick="goToTodaysChapter()"
+		>
+			Read Chapter of the Day
+		</button>
+	</section>
+
+	<section class="home-card" data-cy="homeContinue">
+		<h2>Continue where you left off</h2>
+		<div id="homeContinue" class="home-continue"></div>
+		<a
+			href="#"
+			class="home-history-link"
+			onclick="fireEvent({name:'showPage', page:'history'}); return false;"
+		>
+			Full history
+		</a>
+	</section>
+
+	<section class="home-card" data-cy="homeSearch">
+		<h2>Search</h2>
+		<div class="home-search-row">
+			<input
+				id="homeSearchInput"
+				type="search"
+				placeholder="Search the entire Bible..."
+				autocomplete="off"
+				spellcheck="false"
+			/>
+			<button type="button" class="home-button" onclick="homeSearch()">
+				Search
+			</button>
+		</div>
+	</section>
+
+	<section class="home-card" data-cy="homePicker">
+		<h2>Chapter Picker</h2>
+		<div id="homePicker"></div>
+	</section>
+</div>
+
+<script>
+	function renderHomeToday() {
+		var p = document.getElementById("homeTodayChapter");
+		if (!p) return;
+		var target = chapterIndexToBookAndChapter(todaysChapterIndex());
+		p.textContent = target.book.name + " " + target.chapter;
+	}
+
+	function recentHistoryEntries(count) {
+		var entries = [];
+		var seen = {};
+		for (
+			var i = settings.browseHistory.length - 1;
+			i >= 0 && entries.length < count;
+			i--
+		) {
+			var entry = settings.browseHistory[i];
+			if (!entry || !entry.slug) continue;
+			var key = entry.slug + ":" + entry.chapter;
+			if (seen[key]) continue;
+			seen[key] = true;
+			entries.push(entry);
+		}
+		return entries;
+	}
+
+	function renderHomeContinue() {
+		var el = document.getElementById("homeContinue");
+		if (!el) return;
+		var entries = recentHistoryEntries(3);
+		if (entries.length === 0) {
+			el.innerHTML =
+				"<p class='home-empty'>No history yet &mdash; your recent chapters will appear here.</p>";
+			return;
+		}
+		var html = "";
+		entries.forEach(function (entry) {
+			html +=
+				createLink(entry.name, entry.slug, entry.chapter, true) +
+				(entry.finished ? "*" : "") +
+				"<br>";
+		});
+		el.innerHTML = html;
+	}
+
+	function homeSearch() {
+		var input = document.getElementById("homeSearchInput");
+		var query = (input && input.value || "").trim();
+		if (!query) return;
+		window.pendingSearchQuery = query;
+		fireEvent({ name: "showPage", page: "search" });
+	}
+
+	function initHome() {
+		var input = document.getElementById("homeSearchInput");
+		if (input) {
+			input.addEventListener("keydown", function (event) {
+				if (event.key === "Enter") homeSearch();
+			});
+		}
+		renderHomeToday();
+		renderHomeContinue();
+		var picker = document.getElementById("homePicker");
+		if (picker && !picker._indexBuilt) buildIndex(picker, "home");
+	}
+
+	registerEventListener(
+		(e) => e.name == "showPage" && e.page == "home",
+		function (event) {
+			renderHomeToday();
+			renderHomeContinue();
+			var picker = document.getElementById("homePicker");
+			if (picker && !picker._indexBuilt) buildIndex(picker, "home");
+		}
+	);
+
+	initHome();
+</script>

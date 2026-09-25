@@ -1,6 +1,11 @@
 describe("page turning", () => {
 	beforeEach(() => {
 		cy.visit("http://localhost:8001");
+		cy.window().should("have.property", "hideDropDown"); // menu component loaded
+		// the app now lands on Home; the picker tests run on the Index page
+		cy.get("#menuIcon").click();
+		cy.get("#dropdown div").contains("Index").click();
+		cy.get("#index").should("be.visible");
 	});
 
 	function enablePageTurning() {
@@ -15,7 +20,7 @@ describe("page turning", () => {
 		enablePageTurning();
 
 // Open Psalm 119 (176 verses -> multiple pages)
-		cy.contains("Psalms").click();
+		cy.get("#index").contains("Psalms").click();
 		cy.get("[data-cy='Psalms'] a[data-chapter='119']").click();
 
 		cy.get("#chapter").should("have.class", "page-turn");
@@ -68,7 +73,7 @@ describe("page turning", () => {
 
 	it("recalculates pages on window resize", () => {
 		enablePageTurning();
-		cy.contains("Psalms").click();
+		cy.get("#index").contains("Psalms").click();
 		cy.get("[data-cy='Psalms'] a[data-chapter='119']").click();
 		cy.get("#chapter").should("have.class", "page-turn");
 
@@ -86,7 +91,7 @@ describe("page turning", () => {
 
 	it("keeps the paging UI when moving between chapters with the nav arrows", () => {
 		enablePageTurning();
-		cy.contains("Genesis").click();
+		cy.get("#index").contains("Genesis").click();
 		cy.get("[data-cy='Genesis'] a[data-chapter='1']").click();
 		cy.get("#chapter").should("have.class", "page-turn");
 		cy.get("#pageTurnControls").should("be.visible");
@@ -106,5 +111,27 @@ describe("page turning", () => {
 		cy.get("#pageTurnViewport").should("be.visible");
 		cy.get("#pageTurnControls").should("be.visible");
 		cy.get("#pageTurnCount").invoke("text").should("match", /^1 \/ \d+$/);
+	});
+
+	it("does not mark a chapter finished until the last page is reached", () => {
+		enablePageTurning();
+		cy.get("#index").contains("Psalms").click();
+		cy.get("[data-cy='Psalms'] a[data-chapter='119']").click();
+		cy.get("#chapter").should("have.class", "page-turn");
+		cy.get(".page-turn-dot").should("have.length.greaterThan", 1);
+
+		// just opened on page 1 of many -> must NOT be marked finished
+		cy.window().then((win) => {
+			const history = JSON.parse(win.localStorage.getItem("browseHistory"));
+			expect(history[history.length - 1].finished).to.eq(false);
+		});
+
+		// jump to the last page via the last dot -> now it is finished
+		cy.get(".page-turn-dot").last().click();
+		cy.get("#pageTurnRight").should("be.disabled");
+		cy.window().then((win) => {
+			const history = JSON.parse(win.localStorage.getItem("browseHistory"));
+			expect(history[history.length - 1].finished).to.eq(true);
+		});
 	});
 });
