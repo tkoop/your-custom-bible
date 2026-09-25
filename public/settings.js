@@ -13,7 +13,7 @@ var settings = {
 	woc: false,
 	order: "canonical",
 	pageturning: false,
-	wordStudyLinks: true,
+	wordStudyLinks: false,
 };
 
 registerEventListener(
@@ -77,7 +77,7 @@ function loadSettingsFromLocalStorage() {
 	settings.verses = localStorageSettings?.verses ?? false;
 	settings.you = localStorageSettings?.you ?? "youpl";
 	settings.woc = localStorageSettings?.woc ?? false;
-	settings.wordStudyLinks = localStorageSettings?.wordStudyLinks ?? true;
+	settings.wordStudyLinks = localStorageSettings?.wordStudyLinks ?? false;
 	settings.browseHistory = JSON.parse(localStorage?.browseHistory ?? "[]");
 
 	// normalize legacy date strings and persist the cleanup if anything changed

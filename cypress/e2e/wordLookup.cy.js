@@ -84,7 +84,24 @@ describe("word lookup popup", () => {
     cy.get("[data-cy='wordPopup']").should("not.be.visible");
   });
 
+  it("is off by default (no underlines) but popup still works", () => {
+    cy.get("#chapter .word-link").should("not.exist");
+
+    cy.get("#chapter p.reg1")
+      .first()
+      .then(($p) => {
+        const pos = chapterRelative($p, "heavens");
+        cy.get("#chapter").click(pos.x, pos.y);
+      });
+
+    cy.get("[data-cy='wordPopup']", { timeout: 5000 }).should("be.visible");
+  });
+
   it("shows dotted underlines with pointer cursor when Word study links is on", () => {
+    cy.get("#gearIcon").should("be.visible").click();
+    cy.get("#settingsDropdown").should("be.visible");
+    cy.get("#settingsDropdown").contains("Word study links").click();
+
     cy.get("#chapter .word-link", { timeout: 10000 }).should("exist");
     cy.get("#chapter .word-link")
       .first()
@@ -98,9 +115,11 @@ describe("word lookup popup", () => {
   });
 
   it("removes underlines when Word study links is off but popup still works", () => {
+    cy.get("#gearIcon").should("be.visible").click();
+    cy.get("#settingsDropdown").should("be.visible");
+    cy.get("#settingsDropdown").contains("Word study links").click();
     cy.get("#chapter .word-link", { timeout: 10000 }).should("exist");
 
-    cy.get("#gearIcon").should("be.visible").click();
     cy.get("#settingsDropdown").should("be.visible");
     cy.get("#settingsDropdown").contains("Word study links").click();
     cy.get("#chapter .word-link").should("not.exist");
