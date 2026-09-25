@@ -5,7 +5,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="theme-color" content="#34507a" />
 		<title>Your Custom Bible</title>
-		<link rel="stylesheet" href="style.css?version=18" />
+<link rel="stylesheet" href="style.css?version=19" />
 		<link rel="icon" type="image/png" href="images/logo.png?version=4" />
 		<link rel="manifest" href="manifest.json?version=2" />
 	</head>
@@ -80,8 +80,8 @@
 
 	<script>
 		async function loadComponents() {
-			await loadComponent("dropdown", "components/menu.html?version=12");
-			await loadComponent("chapter", "components/chapter.html?version=26");
+await loadComponent("dropdown", "components/menu.html?version=12");
+			await loadComponent("chapter", "components/chapter.html?version=28");
 			await loadComponent("home", "components/home.html?version=2");
 			await loadComponent("about", "components/about.html?version=2");
 			await loadComponent("history", "components/history.html?version=2");
@@ -93,6 +93,9 @@
 			await loadComponent("speedReader", "components/speedReader.html?version=7");
 		}
 		loadComponents().then(() => {
+			// If the user already navigated while components were loading, the
+			// chapter/render is in flight; don't clobber it.
+			if (window.__userNavigated) return;
 			if (window.location.hash) {
 				history.replaceState(window.location.hash, "", window.location.hash);
 				updatePage(window.location.hash);

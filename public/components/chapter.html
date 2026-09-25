@@ -2,11 +2,13 @@
 	var currentBookIndex = 0;
 	var currentChapter = 1; // one based
 	var chronoSequence = [];
+	var wordDataCache = {};
 
 	registerEventListener(
 		(e) => e.name == "settingsUpdated",
 		function (event) {
 			applySettings();
+			applyWordStudyLinks();
 		},
 	);
 
@@ -212,6 +214,7 @@
 	}
 
 	function loadThisChapter(book, slug, chapter) {
+		window.__userNavigated = true;
 		var url = "./chapters/" + slug + "-" + chapter + ".html";
 		var bookObj = books.find((b) => b.slug === slug);
 		var hash = "#" + bookObj.abbr + "-" + chapter;
@@ -358,6 +361,7 @@
 				title = title + " (<span class='version'></span>)";
 				chapter.innerHTML = addArrows(text, title);
 				applySettings();
+				applyWordStudyLinks(book ? book.slug : null, chapterNum);
 				setTimeout(chapterFinishedCheck, 100);
 
 fireEvent({
@@ -1100,4 +1104,509 @@ fireEvent({
 
 	window.addEventListener("scroll", chapterFinishedCheck, { passive: true });
 	window.addEventListener("resize", chapterFinishedCheck, { passive: true });
+
+	// ---------- Word lookup ----------
+
+	function normWord(w) {
+		return w.toLowerCase().replace(/^'+|'+$/g, "");
+	}
+
+	function wordDataEntry(slug, verseKey) {
+		var data = wordDataCache[slug];
+		if (!data || !data.verses) return null;
+		return data.verses[verseKey] || null;
+	}
+
+	function currentBook() {
+		var hash = location.hash || "";
+		var m = /^#([A-Za-z0-9]+)-(\d+)$/.exec(hash);
+		if (!m) return null;
+		var abbr = m[1].toUpperCase();
+		return books.find((b) => b.abbr.toUpperCase() === abbr) || null;
+	}
+
+	function currentBookChapter() {
+		var hash = location.hash || "";
+		var m = /^#([A-Za-z0-9]+)-(\d+)$/.exec(hash);
+		return m ? m[2] : null;
+	}
+
+	function visibleTextNodes(p) {
+		if (!p || p.tagName != "P") return [];
+		if (
+			p.classList.contains("hdg") ||
+			p.classList.contains("subhdg") ||
+			p.classList.contains("cross")
+		)
+			return [];
+		var nodes = [];
+		var walker = document.createTreeWalker(p, NodeFilter.SHOW_TEXT);
+		var node;
+		while ((node = walker.nextNode())) {
+			var el = node.parentNode;
+			if (el && el.classList && el.classList.contains("fn")) continue;
+			if (el && el.classList && el.classList.contains("cross1")) continue;
+			if (el && el.style && el.style.display == "none") continue;
+			nodes.push(node);
+		}
+		return nodes;
+	}
+
+	function buildVerseTokens(refEl) {
+		var chapter = document.getElementById("chapter");
+		if (!chapter) return { tokens: [], pos: [] };
+		var refs = chapter.querySelectorAll(".reftext");
+		var idx = Array.prototype.indexOf.call(refs, refEl);
+		var nextRef = refs[idx + 1] || null;
+		var tokens = [];
+		var pos = [];
+		var ps = Array.prototype.slice.call(chapter.querySelectorAll("p"));
+		var from = refEl.closest("p") || chapter;
+		var to = nextRef ? nextRef.closest("p") || chapter : null;
+		var scanning = false;
+		for (var i = 0; i < ps.length; i++) {
+			var p = ps[i];
+			if (p == from) scanning = true;
+			if (to && p == to) break;
+			if (!scanning) continue;
+			var nodes = visibleTextNodes(p);
+			for (var n = 0; n < nodes.length; n++) {
+				var text = nodes[n].nodeValue;
+				var re = /[a-z']+/gi;
+				var m;
+				while ((m = re.exec(text))) {
+					tokens.push(normWord(m[0]));
+					pos.push({ node: nodes[n], start: m.index });
+				}
+			}
+		}
+		return { tokens: tokens, pos: pos };
+	}
+
+	function clickedTokenIndex(tokens, pos, node, offset) {
+		for (var i = 0; i < pos.length; i++) {
+			if (pos[i].node == node) {
+				var len = tokens[i].length;
+				if (offset >= pos[i].start && offset <= pos[i].start + len) {
+					return i;
+				}
+			}
+		}
+		return -1;
+	}
+
+	function indexOfSubarray(tokens, sub, start) {
+		for (var i = start || 0; i <= tokens.length - sub.length; i++) {
+			var match = true;
+			for (var j = 0; j < sub.length; j++) {
+				if (tokens[i + j] != sub[j]) {
+					match = false;
+					break;
+				}
+			}
+			if (match) return i;
+		}
+		return -1;
+	}
+
+	function findVerseEntry(entries, verseTokens, clickedIndex, clickedWord) {
+		var tokens = verseTokens.tokens;
+		var best = null;
+		var bestScore = -1;
+		for (var i = 0; i < entries.length; i++) {
+			var w = entries[i].w;
+			if (w.indexOf(clickedWord) == -1) continue;
+			var start = -1;
+			while ((start = indexOfSubarray(tokens, w, start + 1)) != -1) {
+				var end = start + w.length - 1;
+				var contains = clickedIndex >= start && clickedIndex <= end;
+				var dist = contains
+					? 0
+					: Math.min(
+							Math.abs(clickedIndex - start),
+							Math.abs(clickedIndex - end),
+						);
+				var score = w.length * 100 + (contains ? 1000 : 0) - dist;
+				if (score > bestScore) {
+					bestScore = score;
+					best = entries[i];
+				}
+			}
+		}
+		return best;
+	}
+
+	function applyWordStudyLinks(slug, chapterNum) {
+		unwrapWordLinks();
+		if (!settings.wordStudyLinks) return;
+		if (!slug) {
+			var book = currentBook();
+			if (!book) return;
+			slug = book.slug;
+		}
+		if (!chapterNum) chapterNum = currentBookChapter();
+		loadWordData(slug)
+			.then(function () {
+				// A stale lookup: the user has since navigated. A fresh
+				// loadURL() invocation will have triggered its own wrap.
+				var bookNow = currentBook();
+				if (!bookNow || bookNow.slug != slug) return;
+				if (currentBookChapter() != chapterNum) return;
+				if (!settings.wordStudyLinks) return;
+				var chapter = document.getElementById("chapter");
+				if (!chapter) return;
+				var refs = chapter.querySelectorAll(".reftext");
+				Array.prototype.forEach.call(refs, function (refEl) {
+					wrapVerseWords(slug, chapterNum, refEl);
+				});
+			})
+			.catch(function () {});
+	}
+
+	function unwrapWordLinks() {
+		var chapter = document.getElementById("chapter");
+		if (!chapter) return;
+		Array.prototype.slice
+			.call(chapter.querySelectorAll(".word-link"))
+			.forEach(function (span) {
+				var parent = span.parentNode;
+				while (span.firstChild) parent.insertBefore(span.firstChild, span);
+				parent.removeChild(span);
+			});
+	}
+
+	function wrapVerseWords(slug, chapterNum, refEl) {
+		var verseNum = parseInt(refEl.id.substr(1), 10);
+		if (isNaN(verseNum)) return;
+		var verseKey = "" + parseInt(chapterNum, 10) + ":" + verseNum;
+		var entries = wordDataEntry(slug, verseKey);
+		if (!entries) return;
+		var vt = buildVerseTokens(refEl);
+		if (vt.pos.length == 0) return;
+		var nodes = [];
+		for (var i = 0; i < vt.pos.length; i++) {
+			if (!findVerseEntry(entries, vt, i, vt.tokens[i])) continue;
+			var p = vt.pos[i];
+			var rawLen = rawTokenLength(p.node.nodeValue, p.start);
+			if (rawLen <= 0) continue;
+			pushRange(nodes, p.node, p.start, p.start + rawLen);
+		}
+		nodes.forEach(function (g) {
+			g.ranges.sort(function (a, b) {
+				return a[0] - b[0];
+			});
+			wrapNodeRanges(g.node, g.ranges);
+		});
+	}
+
+	function pushRange(nodes, node, start, end) {
+		for (var i = 0; i < nodes.length; i++) {
+			if (nodes[i].node === node) {
+				nodes[i].ranges.push([start, end]);
+				return;
+			}
+		}
+		nodes.push({ node: node, ranges: [[start, end]] });
+	}
+
+	function rawTokenLength(text, start) {
+		var re = /[a-z']+/gi;
+		var m;
+		while ((m = re.exec(text))) {
+			if (m.index === start) return m[0].length;
+			if (m.index > start) break;
+		}
+		return 0;
+	}
+
+	function wrapNodeRanges(node, ranges) {
+		if (!ranges.length || !node.parentNode) return;
+		var text = node.nodeValue;
+		var frag = document.createDocumentFragment();
+		var cursor = 0;
+		for (var i = 0; i < ranges.length; i++) {
+			var s = ranges[i][0];
+			var e = ranges[i][1];
+			if (s > cursor) frag.appendChild(document.createTextNode(text.slice(cursor, s)));
+			if (e > s) {
+				var span = document.createElement("span");
+				span.className = "word-link";
+				span.textContent = text.slice(s, e);
+				frag.appendChild(span);
+			}
+			cursor = Math.max(cursor, e);
+		}
+		if (cursor < text.length) frag.appendChild(document.createTextNode(text.slice(cursor)));
+		node.parentNode.replaceChild(frag, node);
+	}
+
+	function strongLetter(lang) {
+		if (lang == "Greek") return "G";
+		if (lang == "Hebrew" || lang == "Aramaic") return "H";
+		return "";
+	}
+
+	function openWordPopup(entry, ref, x, y) {
+		window.__popupOpenScrollY = window.scrollY;
+		var popup = document.getElementById("wordPopup");
+		if (!popup) {
+			popup = document.createElement("div");
+			popup.id = "wordPopup";
+			popup.className = "word-popup";
+			popup.setAttribute("data-cy", "wordPopup");
+
+			var close = document.createElement("button");
+			close.className = "word-popup-close";
+			close.setAttribute("data-cy", "wordPopupClose");
+			close.innerHTML = "&times;";
+			close.addEventListener("click", function (e) {
+				e.stopPropagation();
+				closeWordPopup();
+			});
+			popup.appendChild(close);
+
+			var refEl = document.createElement("div");
+			refEl.className = "word-popup-ref";
+			popup.appendChild(refEl);
+
+			var orig = document.createElement("div");
+			orig.className = "word-popup-orig";
+			popup.appendChild(orig);
+
+			var translit = document.createElement("div");
+			translit.className = "word-popup-translit";
+			popup.appendChild(translit);
+
+			var parse = document.createElement("div");
+			parse.className = "word-popup-parse";
+			popup.appendChild(parse);
+
+			var strong = document.createElement("div");
+			strong.className = "word-popup-strong";
+			popup.appendChild(strong);
+
+			var gloss = document.createElement("div");
+			gloss.className = "word-popup-gloss";
+			popup.appendChild(gloss);
+
+			document.body.appendChild(popup);
+		}
+
+		var isHebrew =
+			entry.l == "Hebrew" || entry.l == "Aramaic" || entry.l == "Aramaic (Biblical)";
+
+		popup.querySelector(".word-popup-ref").textContent = ref;
+		popup.querySelector(".word-popup-orig").textContent = entry.o;
+		popup
+			.querySelector(".word-popup-orig")
+			.setAttribute("dir", isHebrew ? "rtl" : "ltr");
+		popup
+			.querySelector(".word-popup-orig")
+			.setAttribute("lang", isHebrew ? "he" : "el");
+		popup.querySelector(".word-popup-translit").textContent = entry.t;
+		popup.querySelector(".word-popup-parse").textContent = entry.p;
+		popup.querySelector(".word-popup-strong").textContent =
+			"Strong's " + strongLetter(entry.l) + entry.s;
+		popup.querySelector(".word-popup-gloss").textContent = entry.e;
+
+		popup.style.display = "block";
+		var rect = popup.getBoundingClientRect();
+		var left = Math.max(
+			8,
+			Math.min(x + 10, window.innerWidth - rect.width - 8),
+		);
+		var top = y + 12;
+		if (top + rect.height > window.innerHeight - 8) {
+			top = Math.max(8, y - rect.height - 12);
+		}
+		popup.style.left = left + "px";
+		popup.style.top = top + "px";
+	}
+
+	function closeWordPopup() {
+		var popup = document.getElementById("wordPopup");
+		if (popup) popup.style.display = "none";
+		window.__popupOpenScrollY = null;
+	}
+
+	function loadWordData(slug) {
+		return new Promise(function (resolve, reject) {
+			if (wordDataCache[slug]) return resolve(wordDataCache[slug]);
+			fetch("wordData/" + slug + ".json?version=1")
+				.then(function (r) {
+					return r.json();
+				})
+				.then(function (data) {
+					wordDataCache[slug] = data;
+					resolve(data);
+				})
+				.catch(reject);
+		});
+	}
+
+	function ignoreClickElement(el) {
+		while (el && el != document.body) {
+			if (
+				el.classList.contains("hdg") ||
+				el.classList.contains("subhdg") ||
+				el.classList.contains("fn") ||
+				el.classList.contains("cross") ||
+				el.classList.contains("cross1") ||
+				el.classList.contains("reftext") ||
+				el.classList.contains("chapter-nav")
+			)
+				return true;
+			el = el.parentNode;
+		}
+		return false;
+	}
+
+	function wordAtOffset(text, offset) {
+		var re = /[a-z']+/gi;
+		var m;
+		while ((m = re.exec(text))) {
+			if (offset >= m.index && offset <= m.index + m[0].length) {
+				return normWord(m[0]);
+			}
+		}
+		return null;
+	}
+
+	function nearestPrecedingReftext(node) {
+		var refs = document
+			.getElementById("chapter")
+			.querySelectorAll(".reftext");
+		var prev = null;
+		for (var i = 0; i < refs.length; i++) {
+			if (node.compareDocumentPosition(refs[i]) & Node.DOCUMENT_POSITION_FOLLOWING) {
+				continue;
+			}
+			prev = refs[i];
+		}
+		return prev;
+	}
+
+	function caretPoint(x, y) {
+		if (document.caretRangeFromPoint) {
+			return document.caretRangeFromPoint(x, y);
+		}
+		if (document.caretPositionFromPoint) {
+			var pos = document.caretPositionFromPoint(x, y);
+			if (!pos) return null;
+			var dummy = document.createRange();
+			dummy.setStart(pos.offsetNode, pos.offset);
+			return dummy;
+		}
+		// last resort: whatever element sits at the point
+		var el = document.elementFromPoint(x, y);
+		if (!el) return null;
+		var dummy = document.createRange();
+		dummy.selectNodeContents(el);
+		dummy.collapse(true);
+		return dummy;
+	}
+
+	document
+		.getElementById("chapter")
+		.addEventListener("click", function (ev) {
+			if (!window.getSelection().isCollapsed) return;
+			if (ignoreClickElement(ev.target)) return;
+
+			var range = caretPoint(ev.clientX, ev.clientY);
+			if (!range) return;
+			var node = range.startContainer;
+			var offset = range.startOffset;
+			if (node.nodeType != 3) {
+				var tc = node.childNodes[offset] || node;
+				if (tc && tc.nodeType != 3) tc = tc.firstChild;
+				if (!tc || tc.nodeType != 3) return;
+				node = tc;
+				offset = 0;
+			}
+			var clickedWord = wordAtOffset(node.nodeValue, offset);
+			if (!clickedWord) return;
+
+			var refEl = nearestPrecedingReftext(node);
+			if (!refEl || refEl.contains(node)) return;
+			var verseNum = parseInt(refEl.id.substr(1), 10);
+			if (isNaN(verseNum)) return;
+
+			var book = currentBook();
+			if (!book) return;
+			var chapter = currentBookChapter();
+			var verseKey = "" + parseInt(chapter, 10) + ":" + verseNum;
+			var refName = book.name + " " + chapter + ":" + verseNum;
+
+			// All DOM interrogation happens synchronously while the nodes are
+			// stable; only the word-data fetch is deferred.
+			var vt = buildVerseTokens(refEl);
+			if (vt.pos.length == 0) return;
+			var clickedIndex = clickedTokenIndex(vt.tokens, vt.pos, node, offset);
+			if (clickedIndex == -1) return;
+
+			loadWordData(book.slug)
+				.then(function (data) {
+					var entries = wordDataEntry(book.slug, verseKey);
+					if (!entries) return;
+					var entry = findVerseEntry(entries, vt, clickedIndex, clickedWord);
+					if (!entry) return;
+					openWordPopup(entry, refName, ev.clientX, ev.clientY);
+				})
+				.catch(function (e) {
+					console.error("word lookup failed", e);
+				});
+		});
+
+	// Close popup on outside pointerdown, Escape, scroll, or page change
+	window.__popupOpenScrollY = null;
+	document.addEventListener("pointerdown", function (ev) {
+		var popup = document.getElementById("wordPopup");
+		if (!popup || popup.style.display == "none") return;
+		if (popup.contains(ev.target)) return;
+		closeWordPopup();
+	});
+
+	document.addEventListener("keydown", function (ev) {
+		if (ev.key == "Escape") closeWordPopup();
+	});
+
+	window.addEventListener(
+		"scroll",
+		function () {
+			// Dismiss only when the user actually scrolls away from the position
+			// where the popup opened. Some browsers/automation emit scroll events
+			// at the same offset (scroll-into-view re-alignment) which must not
+			// close the popup.
+			if (window.__popupOpenScrollY !== null) {
+				if (Math.abs(window.scrollY - window.__popupOpenScrollY) < 4) return;
+				window.__popupOpenScrollY = null;
+				closeWordPopup();
+			}
+		},
+		{ capture: true },
+	);
+
+	registerEventListener(
+		(e) => e.name == "showPage",
+		function () {
+			closeWordPopup();
+		},
+	);
+
+	window.testLookup = function (slug, chapter, verse, word) {
+		return loadWordData(slug).then(function () {
+			var entries = wordDataEntry(slug, chapter + ":" + verse);
+			if (!entries) return null;
+			var target = normWord(word);
+			for (var i = 0; i < entries.length; i++) {
+				var w = entries[i].w;
+				var found = false;
+				for (var j = 0; j < w.length; j++) {
+					if (w[j] == target) found = true;
+				}
+				if (found) return entries[i];
+			}
+			return null;
+		});
+	};
 </script>

@@ -13,6 +13,7 @@ var settings = {
 	woc: false,
 	order: "canonical",
 	pageturning: false,
+	wordStudyLinks: true,
 };
 
 registerEventListener(
@@ -76,6 +77,7 @@ function loadSettingsFromLocalStorage() {
 	settings.verses = localStorageSettings?.verses ?? false;
 	settings.you = localStorageSettings?.you ?? "youpl";
 	settings.woc = localStorageSettings?.woc ?? false;
+	settings.wordStudyLinks = localStorageSettings?.wordStudyLinks ?? true;
 	settings.browseHistory = JSON.parse(localStorage?.browseHistory ?? "[]");
 
 	// normalize legacy date strings and persist the cleanup if anything changed
@@ -114,6 +116,7 @@ function saveSettingsToLocalStorage() {
 		woc: settings.woc,
 		order: settings.order,
 		pageturning: settings.pageturning,
+		wordStudyLinks: settings.wordStudyLinks,
 	};
 
 	localStorage.settings = JSON.stringify(localStorageSettings);

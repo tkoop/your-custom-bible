@@ -1307,3 +1307,91 @@ hr {
 	height: 42px;
 	padding: 0;
 }
+
+/* ---------- Word lookup popup ---------- */
+.word-link {
+	text-decoration: underline dotted;
+	cursor: pointer;
+}
+
+.word-popup {
+	display: none;
+	position: fixed;
+	z-index: 1000;
+	width: 320px;
+	max-width: calc(100vw - 24px);
+	background: var(--surface);
+	color: var(--text-primary);
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	box-shadow: var(--shadow-lg);
+	padding: 14px 16px 16px;
+	pointer-events: auto;
+}
+
+.word-popup-close {
+	position: absolute;
+	top: 6px;
+	right: 10px;
+	background: none;
+	border: none;
+	font-size: 20px;
+	line-height: 1;
+	cursor: pointer;
+	color: var(--text-muted);
+	padding: 4px;
+}
+
+.word-popup-close:hover {
+	color: var(--text-primary);
+}
+
+.word-popup-ref {
+	font-size: 0.8rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--text-muted);
+	margin-top: 2px;
+	margin-right: 28px;
+}
+
+.word-popup-orig {
+	font-family: 'EB Garamond', 'Noto Serif Hebrew', serif;
+	font-size: 26px;
+	line-height: 1.3;
+	margin: 10px 0 2px;
+	direction: ltr;
+	text-align: left;
+}
+
+.word-popup-orig[dir='rtl'] {
+	text-align: right;
+}
+
+.word-popup-translit {
+	font-style: italic;
+	color: var(--text-secondary);
+	font-size: 0.95rem;
+}
+
+.word-popup-parse {
+	color: var(--text-secondary);
+	font-size: 0.9rem;
+	margin-top: 4px;
+}
+
+.word-popup-strong {
+	color: var(--primary);
+	font-size: 0.85rem;
+	margin-top: 6px;
+}
+
+.word-popup-gloss {
+	font-family: 'EB Garamond', Georgia, serif;
+	font-size: 1.05rem;
+	font-style: italic;
+	line-height: 1.4;
+	margin-top: 8px;
+	border-top: 1px solid var(--border-light);
+	padding-top: 8px;
+}
