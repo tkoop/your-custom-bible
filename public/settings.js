@@ -16,6 +16,10 @@ var settings = {
 	wordStudyLinks: false,
 };
 
+// settings.fontSize is a preference, not a pixel count: it is rendered at
+// settings.fontSize * FONT_SCALE, so the historic 16 default reads as 20px.
+var FONT_SCALE = 1.25;
+
 registerEventListener(
 	(e) => e.name == "addBrowseHistory",
 	function (event) {

@@ -199,7 +199,8 @@
 				.forEach((el) => (el.innerHTML = getVersion()));
 		}
 
-		document.getElementById("body").style.fontSize = settings.fontSize + "px";
+		document.getElementById("body").style.fontSize =
+			settings.fontSize * FONT_SCALE + "px";
 
 		setupPageTurn();
 	}
