@@ -355,6 +355,11 @@
 				var chapterNum = parts.pop();
 				var slug = parts.join("-");
 				var book = books.find((b) => b.slug === slug);
+				// Keep the arrow buttons anchored to the chapter on screen. This
+				// is the only path all chapter loads funnel through, including
+				// the initial hash and back/forward navigation.
+				currentBookIndex = slugToIndex(slug);
+				currentChapter = parseInt(chapterNum) || 1;
 				var title = book
 					? book.name + " " + chapterNum
 					: titleCase(slug.replaceAll("-", " "));
