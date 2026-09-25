@@ -273,7 +273,10 @@
 		);
 		const tempDiv = document.createElement("div");
 		tempDiv.style.fontSize = "48px";
-		tempDiv.style.fontFamily = "inherit";
+		// measure with the same face the word is displayed in
+		tempDiv.style.fontFamily = getComputedStyle(
+			document.getElementById("speedWord"),
+		).fontFamily;
 		tempDiv.style.position = "absolute";
 		tempDiv.style.visibility = "hidden";
 		tempDiv.innerText = longestWord;
