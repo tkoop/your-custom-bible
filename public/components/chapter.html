@@ -599,7 +599,7 @@ fireEvent({
 			dot.setAttribute("data-page", i);
 			dot.onclick = (function (n) {
 				return function () {
-					goToPage(n);
+					goToPage(n, true);
 				};
 			})(i);
 			frag.appendChild(dot);
@@ -613,18 +613,22 @@ fireEvent({
 		if (rightBtn) rightBtn.disabled = pageTurning.page >= total - 1;
 	}
 
-	function goToPage(n) {
+	function goToPage(n, allowFinish) {
 		if (!pageTurning.enabled) return;
 		n = Math.max(0, Math.min(n, pageTurning.pageCount - 1));
 		if (n === pageTurning.page) return;
 		pageTurning.page = n;
 		applyPageTransform(true);
 		renderPageTurnIndicator();
+		// only explicit paging (not a search jump) counts as reading to the end
+		if (allowFinish && n === pageTurning.pageCount - 1) {
+			markCurrentChapterFinished();
+		}
 	}
 
 	function turnPage(delta) {
 		if (!pageTurning.enabled) return;
-		goToPage(pageTurning.page + delta);
+		goToPage(pageTurning.page + delta, true);
 	}
 
 	function jumpToPageWithVerse(verseNum) {
@@ -655,10 +659,10 @@ fireEvent({
 		if (/INPUT|TEXTAREA|SELECT/.test(tag)) return;
 		if (event.key === "ArrowRight" || event.key === "PageDown") {
 			event.preventDefault();
-			goToPage(pageTurning.page + 1);
+			goToPage(pageTurning.page + 1, true);
 		} else if (event.key === "ArrowLeft" || event.key === "PageUp") {
 			event.preventDefault();
-			goToPage(pageTurning.page - 1);
+			goToPage(pageTurning.page - 1, true);
 		}
 	});
 
@@ -700,16 +704,25 @@ fireEvent({
 
 	var order = settings.order;
 
-	function applyOrderToUI() {
-		document
+	var indexContainers = [];
+
+	function applyOrderToUI(container) {
+		if (!container) return;
+		container
 			.querySelectorAll(".index-order-button")
 			.forEach((b) => b.classList.toggle("active", b.id == "order-" + order));
-		var canonical = document.getElementById("canonicalSections");
-		var chrono = document.getElementById("chronoSections");
-		var alpha = document.getElementById("alphabeticalSections");
-		if (canonical) canonical.style.display = order == "canonical" ? "flex" : "none";
-		if (chrono) chrono.style.display = order == "chronological" ? "flex" : "none";
-		if (alpha) alpha.style.display = order == "alphabetical" ? "flex" : "none";
+		container.querySelectorAll(".index-sections").forEach((s) => {
+			var show =
+				(order == "canonical" && s.classList.contains("index-canonical")) ||
+				(order == "chronological" &&
+					s.classList.contains("index-chronological")) ||
+				(order == "alphabetical" && s.classList.contains("index-alphabetical"));
+			s.style.display = show ? "flex" : "none";
+		});
+	}
+
+	function applyOrderToAllContainers() {
+		indexContainers.forEach(applyOrderToUI);
 	}
 
 	function setBibleOrder(newOrder) {
@@ -723,7 +736,7 @@ fireEvent({
 				});
 			}
 		}
-		applyOrderToUI();
+		applyOrderToAllContainers();
 	}
 
 	registerEventListener(
@@ -731,7 +744,7 @@ fireEvent({
 		function (event) {
 			if (order != "alphabetical" && settings.order != order) {
 				order = settings.order;
-				applyOrderToUI();
+				applyOrderToAllContainers();
 			}
 		}
 	);
@@ -760,55 +773,51 @@ fireEvent({
 		return picker;
 	}
 
-	var canonicalSections = document.createElement("div");
-	canonicalSections.id = "canonicalSections";
-	canonicalSections.className = "index-sections";
+	function buildCanonicalSections(container, cyPrefix) {
+		var section = document.createElement("div");
+		section.className = "index-sections index-canonical";
+		if (!cyPrefix) section.id = "canonicalSections";
 
-	var oldTestament = makeTestamentSection("The Old Testament");
-	var newTestament = makeTestamentSection("The New Testament");
-	var oldBooks = oldTestament.querySelector(".index-books");
-	var newBooks = newTestament.querySelector(".index-books");
+		var oldTestament = makeTestamentSection("The Old Testament");
+		var newTestament = makeTestamentSection("The New Testament");
+		var oldBooks = oldTestament.querySelector(".index-books");
+		var newBooks = newTestament.querySelector(".index-books");
 
-	books.forEach(function (book, idx) {
-		var bookDiv = document.createElement("div");
-		bookDiv.className = "index-book-row";
-		bookDiv.innerHTML =
-			"<div class='index-book' data-book='" +
-			book.name +
-			"' onclick='toggleBookChapters(this)'>" +
-			book.name +
-			"</div>";
-		var chapterLinks =
-			"<div class='index-chapters' data-cy='" +
-			book.name +
-			"' style='display:none'>";
-		for (let i = 1; i <= book.chapters; i++) {
-			chapterLinks += createLink(book.name, book.slug, i) + " ";
-		}
-		chapterLinks += "</div>";
-		bookDiv.innerHTML += chapterLinks;
-		(idx < 39 ? oldBooks : newBooks).appendChild(bookDiv);
-	});
+		books.forEach(function (book, idx) {
+			var bookDiv = document.createElement("div");
+			bookDiv.className = "index-book-row";
+			bookDiv.innerHTML =
+				"<div class='index-book' data-book='" +
+				book.name +
+				"' onclick='toggleBookChapters(this)'>" +
+				book.name +
+				"</div>";
+			var chapterLinks =
+				"<div class='index-chapters' data-cy='" +
+				cyPrefix +
+				book.name +
+				"' style='display:none'>";
+			for (let i = 1; i <= book.chapters; i++) {
+				chapterLinks += createLink(book.name, book.slug, i) + " ";
+			}
+			chapterLinks += "</div>";
+			bookDiv.innerHTML += chapterLinks;
+			(idx < 39 ? oldBooks : newBooks).appendChild(bookDiv);
+		});
 
-	canonicalSections.appendChild(oldTestament);
-	canonicalSections.appendChild(newTestament);
+		section.appendChild(oldTestament);
+		section.appendChild(newTestament);
+		container.appendChild(section);
+	}
 
-	var chronoSections = document.createElement("div");
-	chronoSections.id = "chronoSections";
-	chronoSections.className = "index-sections";
-
-	var eraTitles = [
-		"From Creation to the Law",
-		"The Conquest and the Judges",
-		"The United Kingdom",
-		"From the Divided Kingdom to the Restoration",
-		"The Life of Christ",
-		"The Early Church",
-	];
-	var chronoSectionsMap = eraTitles.map(makeTestamentSection);
-	var chronoBooks = chronoSectionsMap.map(function (section) {
-		return section.querySelector(".index-books");
-	});
+	function buildChronoSections(container, cyPrefix) {
+		var section = document.createElement("div");
+		section.className = "index-sections index-chronological";
+		if (!cyPrefix) section.id = "chronoSections";
+		container.appendChild(section);
+		container._chronoWrap = section;
+		container._cyPrefix = cyPrefix;
+	}
 
 	function otEraIndex(entry) {
 		var name = entry.book;
@@ -909,89 +918,146 @@ fireEvent({
 		return groups.join(", ");
 	}
 
+	var chronoEntries = null;
+	var chronoSequenceBuilt = false;
+
+	function fillChronoSections(container, entries) {
+		var wrap = container._chronoWrap;
+		if (!wrap || wrap.childNodes.length > 0) return;
+		var cyPrefix = container._cyPrefix || "";
+		var eraTitles = [
+			"From Creation to the Law",
+			"The Conquest and the Judges",
+			"The United Kingdom",
+			"From the Divided Kingdom to the Restoration",
+			"The Life of Christ",
+			"The Early Church",
+		];
+		var sectionsMap = eraTitles.map(makeTestamentSection);
+		var eraBooks = sectionsMap.map(function (section) {
+			return section.querySelector(".index-books");
+		});
+		entries.forEach(function (entry, idx) {
+			var book = chronoBook(entry.book);
+			if (!book) {
+				console.warn("ChronoChapters: unknown book " + entry.book);
+				return;
+			}
+			var label =
+				book.name == "Psalms" && entry.chapter.length >= 100
+					? "Psalms (most)"
+					: book.name + " " + formatChapterList(entry.chapter);
+			var row = document.createElement("div");
+			row.className = "index-book-row";
+			row.innerHTML =
+				"<div class='index-book' data-book='" +
+				book.name +
+				"' data-cy='" +
+				cyPrefix +
+				"chrono-" +
+				idx +
+				"' onclick='toggleBookChapters(this)'>" +
+				label +
+				"</div>";
+			var chapterLinks =
+				"<div class='index-chapters' data-cy='" +
+				cyPrefix +
+				"chronoChapters-" +
+				idx +
+				"' style='display:none'>";
+			entry.chapter.forEach(function (chapter) {
+				chapterLinks += createLink(book.name, book.slug, chapter) + " ";
+			});
+			chapterLinks += "</div>";
+			row.innerHTML += chapterLinks;
+			eraBooks[chronicleSectionIndex(book, entry)].appendChild(row);
+		});
+		sectionsMap.forEach(function (section) {
+			wrap.appendChild(section);
+		});
+	}
+
+	function buildChronoSequence(entries) {
+		if (chronoSequenceBuilt) return;
+		entries.forEach(function (entry) {
+			var book = chronoBook(entry.book);
+			if (!book) return;
+			entry.chapter.forEach(function (chapter) {
+				chronoSequence.push({
+					name: book.name,
+					slug: book.slug,
+					chapter: chapter,
+				});
+			});
+		});
+		chronoSequenceBuilt = true;
+	}
+
+	function buildAlphabeticalSections(container, cyPrefix) {
+		var section = document.createElement("div");
+		section.className = "index-sections index-alphabetical";
+		if (!cyPrefix) section.id = "alphabeticalSections";
+		var sortedBooks = books.slice().sort(function (a, b) {
+			return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+		});
+		sortedBooks.forEach(function (book) {
+			var bookDiv = document.createElement("div");
+			bookDiv.className = "index-book-row";
+			bookDiv.innerHTML =
+				"<div class='index-book' data-book='" +
+				book.name +
+				"' data-cy='" +
+				cyPrefix +
+				"alpha-" +
+				book.name +
+				"' onclick='toggleBookChapters(this)'>" +
+				book.name +
+				"</div>";
+			var chapterLinks =
+				"<div class='index-chapters' data-cy='" +
+				cyPrefix +
+				"alphaChapters-" +
+				book.name +
+				"' style='display:none'>";
+			for (let i = 1; i <= book.chapters; i++) {
+				chapterLinks += createLink(book.name, book.slug, i) + " ";
+			}
+			chapterLinks += "</div>";
+			bookDiv.innerHTML += chapterLinks;
+			section.appendChild(bookDiv);
+		});
+		container.appendChild(section);
+	}
+
+	function buildIndex(container, cyPrefix) {
+		if (!container._indexBuilt) {
+			container.innerHTML = "";
+			container.appendChild(makeOrderPicker());
+			buildCanonicalSections(container, cyPrefix);
+			buildChronoSections(container, cyPrefix);
+			buildAlphabeticalSections(container, cyPrefix);
+			if (chronoEntries) fillChronoSections(container, chronoEntries);
+			if (indexContainers.indexOf(container) == -1)
+				indexContainers.push(container);
+			container._indexBuilt = true;
+		}
+		applyOrderToUI(container);
+	}
+
+	buildIndex(document.getElementById("index"), "");
+
 	fetch("chronoChapters.json?version=1")
 		.then(function (response) {
 			return response.json();
 		})
 		.then(function (entries) {
-			entries.forEach(function (entry, idx) {
-				var book = chronoBook(entry.book);
-				if (!book) {
-					console.warn("ChronoChapters: unknown book " + entry.book);
-					return;
-				}
-				var label =
-					book.name == "Psalms" && entry.chapter.length >= 100
-						? "Psalms (most)"
-						: book.name + " " + formatChapterList(entry.chapter);
-				var row = document.createElement("div");
-				row.className = "index-book-row";
-				row.innerHTML =
-					"<div class='index-book' data-book='" +
-					book.name +
-					"' data-cy='chrono-" +
-					idx +
-					"' onclick='toggleBookChapters(this)'>" +
-					label +
-					"</div>";
-				var chapterLinks =
-					"<div class='index-chapters' data-cy='chronoChapters-" +
-					idx +
-					"' style='display:none'>";
-				entry.chapter.forEach(function (chapter) {
-					chapterLinks += createLink(book.name, book.slug, chapter) + " ";
-					chronoSequence.push({
-						name: book.name,
-						slug: book.slug,
-						chapter: chapter,
-					});
-				});
-				chapterLinks += "</div>";
-				row.innerHTML += chapterLinks;
-				chronoBooks[chronicleSectionIndex(book, entry)].appendChild(row);
+			chronoEntries = entries;
+			buildChronoSequence(entries);
+			indexContainers.forEach(function (container) {
+				fillChronoSections(container, entries);
 			});
-			chronoSectionsMap.forEach(function (section) {
-				chronoSections.appendChild(section);
-			});
-			setBibleOrder(order);
+			applyOrderToAllContainers();
 		});
-
-	var alphabeticalSections = document.createElement("div");
-	alphabeticalSections.id = "alphabeticalSections";
-	alphabeticalSections.className = "index-sections";
-
-	var sortedBooks = books.slice().sort(function (a, b) {
-		return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
-	});
-
-	sortedBooks.forEach(function (book) {
-		var bookDiv = document.createElement("div");
-		bookDiv.className = "index-book-row";
-		bookDiv.innerHTML =
-			"<div class='index-book' data-book='" +
-			book.name +
-			"' data-cy='alpha-" +
-			book.name +
-			"' onclick='toggleBookChapters(this)'>" +
-			book.name +
-			"</div>";
-		var chapterLinks =
-			"<div class='index-chapters' data-cy='alphaChapters-" +
-			book.name +
-			"' style='display:none'>";
-		for (let i = 1; i <= book.chapters; i++) {
-			chapterLinks += createLink(book.name, book.slug, i) + " ";
-		}
-		chapterLinks += "</div>";
-		bookDiv.innerHTML += chapterLinks;
-		alphabeticalSections.appendChild(bookDiv);
-	});
-
-	document.getElementById("index").appendChild(makeOrderPicker());
-	document.getElementById("index").appendChild(canonicalSections);
-	document.getElementById("index").appendChild(chronoSections);
-	document.getElementById("index").appendChild(alphabeticalSections);
-	setBibleOrder(order);
 
 	function markCurrentChapterFinished() {
 		var bookObj = books[currentBookIndex];
@@ -1016,6 +1082,14 @@ fireEvent({
 		if (!chapterEl || getComputedStyle(chapterEl).display == "none") return;
 		// only once the chapter has fully rendered (footer nav present)
 		if (!chapterEl.querySelector(".chapter-nav.bottom")) return;
+		// In page-turn mode the body does not scroll, so completion means the
+		// reader reached the last page rather than the page bottom.
+		if (pageTurning.enabled) {
+			if (pageTurning.page >= pageTurning.pageCount - 1) {
+				markCurrentChapterFinished();
+			}
+			return;
+		}
 		if (
 			window.innerHeight + window.scrollY >=
 			document.documentElement.scrollHeight - 80
@@ -1026,13 +1100,4 @@ fireEvent({
 
 	window.addEventListener("scroll", chapterFinishedCheck, { passive: true });
 	window.addEventListener("resize", chapterFinishedCheck, { passive: true });
-
-	if (settings.browseHistory.length > 0) {
-		let history = settings.browseHistory[settings.browseHistory.length - 1];
-
-		var url = "./chapters/" + history.slug + "-" + history.chapter + ".html";
-		loadURL(url);
-		currentChapter = history.chapter;
-		currentBookIndex = slugToIndex(history.slug);
-	}
 </script>

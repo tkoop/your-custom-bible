@@ -21,7 +21,14 @@
 		(e) => e.name == "showPage" && e.page == "search",
 		function (event) {
 			var input = document.getElementById("searchInput");
-			if (input) input.focus();
+			if (!input) return;
+			input.focus();
+			if (window.pendingSearchQuery) {
+				var query = window.pendingSearchQuery;
+				window.pendingSearchQuery = null;
+				input.value = query;
+				runSearch(query);
+			}
 		}
 	);
 
