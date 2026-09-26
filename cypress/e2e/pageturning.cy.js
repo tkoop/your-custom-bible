@@ -16,6 +16,34 @@ describe("page turning", () => {
 		cy.get("#menuIcon").click(); // close dropdown
 	}
 
+	// A touch swipe across the page-turn viewport: press at (x1, y1), release at
+	// (x2, y2).
+	function swipe(x1, y1, x2, y2) {
+		gesture("touch", x1, y1, x2, y2);
+	}
+
+	// The same drag, but with a mouse.
+	function drag(x1, y1, x2, y2) {
+		gesture("mouse", x1, y1, x2, y2);
+	}
+
+	function gesture(pointerType, x1, y1, x2, y2) {
+		const init = {
+			pointerId: 1,
+			pointerType: pointerType,
+			isPrimary: true,
+			clientX: x1,
+			clientY: y1,
+			button: 0,
+		};
+		cy.get("#pageTurnViewport").trigger("pointerdown", init);
+		cy.get("#pageTurnViewport").trigger("pointerup", {
+			...init,
+			clientX: x2,
+			clientY: y2,
+		});
+	}
+
 	it("pagination on, off, and page navigation", () => {
 		enablePageTurning();
 
@@ -133,5 +161,54 @@ describe("page turning", () => {
 			const history = JSON.parse(win.localStorage.getItem("browseHistory"));
 			expect(history[history.length - 1].finished).to.eq(true);
 		});
+	});
+
+	it("pages on a horizontal swipe and ignores other gestures", () => {
+		enablePageTurning();
+		cy.get("#index").contains("Psalms").click();
+		cy.get("[data-cy='Psalms'] a[data-chapter='119']").click();
+		cy.get("#chapter").should("have.class", "page-turn");
+
+		// swipe left -> next page
+		swipe(300, 400, 120, 400);
+		cy.get("#pageTurnCount").invoke("text").should("match", /^2 \/ \d+$/);
+
+		// swipe right -> back to the first page
+		swipe(120, 400, 300, 400);
+		cy.get("#pageTurnCount").invoke("text").should("match", /^1 \/ \d+$/);
+
+		// a mostly vertical drag must not page
+		swipe(300, 200, 320, 500);
+		cy.get("#pageTurnCount").invoke("text").should("match", /^1 \/ \d+$/);
+
+		// a short drag must not page
+		swipe(300, 400, 280, 400);
+		cy.get("#pageTurnCount").invoke("text").should("match", /^1 \/ \d+$/);
+
+		// swiping back past the first page changes nothing
+		swipe(120, 400, 400, 400);
+		cy.get("#pageTurnCount").invoke("text").should("match", /^1 \/ \d+$/);
+		cy.get("#pageTurnLeft").should("be.disabled");
+	});
+
+	it("does not page when a mouse drag selects text", () => {
+		enablePageTurning();
+		cy.get("#index").contains("Psalms").click();
+		cy.get("[data-cy='Psalms'] a[data-chapter='119']").click();
+		cy.get("#chapter").should("have.class", "page-turn");
+
+		cy.get("#pageTurnCount").invoke("text").should("match", /^1 \/ \d+$/);
+
+		// select some text, then drag across it like a selection drag
+		cy.window().then((win) => {
+			const text = win.document.getElementById("chapterText");
+			const range = win.document.createRange();
+			range.selectNodeContents(text.querySelector("p") || text);
+			const selection = win.getSelection();
+			selection.removeAllRanges();
+			selection.addRange(range);
+		});
+		drag(400, 400, 100, 400);
+		cy.get("#pageTurnCount").invoke("text").should("match", /^1 \/ \d+$/);
 	});
 });

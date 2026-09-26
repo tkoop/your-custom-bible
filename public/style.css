@@ -861,6 +861,10 @@ body.chrono-nav .chapter-nav button .chrono-corner {
 	min-height: 0;
 	overflow: hidden;
 	position: relative;
+	/* horizontal drags are page turns, so don't let the browser pan with them */
+	touch-action: pan-y;
+	-webkit-user-select: text;
+	user-select: text;
 }
 
 .page-turn-viewport #chapterText {
