@@ -1,0 +1,30 @@
+# Verses where the BSB epub's own red-letter markup is wrong, so the
+# quote-propagation heuristic in compile.mjs needs a hand-written correction.
+#
+# Columns (tab separated):
+#   1. reference, as "Book chapter:verses"; "verses" takes ranges and singles,
+#      e.g. "Matthew 6:1-2 5 7"
+#   2. state: "red" = render as Christ's words, "black" = render as narration
+#   3. why
+#
+# A "red" row marks every verse body block in the range, including the blocks
+# that continue the verse and the words of the characters in a parable.
+# Headings and cross-references inside a range are left alone.
+#
+# House rule: a parable is Christ's, so the whole of a parable is red even
+# where the words belong to a character in the story.
+
+# --- Jesus speaking, but the epub never marked it red --------------------
+Matthew 6:1-2 5 7	red	Giving to the needy and how to pray. Verse 9's "So then, this is how you should pray:" is narration, so it is left out.
+Matthew 7:1-26	red	Sermon on the Mount continues; verse 28 is narration.
+Matthew 20:1-16	red	Parable of the Workers in the Vineyard. Verse 17 is narration.
+Matthew 25:1-46	red	Parables of the Ten Virgins and the Talents, and the Sheep and the Goats.
+John 10:1 4	red	Good Shepherd speech. Verse 6 ("Jesus spoke to them using this illustration") is narration.
+John 15:1-27	red	Vine discourse, which runs past the end of verse 26.
+John 16:1-16	red	Farewell discourse. Verse 17 returns to narration and is left out.
+Luke 7:31	red	Jesus compares this generation to children.
+Revelation 2:1	red	Letter to Ephesus. The salutation in verse 1 sits in an unmarked block above the red quotation.
+Revelation 3:1	red	Letter to Sardis. The salutation in verse 1 sits in an unmarked block above the red quotation.
+
+# --- Narration that the quote heuristic wrongly carried over as red -------
+John 3:16 19	black	"God so loved the world" and "this is the verdict" are the evangelist's summary. The quotation opened in verse 10 is never closed in the source, so the speech ran on.

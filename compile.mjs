@@ -130,13 +130,31 @@ function upperCaseWords(body) {
 
 // ---------- Words of Christ (red letter) ----------
 
-// The BSB epub marks Christ's direct speech with a bare <span> (no class).
-// This pass turns those spans into <span class="woc"> so the runtime can
-// render them in red when the "Words of Christ" setting is on. Quoted speech
-// that spills past the closing </span> (e.g. Matthew 16:28 ends in its own
-// paragraph) keeps its red marking by colouring the continuation block.
+// The BSB epub marks Christ's direct speech in two ways: a bare <span> (no
+// class) for speech that runs inline, and a paragraph class ending in "red"
+// (WOC_RED_CLASSES) for speech set as its own indented block. This pass adds
+// the woc class to both so the runtime can render them in red when the
+// "Words of Christ" setting is on.
+//
+// Long speeches (the Sermon on the Mount, the letters in Revelation) run on
+// for many paragraphs with only the first one marked, so speech that spills
+// past the end of its inline <span> or its red block keeps the red marking on
+// the following blocks too, until the closing quotation mark.
+
+// True when the tag's class attribute lists any of the given class names.
+function hasClass(tagInner, names) {
+	var match = /class=(["'])(.*?)\1/.exec(tagInner);
+	if (!match) return false;
+	return match[2]
+		.trim()
+		.split(/\s+/)
+		.some((name) => names.has(name));
+}
+
+const WOC_CLASS = new Set(["woc"]);
 
 function addWocClass(tag) {
+	if (hasClass(tag, WOC_CLASS)) return tag;
 	if (/class=/.test(tag)) {
 		return tag.replace(
 			/class=(["'])(.*?)\1/,
@@ -148,12 +166,26 @@ function addWocClass(tag) {
 
 const WOC_BLOCK_TAGS = new Set(["p", "div"]);
 
+// Indent classes the BSB epub uses for red-lettered blocks. calibre3 is also
+// an indent class, but the epub applies it to non-red text too (for example
+// the "BOOK I" divider in Psalm 1), so it is deliberately not listed here.
+const WOC_RED_CLASSES = new Set([
+	"indentred",
+	"indentred1",
+	"indent1stlinered",
+	"tab1stlinered",
+]);
+
+function hasWocRedClass(tagInner) {
+	return hasClass(tagInner, WOC_RED_CLASSES);
+}
+
 function markWordsOfChrist(body, book, chapter) {
 	var out = "";
 	var i = 0;
-	var stack = []; // open tags, each {tag, bare}
+	var stack = []; // open tags, each {tag, bare, red}
 	var quoteDepth = 0; // unclosed " quotes inside the current woc span
-	var continuing = false; // quoted speech continues past its </span>
+	var continuing = false; // quoted speech continues past its </span> or </p>
 
 	while (i < body.length) {
 		var ch = body[i];
@@ -173,17 +205,19 @@ function markWordsOfChrist(body, book, chapter) {
 
 			if (closing) {
 				var el = stack.pop();
-				if (el && el.bare && quoteDepth > 0) continuing = true;
+				if (el && (el.bare || el.red) && quoteDepth > 0) continuing = true;
 				out += raw;
 			} else if (selfClosing || VOID_TAGS.has(tagName)) {
 				out += raw;
 			} else {
 				var bare = tagName == "span" && inner.indexOf("=") < 0;
-				stack.push({ tag: tagName, bare });
+				stack.push({ tag: tagName, bare, red: hasWocRedClass(inner) });
 				if (bare) {
 					quoteDepth = 0;
 					out += raw.replace("<span>", '<span class="woc">');
-				} else if (continuing && WOC_BLOCK_TAGS.has(tagName)) {
+				} else if (WOC_BLOCK_TAGS.has(tagName) &&
+					(continuing || hasWocRedClass(inner))
+				) {
 					out += addWocClass(raw);
 				} else {
 					out += raw;
@@ -206,6 +240,149 @@ function markWordsOfChrist(body, book, chapter) {
 	}
 
 	return out;
+}
+
+// The quote heuristic above is only as good as the epub's punctuation, and in a
+// few places it is wrong: a speech the epub never marked at all stays black, and
+// a quotation it forgot to close runs on into the narration that follows.
+// resources/woc_verses.tsv lists those verses by hand, both the ones to force
+// red and the ones to force back to black.
+
+const WOC_OVERRIDE_FILE = join("resources", "woc_verses.tsv");
+
+// Blocks that sit between verse bodies and are never scripture text: the
+// hidden chapter nav block, headings, and cross-reference lines.
+const WOC_NON_VERSE_CLASSES = new Set([
+	"calibre2",
+	"hdg",
+	"subhdg",
+	"cross",
+	"inscrip1",
+]);
+
+function loadWocOverrides() {
+	var overrides = new Map();
+	var text = readFileSync(WOC_OVERRIDE_FILE, "utf8");
+
+	for (var line of text.split("\n")) {
+		if (!line.trim() || line.startsWith("#")) continue;
+		var [reference, state] = line.split("\t");
+		if (state != "red" && state != "black") {
+			throw new Error("Bad woc state in " + WOC_OVERRIDE_FILE + ": " + state);
+		}
+		var space = reference.indexOf(" ");
+		var colon = reference.indexOf(":");
+		if (space < 0 || colon < space) throw new Error("Bad woc override: " + line);
+		var chapter = reference.slice(space + 1, colon);
+		if (isNaN(Number(chapter))) {
+			throw new Error("Bad woc chapter in " + WOC_OVERRIDE_FILE + ": " + line);
+		}
+		var chapterKey = (reference.slice(0, space) + " " + chapter).toLowerCase();
+		var verses = new Set();
+		for (var part of reference.slice(colon + 1).split(/\s+/)) {
+			if (!part) continue;
+			var range = part.split("-").map(Number);
+			if (range.some(isNaN)) throw new Error("Bad woc verse: " + line);
+			for (var v = range[0]; v <= (range[1] ?? range[0]); v++) verses.add(v);
+		}
+		var entry = overrides.get(chapterKey) || { red: new Set(), black: new Set() };
+		for (var verse of verses) entry[state].add(verse);
+		overrides.set(chapterKey, entry);
+	}
+
+	return overrides;
+}
+
+var wocOverrides = loadWocOverrides();
+
+function withoutWocClass(tag) {
+	var match = /class=(["'])(.*?)\1/.exec(tag);
+	if (!match) return tag;
+	var classes = match[2].trim().split(/\s+/).filter((c) => c && c != "woc");
+	return classes.length
+		? tag.replace(/class=(["']).*?\1/, "class=$1" + classes.join(" ") + "$1")
+		: tag.replace(/\s*class=(["']).*?\1/, "");
+}
+
+// Runs after markWordsOfChrist, so a listed verse always wins over the
+// heuristic. Only the scripture blocks are touched; the footnote block that
+// closes each chapter is left alone, as are the headings inside a range.
+function applyWocOverrides(body, book, chapter) {
+	var entry = wocOverrides.get((book + " " + chapter).toLowerCase());
+	if (!entry) return body;
+
+	var footnote = body.indexOf('<div class="fn"');
+	var end = footnote < 0 ? body.length : footnote;
+	var out = [];
+	var buf = ""; // text inside the block currently being read
+	var open = null; // its opening <p>, held back until we know its verse
+	var verse = 0; // the verse the last block belonged to
+	var blockVerse = 0; // the verse this block opens with, 0 if it opens mid-verse
+
+	for (var i = 0; i < end; i++) {
+		if (body[i] != "<") {
+			buf += body[i];
+			continue;
+		}
+
+		var gt = body.indexOf(">", i);
+		if (gt < 0 || gt > end) {
+			buf += body.slice(i);
+			break;
+		}
+		var raw = body.slice(i, gt + 1);
+		var inner = body.slice(i + 1, gt);
+		var closing = inner[0] == "/";
+		if (closing) inner = inner.slice(1);
+		var tag = inner.trim().split(/[\s\/]/)[0].toLowerCase();
+
+		if (closing) {
+			if (open && tag == "p") {
+				buf += raw; // the </p> belongs to the block being held
+				// A block belongs to the verse it opens with. The epub often
+				// ends a block with the number of the verse that follows, so
+				// only the first anchor in the block counts.
+				if (blockVerse) verse = blockVerse;
+				var forced = entry.red.has(verse)
+					? true
+					: entry.black.has(verse)
+						? false
+						: null;
+				if (forced === null) {
+					out.push(open, buf);
+				} else {
+					out.push(
+						hasClass(open, WOC_NON_VERSE_CLASSES)
+							? open
+							: forced
+								? addWocClass(open)
+								: withoutWocClass(open)
+					);
+					out.push(buf);
+				}
+				open = null;
+				buf = "";
+				blockVerse = 0;
+			} else {
+				buf += raw;
+			}
+		} else {
+			var anchor = /^<span[^>]*class=(["'])reftext\1[^>]*\bid="v(\d+)"/.exec(raw);
+			if (anchor && open && !blockVerse) blockVerse = Number(anchor[2]);
+			if (tag == "p" && !open) {
+				// Everything read so far belongs before this block.
+				out.push(buf);
+				open = raw;
+				buf = "";
+			} else {
+				buf += raw;
+			}
+		}
+		i = gt;
+	}
+
+	out.push(open || "", buf);
+	return out.join("") + body.slice(end);
 }
 
 async function parseChapters() {
@@ -340,6 +517,7 @@ async function parseChapters() {
 
 		// Words of Christ (red letter)
 		body = markWordsOfChrist(body, book, chapter);
+		body = applyWocOverrides(body, book, chapter);
 
 		writeFile(toDir + "/" + newFilename + ".html", body);
 	}
