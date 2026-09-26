@@ -456,6 +456,7 @@ fireEvent({
 		page: 0, // zero based
 		pageCount: 1,
 		pageGap: 8,
+		swipeDistance: 40, // px of horizontal travel before it counts as a swipe
 	};
 
 	var pageTurnArrows = {
@@ -519,7 +520,60 @@ fireEvent({
 
 		pageTurning.enabled = true;
 		pageTurning.page = 0;
+		attachSwipeGestures(viewport);
 		recalcPages();
+	}
+
+	// Swipe left/right over the text to page through the chapter. Pointer events
+	// cover touch, pen and mouse drags; a drag that selected text is left alone
+	// so text selection still works, and vertical drags never page.
+	function attachSwipeGestures(viewport) {
+		var startX = 0;
+		var startY = 0;
+		var tracking = false;
+
+		viewport.addEventListener("pointerdown", function (event) {
+			// a second finger means a pinch, not a swipe
+			if (event.isPrimary === false) {
+				tracking = false;
+				return;
+			}
+			if (event.pointerType === "mouse" && event.button !== 0) return;
+			// let taps on links and buttons through
+			if (event.target.closest && event.target.closest("a, button")) return;
+			tracking = true;
+			startX = event.clientX;
+			startY = event.clientY;
+			if (event.pointerType !== "mouse" && viewport.setPointerCapture) {
+				try {
+					viewport.setPointerCapture(event.pointerId);
+				} catch (e) {
+					// capture is best effort; the swipe still works without it
+				}
+			}
+		});
+
+		viewport.addEventListener("pointerup", function (event) {
+			if (!tracking) return;
+			tracking = false;
+			var dx = event.clientX - startX;
+			var dy = event.clientY - startY;
+			if (Math.abs(dx) < pageTurning.swipeDistance) return;
+			if (Math.abs(dx) < Math.abs(dy) * 1.5) return; // mostly vertical
+			// a drag that left text selected was a selection, not a page turn.
+			// Compare isCollapsed rather than the selection text: text selected
+			// inside the column layout does not stringify.
+			var selection = window.getSelection ? window.getSelection() : null;
+			if (event.pointerType === "mouse" && selection && !selection.isCollapsed) {
+				return;
+			}
+			// swiping left moves forward through the chapter
+			turnPage(dx < 0 ? 1 : -1);
+		});
+
+		viewport.addEventListener("pointercancel", function () {
+			tracking = false;
+		});
 	}
 
 	function disablePageTurn() {
