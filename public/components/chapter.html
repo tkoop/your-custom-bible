@@ -231,6 +231,7 @@
 				chapter: chapter,
 				date: todayDateString(),
 				finished: false,
+				activity: settings.activity,
 			},
 		});
 
@@ -327,6 +328,9 @@
 	}
 
 	function goToTodaysChapter() {
+		// Reading the chapter of the day is always a COTD activity, and it
+		// becomes the current one so the chapters read after it are too.
+		fireEvent({ name: "setSetting", setting: "activity", value: "cotd" });
 		var target = chapterIndexToBookAndChapter(todaysChapterIndex());
 		loadThisChapter(target.book.name, target.book.slug, target.chapter);
 	}
@@ -1096,6 +1100,12 @@ fireEvent({
 	function buildIndex(container, cyPrefix) {
 		if (!container._indexBuilt) {
 			container.innerHTML = "";
+			if (!cyPrefix) {
+				var activityHolder = document.createElement("div");
+				activityHolder.className = "activity-picker-holder";
+				container.appendChild(activityHolder);
+				mountActivityPicker(activityHolder);
+			}
 			container.appendChild(makeOrderPicker());
 			buildCanonicalSections(container, cyPrefix);
 			buildChronoSections(container, cyPrefix);

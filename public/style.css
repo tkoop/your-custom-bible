@@ -417,6 +417,136 @@ a:hover {
 	accent-color: var(--primary);
 }
 
+/* ---------- Activity types ----------
+   One colour per activity type, plus a soft tint of it for pill backgrounds.
+   Classes rather than inline colours so the palette can differ per theme. */
+.act-default {
+	--activity-color: #6b5f4a;
+	--activity-tint: rgb(107 95 74 / 0.16);
+}
+
+.act-cotd {
+	--activity-color: #34507a;
+	--activity-tint: rgb(52 80 122 / 0.14);
+}
+
+.act-devotions {
+	--activity-color: #1c7263;
+	--activity-tint: rgb(28 114 99 / 0.14);
+}
+
+.act-biblestudy {
+	--activity-color: #6a3d99;
+	--activity-tint: rgb(106 61 153 / 0.14);
+}
+
+.act-church {
+	--activity-color: #a03c22;
+	--activity-tint: rgb(160 60 34 / 0.14);
+}
+
+.act-other1 {
+	--activity-color: #8d6309;
+	--activity-tint: rgb(141 99 9 / 0.16);
+}
+
+.act-other2 {
+	--activity-color: #0f6f86;
+	--activity-tint: rgb(15 111 134 / 0.14);
+}
+
+.act-other3 {
+	--activity-color: #8a2a63;
+	--activity-tint: rgb(138 42 99 / 0.14);
+}
+
+body.dark .act-default {
+	--activity-color: #b0a48a;
+	--activity-tint: rgb(176 164 138 / 0.2);
+}
+
+body.dark .act-cotd {
+	--activity-color: #8fa9cd;
+	--activity-tint: rgb(143 169 205 / 0.2);
+}
+
+body.dark .act-devotions {
+	--activity-color: #3fb8a3;
+	--activity-tint: rgb(63 184 163 / 0.18);
+}
+
+body.dark .act-biblestudy {
+	--activity-color: #b183e0;
+	--activity-tint: rgb(177 131 224 / 0.18);
+}
+
+body.dark .act-church {
+	--activity-color: #e0795a;
+	--activity-tint: rgb(224 121 90 / 0.18);
+}
+
+body.dark .act-other1 {
+	--activity-color: #dfa63c;
+	--activity-tint: rgb(223 166 60 / 0.18);
+}
+
+body.dark .act-other2 {
+	--activity-color: #45b0cc;
+	--activity-tint: rgb(69 176 204 / 0.18);
+}
+
+body.dark .act-other3 {
+	--activity-color: #d973ab;
+	--activity-tint: rgb(217 115 171 / 0.18);
+}
+
+/* The activity select, in the gear dropdown and in the small page pickers. */
+#settingsDropdown select.activity-select,
+.activity-picker select.activity-select {
+	color: var(--activity-color);
+	background-color: var(--activity-tint);
+	border-color: var(--activity-color);
+	font-weight: 700;
+}
+
+/* Small activity selector, top right of the home and index pages. */
+.activity-picker-holder {
+	display: flex;
+	justify-content: flex-end;
+	margin-bottom: 10px;
+}
+
+#index .activity-picker-holder {
+	flex-basis: 100%;
+}
+
+.activity-picker {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 5px 6px 5px 12px;
+	border: 1.5px solid var(--activity-color);
+	border-radius: 999px;
+	background-color: var(--activity-tint);
+	font-family: 'sourceSansPro', sans-serif;
+}
+
+.activity-picker-label {
+	font-size: 0.7rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.16em;
+	color: var(--text-muted);
+}
+
+.activity-picker select.activity-select {
+	padding: 3px 8px;
+	border: 1px solid var(--activity-color);
+	border-radius: 999px;
+	background-color: var(--surface);
+	font-size: 0.85rem;
+}
+
 /* ---------- Index: book picker ---------- */
 #index {
 	flex-wrap: wrap;
@@ -1176,6 +1306,62 @@ h3 {
 #historyLinks p {
 	font-size: 1.05rem;
 	line-height: 1.6;
+}
+
+.history-legend {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px 16px;
+	margin-bottom: 0.4rem;
+}
+
+.history-legend-item {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-family: 'sourceSansPro', sans-serif;
+	font-size: 0.8rem;
+	color: var(--text-secondary);
+}
+
+.history-legend-swatch {
+	width: 12px;
+	height: 12px;
+	border-radius: 4px;
+	background-color: var(--activity-color);
+}
+
+.history-day {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-bottom: 0.5rem;
+}
+
+.history-entry {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 3px 12px;
+	border: 1.5px solid var(--activity-color);
+	border-radius: 999px;
+	background-color: var(--activity-tint);
+	font-family: 'sourceSansPro', sans-serif;
+	font-size: 0.95rem;
+	line-height: 1.5;
+	white-space: nowrap;
+}
+
+.history-entry a {
+	color: var(--text-primary);
+}
+
+.history-entry a:hover {
+	color: var(--activity-color);
+}
+
+.history-finished {
+	color: var(--text-muted);
 }
 
 #historyLinks a {

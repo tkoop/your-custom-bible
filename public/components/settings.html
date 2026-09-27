@@ -1,3 +1,15 @@
+<div style="display: flex">
+	<div>Activity</div>
+	<div>
+		<select
+			style="padding: 6px; border-radius: 6px"
+			id="activity"
+			class="activity-select"
+			aria-label="Activity type"
+		></select>
+	</div>
+</div>
+
 <div
 	style="display: flex"
 	onclick="var i = this.querySelector('input').click(); event.stopPropagation()"
@@ -318,4 +330,5 @@
 	);
 
 	updateModeButtons();
+	applyActivityControls();
 </script>

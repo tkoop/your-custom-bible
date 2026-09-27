@@ -14,6 +14,7 @@ var settings = {
 	order: "canonical",
 	pageturning: false,
 	wordStudyLinks: false,
+	activity: "default",
 };
 
 // settings.fontSize is a preference, not a pixel count: it is rendered at
@@ -100,6 +101,9 @@ function loadSettingsFromLocalStorage() {
 		localStorageSettings?.order ??
 		(localStorage.bibleOrder == "chronological" ? "chronological" : "canonical");
 	settings.pageturning = localStorageSettings?.pageturning ?? false;
+	settings.activity = isActivityType(localStorageSettings?.activity)
+		? localStorageSettings.activity
+		: "default";
 
 	fireEvent({ name: "settingsUpdated" });
 }
@@ -121,6 +125,7 @@ function saveSettingsToLocalStorage() {
 		order: settings.order,
 		pageturning: settings.pageturning,
 		wordStudyLinks: settings.wordStudyLinks,
+		activity: settings.activity,
 	};
 
 	localStorage.settings = JSON.stringify(localStorageSettings);

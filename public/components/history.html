@@ -2,38 +2,59 @@
 
 <script>
 
+function historyDayLabel(date) {
+  return new Date(Date.parse(date)).toLocaleDateString('en-CA', {
+    month: 'short', // this order has nothing to do with the output
+    day: 'numeric',
+    year: 'numeric'
+  })
+}
+
+function historyEntryHtml(entry) {
+  let html = "<span class='history-entry " + activityClass(entry.activity) + "'>"
+  html += createLink(entry.name, entry.slug, entry.chapter, true)
+  if (entry.finished) html += "<span class='history-finished'>*</span>"
+  return html + "</span>"
+}
+
+// Only the activity types actually used are listed, so the legend stays short.
+function historyLegendHtml(entries) {
+  const used = {}
+  entries.forEach(entry => used[activityType(entry.activity).id] = true)
+  const ids = ACTIVITY_TYPES.filter(type => used[type.id]).map(type => type.id)
+  if (ids.length == 0) return ""
+  let html = "<div class='history-legend'>"
+  ids.forEach(id => {
+    html += "<span class='history-legend-item " + activityClass(id) + "'>"
+    html += "<span class='history-legend-swatch'></span>" + activityLabel(id) + "</span>"
+  })
+  return html + "</div>"
+}
 
 function recreateHistory() {
+  const entries = settings.browseHistory.filter(entry => entry && entry.slug)
   let html = "<h2>History</h2>"
-  html += "<p style='font-style:italic;font-size:0.85em'>* = finished to the end of the chapter</p>"
-  let previousDate = null
-  let dateString = null
-  
-  if (settings.browseHistory.length == 0) {
+
+  if (entries.length == 0) {
     html += "<p style='font-style:italic'>No history</p>"
   } else {
-    for (let i = settings.browseHistory.length - 1; i >= 0; i--) {
-      if (settings.browseHistory[i].date != previousDate) {
-        if (html.substr(html.length - 2) == ', ') {
-          html = html.substr(0, html.length - 2)
-        }
-        previousDate = settings.browseHistory[i].date
-        dateString = new Date(Date.parse(settings.browseHistory[i].date)).toLocaleDateString('en-CA', {
-          month: 'short', // this order has nothing to do with the output
-          day: 'numeric',
-          year: 'numeric'
-        })
-        html += "</p><h3>" + dateString + "</h3><p>"
+    html += "<p style='font-style:italic;font-size:0.85em'>* = finished to the end of the chapter</p>"
+    html += historyLegendHtml(entries)
+    let previousDate = null
+    for (let i = entries.length - 1; i >= 0; i--) {
+      const entry = entries[i]
+      if (entry.date != previousDate) {
+        if (previousDate != null) html += "</div>"
+        previousDate = entry.date
+        html += "<h3>" + historyDayLabel(entry.date) + "</h3><div class='history-day'>"
       }
-      html += createLink(settings.browseHistory[i].name, settings.browseHistory[i].slug, settings.browseHistory[i].chapter, true) + (settings.browseHistory[i].finished ? "*" : "") + ", "
+      html += historyEntryHtml(entry)
     }
+    html += "</div>"
   }
-  if (html.substr(html.length - 2) == ', ') {
-    html = html.substr(0, html.length - 2)
-  }
-  
+
   document.getElementById("historyLinks").innerHTML = html
-  
+
 }
 
 recreateHistory()

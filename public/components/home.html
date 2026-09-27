@@ -1,3 +1,5 @@
+<div id="homeActivity" class="activity-picker-holder"></div>
+
 <div class="home-cards">
 	<section class="home-card" data-cy="homeChapterOfDay">
 		<h2>Chapter of the Day</h2>
@@ -106,6 +108,7 @@
 				if (event.key === "Enter") homeSearch();
 			});
 		}
+		mountActivityPicker(document.getElementById("homeActivity"));
 		renderHomeToday();
 		renderHomeContinue();
 		var picker = document.getElementById("homePicker");
