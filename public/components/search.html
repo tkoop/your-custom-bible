@@ -1,12 +1,27 @@
 <h1>Search</h1>
 
-<input
-	id="searchInput"
-	type="search"
-	placeholder="Search the entire Bible..."
-	autocomplete="off"
-	spellcheck="false"
-/>
+<div class="search-controls">
+	<input
+		id="searchInput"
+		type="search"
+		placeholder="Search the entire Bible..."
+		autocomplete="off"
+		spellcheck="false"
+	/>
+	<select id="searchScope" title="What to search in"></select>
+	<div class="search-mode">
+		<label
+			><input type="radio" name="searchMode" value="phrase" checked />
+			Exact phrase</label
+		>
+		<label
+			><input type="radio" name="searchMode" value="words" /> Each
+			word</label
+		>
+	</div>
+</div>
+
+<div id="searchHistory"></div>
 <div id="searchStatus" class="search-status"></div>
 <div id="searchResults" class="search-results"></div>
 
@@ -14,8 +29,89 @@
 	var searchIndex = null;
 	var searchIndexLoading = null;
 	var bookNames = {};
+	var lastSearch = null;
+	var HISTORY_KEY = "searchHistory";
+	var HISTORY_LIMIT = 15;
 
 	books.forEach((b) => (bookNames[b.slug] = b.name));
+
+	function bookRange(first, last) {
+		var start = books.findIndex((b) => b.name === first);
+		var end = books.findIndex((b) => b.name === last);
+		if (start < 0 || end < 0 || start > end) return [];
+		return books.slice(start, end + 1).map((b) => b.slug);
+	}
+
+	var SCOPES = [
+		{ key: "whole", label: "The whole Bible", slugs: null },
+		{ key: "nt", label: "New Testament", slugs: bookRange("Matthew", "Revelation") },
+		{ key: "ot", label: "Old Testament", slugs: bookRange("Genesis", "Malachi") },
+		{ key: "gospels", label: "Gospels", slugs: bookRange("Matthew", "John") },
+		{ key: "acts", label: "Acts", slugs: bookRange("Acts", "Acts") },
+		{ key: "paul", label: "Paul's Letters", slugs: bookRange("Romans", "Philemon") },
+		{ key: "general", label: "General Letters", slugs: bookRange("Hebrews", "Jude") },
+		{ key: "pentateuch", label: "Pentateuch", slugs: bookRange("Genesis", "Deuteronomy") },
+		{ key: "history", label: "Historical Books", slugs: bookRange("Joshua", "Esther") },
+		{ key: "wisdom", label: "Wisdom Books", slugs: bookRange("Job", "Song of Solomon") },
+		{ key: "major", label: "Major Prophets", slugs: bookRange("Isaiah", "Daniel") },
+		{ key: "minor", label: "Minor Prophets", slugs: bookRange("Hosea", "Malachi") },
+	];
+
+	var scopeSelect = document.getElementById("searchScope");
+
+	function buildScopeOptions() {
+		SCOPES.forEach(function (s) {
+			var opt = document.createElement("option");
+			opt.value = s.key;
+			opt.textContent = s.label;
+			scopeSelect.appendChild(opt);
+		});
+		var sep = document.createElement("option");
+		sep.disabled = true;
+		sep.textContent = "— Books —";
+		scopeSelect.appendChild(sep);
+		books.forEach(function (b) {
+			var opt = document.createElement("option");
+			opt.value = "book:" + b.slug;
+			opt.textContent = b.name;
+			scopeSelect.appendChild(opt);
+		});
+		var saved = localStorage.searchScope;
+		if (saved && [].some.call(scopeSelect.options, (o) => o.value === saved))
+			scopeSelect.value = saved;
+	}
+	buildScopeOptions();
+
+	function scopeLabel(value) {
+		if (value === "book:") return "";
+		if (value && value.indexOf("book:") === 0) {
+			var slug = value.slice(5);
+			return bookNames[slug] || slug;
+		}
+		var s = SCOPES.find((s) => s.key === value);
+		return s ? s.label : "";
+	}
+
+	function currentScopeSlugs() {
+		var v = scopeSelect.value;
+		if (v === "whole") return null;
+		if (v.indexOf("book:") === 0) return [v.slice(5)];
+		var s = SCOPES.find((s) => s.key === v);
+		return s ? s.slugs : null;
+	}
+
+	function currentMode() {
+		var el = document.querySelector('input[name="searchMode"]:checked');
+		return el ? el.value : "phrase";
+	}
+
+	function setMode(mode) {
+		var el = document.querySelector('input[name="searchMode"][value="' + mode + '"]');
+		if (el) el.checked = true;
+	}
+
+	var savedMode = localStorage.searchMode;
+	if (savedMode === "words" || savedMode === "phrase") setMode(savedMode);
 
 	registerEventListener(
 		(e) => e.name == "showPage" && e.page == "search",
@@ -23,11 +119,12 @@
 			var input = document.getElementById("searchInput");
 			if (!input) return;
 			input.focus();
+			renderSearchHistory();
 			if (window.pendingSearchQuery) {
 				var query = window.pendingSearchQuery;
 				window.pendingSearchQuery = null;
 				input.value = query;
-				runSearch(query);
+				runSearch(query, true);
 			}
 		}
 	);
@@ -53,33 +150,63 @@
 	inputEl.addEventListener("input", function (event) {
 		clearTimeout(debounceTimer);
 		debounceTimer = setTimeout(function () {
-			runSearch(event.target.value);
+			runSearch(event.target.value, false);
 		}, 250);
 	});
 	inputEl.addEventListener("keydown", function (event) {
 		if (event.key === "Enter") {
 			clearTimeout(debounceTimer);
-			runSearch(event.target.value);
+			runSearch(event.target.value, true);
 		}
 	});
+	scopeSelect.addEventListener("change", function () {
+		localStorage.searchScope = scopeSelect.value;
+		runSearch(inputEl.value, false);
+	});
+	document.querySelectorAll('input[name="searchMode"]').forEach(function (radio) {
+		radio.addEventListener("change", function () {
+			localStorage.searchMode = currentMode();
+			runSearch(inputEl.value, false);
+		});
+	});
 
-	function runSearch(query) {
-		query = query.trim().toLowerCase();
+	function runSearch(query, record) {
+		query = (query || "").trim().toLowerCase();
+		var mode = currentMode();
+		var scope = scopeSelect.value;
+		var slugs = currentScopeSlugs();
+		var slugSet = slugs ? new Set(slugs) : null;
+		lastSearch = { q: query, mode: mode, scope: scope };
 		var status = document.getElementById("searchStatus");
 		var box = document.getElementById("searchResults");
 		box.innerHTML = "";
 		status.textContent = "";
 
+		if (record && query) recordSearch(lastSearch);
 		if (!query) return;
 
 		status.textContent = "Searching...";
 		loadSearchIndex()
 			.then(function () {
+				var terms =
+					mode === "words"
+						? query.split(/\s+/).filter(Boolean)
+						: [query];
+				if (!terms.length) return;
 				var t0 = performance.now();
 				var hits = [];
 				for (var i = 0; i < searchIndex.length; i++) {
 					var rec = searchIndex[i];
-					if (rec[3].toLowerCase().indexOf(query) >= 0) hits.push(rec);
+					if (slugSet && !slugSet.has(rec[0])) continue;
+					var lower = rec[3].toLowerCase();
+					var match = true;
+					for (var j = 0; j < terms.length; j++) {
+						if (lower.indexOf(terms[j]) < 0) {
+							match = false;
+							break;
+						}
+					}
+					if (match) hits.push(rec);
 				}
 				var ms = Math.round(performance.now() - t0);
 				status.textContent =
@@ -89,14 +216,14 @@
 					" \u00b7 " +
 					ms +
 					" ms";
-				renderResults(box, hits, query);
+				renderResults(box, hits, terms);
 			})
 			.catch(function () {
 				status.textContent = "Could not load the search index.";
 			});
 	}
 
-	function renderResults(box, hits, query) {
+	function renderResults(box, hits, terms) {
 		var MAX_RESULTS = 200;
 		var frag = document.createDocumentFragment();
 
@@ -111,7 +238,7 @@
 
 			var text = document.createElement("span");
 			text.className = "search-text";
-			text.appendChild(highlight(rec[3], query));
+			text.appendChild(highlight(rec[3], terms));
 
 			row.appendChild(ref);
 			row.appendChild(text);
@@ -135,30 +262,135 @@
 		}
 	}
 
-	function highlight(text, query) {
+	function highlight(text, terms) {
 		var lower = text.toLowerCase();
 		var frag = document.createDocumentFragment();
 		var pos = 0;
-		var idx;
-		while ((idx = lower.indexOf(query, pos)) >= 0) {
+		while (true) {
+			var idx = -1;
+			var len = 0;
+			for (var i = 0; i < terms.length; i++) {
+				var t = terms[i];
+				var j = lower.indexOf(t, pos);
+				if (
+					j >= 0 &&
+					(idx < 0 || j < idx || (j == idx && t.length > len))
+				) {
+					idx = j;
+					len = t.length;
+				}
+			}
+			if (idx < 0) break;
 			if (idx > pos)
-				frag.appendChild(document.createTextNode(text.substring(pos, idx)));
+				frag.appendChild(
+					document.createTextNode(text.substring(pos, idx))
+				);
 			var mark = document.createElement("mark");
 			mark.appendChild(
-				document.createTextNode(text.substring(idx, idx + query.length))
+				document.createTextNode(text.substring(idx, idx + len))
 			);
 			frag.appendChild(mark);
-			pos = idx + query.length;
+			pos = idx + len;
 		}
 		if (pos < text.length)
 			frag.appendChild(document.createTextNode(text.substring(pos)));
-		if (frag.childNodes.length == 0) frag.appendChild(document.createTextNode(text));
+		if (frag.childNodes.length == 0)
+			frag.appendChild(document.createTextNode(text));
 		return frag;
 	}
+
+	function getSearchHistory() {
+		try {
+			var list = JSON.parse(localStorage[HISTORY_KEY] || "[]");
+			return Array.isArray(list) ? list : [];
+		} catch (e) {
+			return [];
+		}
+	}
+
+	function recordSearch(entry) {
+		if (!entry || !entry.q) return;
+		var list = getSearchHistory().filter(function (e) {
+			return !(
+				e.q === entry.q &&
+				e.mode === entry.mode &&
+				e.scope === entry.scope
+			);
+		});
+		list.unshift({ q: entry.q, mode: entry.mode, scope: entry.scope });
+		if (list.length > HISTORY_LIMIT) list.length = HISTORY_LIMIT;
+		localStorage[HISTORY_KEY] = JSON.stringify(list);
+		renderSearchHistory();
+	}
+
+	function clearSearchHistory() {
+		localStorage.removeItem(HISTORY_KEY);
+		renderSearchHistory();
+	}
+
+	function renderSearchHistory() {
+		var el = document.getElementById("searchHistory");
+		if (!el) return;
+		var list = getSearchHistory();
+		el.innerHTML = "";
+		if (!list.length) return;
+
+		var heading = document.createElement("div");
+		heading.className = "search-history-heading";
+		var title = document.createElement("span");
+		title.textContent = "Recent searches";
+		var clear = document.createElement("button");
+		clear.className = "search-history-clear";
+		clear.type = "button";
+		clear.textContent = "Clear";
+		clear.onclick = clearSearchHistory;
+		heading.appendChild(title);
+		heading.appendChild(clear);
+		el.appendChild(heading);
+
+		var chips = document.createElement("div");
+		chips.className = "search-history-chips";
+		list.forEach(function (entry) {
+			var chip = document.createElement("span");
+			chip.className = "search-history-chip";
+			chip.appendChild(document.createTextNode(entry.q));
+			if (entry.scope && entry.scope !== "whole") {
+				var meta = document.createElement("span");
+				meta.className = "search-history-meta";
+				meta.textContent = " \u00b7 " + scopeLabel(entry.scope);
+				chip.appendChild(meta);
+			}
+			if (entry.mode === "words") {
+				var wmeta = document.createElement("span");
+				wmeta.className = "search-history-meta";
+				wmeta.textContent = " \u00b7 each word";
+				chip.appendChild(wmeta);
+			}
+			chip.onclick = (function (entry) {
+				return function () {
+					inputEl.value = entry.q;
+					if (
+						[].some.call(
+							scopeSelect.options,
+							(o) => o.value === entry.scope
+						)
+					)
+						scopeSelect.value = entry.scope;
+					setMode(entry.mode || "phrase");
+					runSearch(entry.q, true);
+				};
+			})(entry);
+			chips.appendChild(chip);
+		});
+		el.appendChild(chips);
+	}
+
+	renderSearchHistory();
 
 	function openVerse(rec) {
 		var book = books.find((b) => b.slug === rec[0]);
 		if (!book) return;
+		if (lastSearch) recordSearch(lastSearch);
 		window.scrollVerse = rec[2];
 		loadThisChapter(book.name, book.slug, rec[1]);
 	}
