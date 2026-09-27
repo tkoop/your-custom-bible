@@ -1,6 +1,7 @@
 var settings = {
 	browseHistory: [],
 	fontSize: 16,
+	font: "sourceSerif",
 	mode: "auto",
 	spelling: "ca",
 	name: "Yahweh",
@@ -70,6 +71,7 @@ function loadSettingsFromLocalStorage() {
 	var localStorageSettings = JSON.parse(localStorage?.settings ?? "{}");
 
 	settings.fontSize = localStorageSettings?.fontSize ?? 16;
+	settings.font = localStorageSettings?.font ?? "sourceSerif";
 	settings.mode =
 		localStorageSettings?.mode ??
 		(localStorageSettings?.darkMode ? "dark" : "auto");
@@ -112,6 +114,7 @@ loadSettingsFromLocalStorage();
 function saveSettingsToLocalStorage() {
 	var localStorageSettings = {
 		fontSize: settings.fontSize,
+		font: settings.font,
 		mode: settings.mode,
 		spelling: settings.spelling,
 		name: settings.name,

@@ -223,6 +223,25 @@
 </div>
 
 <div>
+	<div>Font</div>
+	<div>
+		<select
+			style="padding: 6px; border-radius: 6px"
+			id="font"
+			onclick="event.stopPropagation()"
+			onchange="fireEvent({name:'setSetting', setting:'font', value:this.options[this.selectedIndex].value}); event.stopPropagation()"
+		>
+			<option value="sourceSerif">Source Serif (default)</option>
+			<option value="ebGaramond">EB Garamond</option>
+			<option value="literata">Literata</option>
+			<option value="sura">Sura</option>
+			<option value="atkinson">Atkinson Hyperlegible</option>
+			<option value="openDyslexic">OpenDyslexic</option>
+		</select>
+	</div>
+</div>
+
+<div>
 	<div>Font Size</div>
 	<div class="buttonHolder">
 		<button
@@ -298,6 +317,10 @@
 
 	document.querySelectorAll("select#you option").forEach((op) => {
 		if (op.value == settings.you) op.selected = true;
+	});
+
+	document.querySelectorAll("select#font option").forEach((op) => {
+		if (op.value == settings.font) op.selected = true;
 	});
 
 	document.querySelector("input[data-value=titles]").checked = settings.titles;

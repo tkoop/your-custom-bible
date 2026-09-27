@@ -5,7 +5,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="theme-color" content="#34507a" />
 		<title>Your Custom Bible</title>
-<link rel="stylesheet" href="style.css?version=31" />
+<link rel="stylesheet" href="style.css?version=32" />
 		<link rel="icon" type="image/png" href="images/logo.png?version=4" />
 		<link rel="manifest" href="manifest.json?version=2" />
 	</head>
@@ -76,7 +76,7 @@
 
 	<script src="framework.js?version=1"></script>
 	<script src="activity.js?version=1"></script>
-	<script src="settings.js?version=9"></script>
+	<script src="settings.js?version=10"></script>
 	<script src="books.js?version=2"></script>
 
 	<script>
@@ -89,7 +89,7 @@ await loadComponent("dropdown", "components/menu.html?version=12");
 			await loadComponent("search", "components/search.html?version=4");
 			await loadComponent(
 				"settingsDropdown",
-				"components/settings.html?version=6"
+				"components/settings.html?version=7"
 			);
 			await loadComponent("speedReader", "components/speedReader.html?version=8");
 		}
@@ -152,10 +152,18 @@ await loadComponent("dropdown", "components/menu.html?version=12");
 		darkModeQuery.addEventListener("change", applyMode);
 		applyMode();
 
+		// The reading font lives in CSS (body[data-font]); this only tags the body
+		// so scripture text picks up the chosen stack everywhere at once.
+		function applyFont() {
+			document.body.dataset.font = settings.font || "sourceSerif";
+		}
+		applyFont();
+
 		registerEventListener(
 			(event) => event.name == "settingsUpdated",
 			function (event) {
 				applyMode();
+				applyFont();
 			},
 		);
 
