@@ -21,7 +21,7 @@ Browsers cache this app's static assets aggressively:
 file under `public/` whose content changed.** Increment the number each time:
 
 - Start/raise any resource that has no version param yet (add `?version=1`).
-- `style.css` is currently at `?version=30`; leave it unless it changes.
+- `style.css` is currently at `?version=31`; leave it unless it changes.
 
 Files involved (all referenced from `public/index.html`):
 

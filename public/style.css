@@ -998,7 +998,11 @@ body.chrono-nav .chapter-nav button .chrono-corner {
 }
 
 #chapterTitle .title-text {
-	white-space: nowrap;
+	/* Long book names (Song of Solomon, 1 Chronicles) must wrap onto a second
+	   line instead of widening the page and raising a horizontal scrollbar. */
+	white-space: normal;
+	overflow-wrap: break-word;
+	min-width: 0;
 }
 
 #chapterTitle .title-rule {

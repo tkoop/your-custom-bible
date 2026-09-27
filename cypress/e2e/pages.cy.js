@@ -49,6 +49,18 @@ describe('template spec', () => {
     cy.contains("is based on the Berean Standard Bible")
   })
 
+  it("chapter page does not scroll sideways for a long book name", () => {
+    cy.viewport(360, 720)
+    cy.visit('http://localhost:8000/#Sng-1')
+    cy.get("#chapterTitle").should("contain", "Song of Solomon 1")
+    cy.window().then((win) => {
+      const doc = win.document.documentElement
+      expect(doc.scrollWidth, "no horizontal scrollbar").to.be.at.most(
+        doc.clientWidth,
+      )
+    })
+  })
+
   it("search page", () => {
     cy.get("div#dropdown").should("exist")
     cy.wait(100)
