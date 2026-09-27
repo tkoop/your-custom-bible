@@ -417,6 +417,187 @@ a:hover {
 	accent-color: var(--primary);
 }
 
+/* ---------- Activity types ----------
+   One colour per activity type, plus a soft tint of it for pill backgrounds.
+   Classes rather than inline colours so the palette can differ per theme.
+   The hues are kept as far apart as possible (grey, blue, green, violet,
+   red, orange, cyan, pink) so pills stay tellable apart at a glance. */
+.act-default {
+	--activity-color: #7a7466;
+	--activity-tint: rgb(122 116 102 / 0.14);
+}
+
+.act-cotd {
+	--activity-color: #1e56a8;
+	--activity-tint: rgb(30 86 168 / 0.14);
+}
+
+.act-devotions {
+	--activity-color: #2e7d32;
+	--activity-tint: rgb(46 125 50 / 0.14);
+}
+
+.act-biblestudy {
+	--activity-color: #6d28c6;
+	--activity-tint: rgb(109 40 198 / 0.14);
+}
+
+.act-church {
+	--activity-color: #b3261e;
+	--activity-tint: rgb(179 38 30 / 0.14);
+}
+
+.act-other1 {
+	--activity-color: #b45309;
+	--activity-tint: rgb(180 83 9 / 0.16);
+}
+
+.act-other2 {
+	--activity-color: #0e7490;
+	--activity-tint: rgb(14 116 144 / 0.14);
+}
+
+.act-other3 {
+	--activity-color: #bd2a6e;
+	--activity-tint: rgb(189 42 110 / 0.14);
+}
+
+body.dark .act-default {
+	--activity-color: #ada697;
+	--activity-tint: rgb(173 166 151 / 0.2);
+}
+
+body.dark .act-cotd {
+	--activity-color: #6d9eeb;
+	--activity-tint: rgb(109 158 235 / 0.2);
+}
+
+body.dark .act-devotions {
+	--activity-color: #4fc46a;
+	--activity-tint: rgb(79 196 106 / 0.18);
+}
+
+body.dark .act-biblestudy {
+	--activity-color: #a88bfa;
+	--activity-tint: rgb(168 139 250 / 0.18);
+}
+
+body.dark .act-church {
+	--activity-color: #ee5c4a;
+	--activity-tint: rgb(238 92 74 / 0.18);
+}
+
+body.dark .act-other1 {
+	--activity-color: #f2a53c;
+	--activity-tint: rgb(242 165 60 / 0.18);
+}
+
+body.dark .act-other2 {
+	--activity-color: #45c4e0;
+	--activity-tint: rgb(69 196 224 / 0.18);
+}
+
+body.dark .act-other3 {
+	--activity-color: #ef69ae;
+	--activity-tint: rgb(239 105 174 / 0.18);
+}
+
+/* The activity select in the small page pickers. In the gear dropdown it
+   deliberately shares the plain #settingsDropdown select style. */
+.activity-picker select.activity-select {
+	color: var(--activity-color);
+	background-color: var(--activity-tint);
+	border-color: var(--activity-color);
+	font-weight: 700;
+}
+
+/* Small activity selector, top right of the home and index pages. */
+.activity-picker-holder {
+	display: flex;
+	justify-content: flex-end;
+	margin-bottom: 10px;
+}
+
+#index .activity-picker-holder {
+	flex-basis: 100%;
+}
+
+.activity-picker {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 5px 6px 5px 12px;
+	border: 1.5px solid var(--activity-color);
+	border-radius: 999px;
+	background-color: var(--activity-tint);
+	font-family: 'sourceSansPro', sans-serif;
+}
+
+.activity-picker-label {
+	font-size: 0.7rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.16em;
+	color: var(--text-muted);
+}
+
+.activity-picker select.activity-select {
+	padding: 3px 8px;
+	border: 1px solid var(--activity-color);
+	border-radius: 999px;
+	background-color: var(--surface);
+	font-size: 0.85rem;
+}
+
+/* In the chapter pickers (the home card heading and the index page top right)
+   the picker stays quiet: just a small colour dot and a plain select. */
+.home-card-head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 10px;
+	margin: 0 0 12px;
+}
+
+.home-card-head h2 {
+	margin: 0;
+}
+
+.activity-quiet .activity-picker {
+	gap: 6px;
+	padding: 0;
+	border: none;
+	background: none;
+}
+
+.activity-quiet .activity-picker::before {
+	content: "";
+	align-self: center;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background-color: var(--activity-color);
+}
+
+.activity-quiet .activity-picker-label {
+	display: none;
+}
+
+.activity-quiet .activity-picker select.activity-select {
+	padding: 2px 4px;
+	border-color: transparent;
+	border-radius: 6px;
+	background: transparent;
+	color: var(--text-secondary);
+	font-size: 0.8rem;
+	font-weight: 400;
+}
+
+.activity-quiet .activity-picker select.activity-select:hover {
+	border-color: var(--border);
+	background-color: var(--surface-soft);
+}
+
 /* ---------- Index: book picker ---------- */
 #index {
 	flex-wrap: wrap;
@@ -1176,6 +1357,102 @@ h3 {
 #historyLinks p {
 	font-size: 1.05rem;
 	line-height: 1.6;
+}
+
+.history-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	flex-wrap: wrap;
+	margin-bottom: 0.4rem;
+}
+
+.history-header h2 {
+	margin: 0;
+}
+
+.history-filter {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	font-family: 'sourceSansPro', sans-serif;
+}
+
+.history-filter-label {
+	font-size: 0.7rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.16em;
+	color: var(--text-muted);
+}
+
+.history-filter-select {
+	padding: 4px 10px;
+	border: 1px solid var(--activity-color, var(--border));
+	border-radius: 999px;
+	background-color: var(--activity-tint, var(--surface));
+	color: var(--activity-color, var(--text-primary));
+	font-family: 'sourceSansPro', sans-serif;
+	font-size: 0.85rem;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.history-legend {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px 16px;
+	margin-bottom: 0.4rem;
+}
+
+.history-legend-item {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-family: 'sourceSansPro', sans-serif;
+	font-size: 0.8rem;
+	color: var(--text-secondary);
+}
+
+.history-legend-swatch {
+	width: 12px;
+	height: 12px;
+	border-radius: 4px;
+	background-color: var(--activity-color);
+}
+
+.history-day {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-bottom: 0.5rem;
+}
+
+.history-entry {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 3px 12px;
+	border: 1.5px solid var(--activity-color);
+	border-radius: 999px;
+	background-color: var(--activity-tint);
+	font-family: 'sourceSansPro', sans-serif;
+	font-size: 0.95rem;
+	line-height: 1.5;
+	white-space: nowrap;
+}
+
+.history-entry a {
+	color: var(--text-primary);
+}
+
+.history-entry a:hover {
+	color: var(--activity-color);
+}
+
+.history-finished {
+	color: var(--text-muted);
 }
 
 #historyLinks a {
