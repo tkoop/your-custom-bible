@@ -54,7 +54,7 @@
 		var p = document.getElementById("homeTodayChapter");
 		if (!p) return;
 		var target = chapterIndexToBookAndChapter(todaysChapterIndex());
-		p.textContent = target.book.name + " " + target.chapter;
+		p.textContent = chapterRefName(target.book.name) + " " + target.chapter;
 	}
 
 	function recentHistoryEntries(count) {

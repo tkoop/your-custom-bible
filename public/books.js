@@ -66,3 +66,7 @@ var books = [
 	{ name: "Jude", slug: "jude", abbr: "Jud", chapters: 1 },
 	{ name: "Revelation", slug: "revelation", abbr: "Rev", chapters: 22 },
 ];
+
+function chapterRefName(bookName) {
+	return bookName == "Psalms" ? "Psalm" : bookName;
+}

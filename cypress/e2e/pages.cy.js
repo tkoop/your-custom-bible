@@ -7,10 +7,10 @@ describe('template spec', () => {
   it('start', () => {
     cy.contains("Genesis")
     cy.contains("Exodus")
-    cy.get("[data-cy='Genesis']").should("not.be.visible")
+    cy.get("[data-cy='homeGenesis']").should("not.be.visible")
     cy.contains("Genesis").click()
-    cy.get("[data-cy='Genesis']").should("be.visible")
-    cy.contains("50")
+    cy.get("[data-cy='homeGenesis']").should("be.visible")
+    cy.get("[data-cy='homeGenesis']").contains("50")
     cy.get(".brand-title").should("contain", "Your Custom Bible")
   })
 
@@ -21,9 +21,10 @@ describe('template spec', () => {
     cy.get("div#dropdown").should("be.visible")
     cy.get("div#dropdown").contains("Index").click()
 
-    cy.contains("Genesis").click()
-    cy.contains("50")
-    cy.contains("Exodus")
+    cy.get("#index").contains(".index-book", "Genesis").click()
+    cy.get("#index [data-cy='Genesis']").should("be.visible")
+    cy.get("#index [data-cy='Genesis']").contains("50")
+    cy.get("#index").contains("Exodus")
   })
 
   it("history page", () => {

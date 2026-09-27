@@ -63,7 +63,10 @@ describe("Today's Chapter", () => {
 			const target = win.chapterIndexToBookAndChapter(
 				win.todaysChapterIndex(),
 			);
-			cy.get("#chapter").should("contain", target.book.name + " " + target.chapter);
+			cy.get("#chapter").should(
+				"contain",
+				win.chapterRefName(target.book.name) + " " + target.chapter,
+			);
 			cy.get("#chapter").should("contain", "YCB-CYL");
 			cy.location("hash").should(
 				"eq",

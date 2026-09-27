@@ -28,7 +28,7 @@ function historyEntryHtml(entry) {
   html += "<a href='#' style='white-space:nowrap' data-slug='" + entry.slug + "'"
   html += " data-book='" + entry.name + "' data-chapter='" + entry.chapter + "'"
   html += " data-activity='" + activityType(entry.activity).id + "'"
-  html += " onclick='loadHistoryChapter(this); return false'>" + entry.name + " " + entry.chapter + "</a>"
+  html += " onclick='loadHistoryChapter(this); return false'>" + chapterRefName(entry.name) + " " + entry.chapter + "</a>"
   if (entry.finished) html += "<span class='history-finished'>*</span>"
   return html + "</span>"
 }

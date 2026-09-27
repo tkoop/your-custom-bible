@@ -5,10 +5,10 @@ describe("chapter finished tracking", () => {
   });
 
   it("marks a chapter finished only after scrolling to the end", () => {
-    // load a long chapter (Psalms 119) without reaching the end
+    // load a long chapter (Psalm 119) without reaching the end
     cy.contains("Psalms").click();
-    cy.get("[data-cy='Psalms']").contains("119").click();
-    cy.get("#chapter").should("contain", "Psalms 119 (YCB-CYL)");
+    cy.get("[data-cy='homePsalms']").contains("119").click();
+    cy.get("#chapter").should("contain", "Psalm 119 (YCB-CYL)");
 
     // the stored date uses a parseable YYYY-MM-DD format, not the legacy one
     cy.then(() => {
@@ -20,20 +20,20 @@ describe("chapter finished tracking", () => {
     cy.get("#menuIcon").click();
     cy.get("div#dropdown").should("be.visible");
     cy.get("div#dropdown").contains("History").click();
-    cy.contains("Psalms 119");
-    cy.contains("Psalms 119*").should("not.exist");
+    cy.contains("Psalm 119");
+    cy.contains("Psalm 119*").should("not.exist");
     cy.contains("* = finished to the end of the chapter");
 
     // go back to the chapter and scroll to the very end
     cy.go("back");
-    cy.get("#chapter").should("contain", "Psalms 119 (YCB-CYL)");
+    cy.get("#chapter").should("contain", "Psalm 119 (YCB-CYL)");
     cy.scrollTo("bottom");
     cy.wait(300);
 
     // now history shows the asterisk
     cy.get("#menuIcon").click();
     cy.get("div#dropdown").contains("History").click();
-    cy.contains("Psalms 119*");
+    cy.contains("Psalm 119*");
   });
 
   it("migrates legacy dates (wrong year) to the current year", () => {

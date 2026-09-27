@@ -6,13 +6,13 @@ describe("bible order picker", () => {
 
   it("shows canonical by default and switches to chronological", () => {
     cy.contains(".index-order-button.active", "Canonical");
-    cy.get("#canonicalSections").should("be.visible");
-    cy.get("#chronoSections").should("not.be.visible");
+    cy.get("#homePicker .index-canonical").should("be.visible");
+    cy.get("#homePicker .index-chronological").should("not.be.visible");
 
     cy.contains(".index-order-button", "Chronological").click();
     cy.contains(".index-order-button.active", "Chronological");
-    cy.get("#canonicalSections").should("not.be.visible");
-    cy.get("#chronoSections").should("be.visible");
+    cy.get("#homePicker .index-canonical").should("not.be.visible");
+    cy.get("#homePicker .index-chronological").should("be.visible");
 
     cy.contains(".index-section-title", "From Creation to the Law");
     cy.contains(".index-section-title", "The Conquest and the Judges");
@@ -21,11 +21,11 @@ describe("bible order picker", () => {
     cy.contains(".index-section-title", "The Life of Christ");
     cy.contains(".index-section-title", "The Early Church");
 
-    cy.get("[data-cy='chrono-0']").should("contain", "Genesis");
-    cy.get("[data-cy='chronoChapters-0']").should("not.be.visible");
-    cy.get("[data-cy='chrono-0']").click();
-    cy.get("[data-cy='chronoChapters-0']").should("be.visible");
-    cy.get("[data-cy='chronoChapters-0']").contains("10").click();
+    cy.get("[data-cy='homechrono-0']").should("contain", "Genesis");
+    cy.get("[data-cy='homechronoChapters-0']").should("not.be.visible");
+    cy.get("[data-cy='homechrono-0']").click();
+    cy.get("[data-cy='homechronoChapters-0']").should("be.visible");
+    cy.get("[data-cy='homechronoChapters-0']").contains("10").click();
 
     cy.get("#chapter").should("contain", "Genesis 10 (YCB-CYL)");
   });
@@ -34,7 +34,7 @@ describe("bible order picker", () => {
     cy.contains(".index-order-button", "Chronological").click();
     cy.reload();
     cy.contains(".index-order-button.active", "Chronological");
-    cy.get("#chronoSections").should("be.visible");
+    cy.get("#homePicker .index-chronological").should("be.visible");
     cy.get("input[data-value=order]").should("be.checked");
   });
 
@@ -45,32 +45,32 @@ describe("bible order picker", () => {
     cy.get("#settingsDropdown").contains("Chronological").should("be.visible");
     cy.get("#settingsDropdown input[data-value=order]").check();
 
-    cy.get("#chronoSections").should("be.visible");
-    cy.get("#canonicalSections").should("not.be.visible");
+    cy.get("#homePicker .index-chronological").should("be.visible");
+    cy.get("#homePicker .index-canonical").should("not.be.visible");
     cy.get("#order-canonical").should("not.have.class", "active");
     cy.get("#order-chronological").should("have.class", "active");
 
     cy.get("#settingsDropdown input[data-value=order]").uncheck();
-    cy.get("#canonicalSections").should("be.visible");
-    cy.get("#chronoSections").should("not.be.visible");
+    cy.get("#homePicker .index-canonical").should("be.visible");
+    cy.get("#homePicker .index-chronological").should("not.be.visible");
     cy.get("#order-canonical").should("have.class", "active");
   });
 
   it("alphabetical view has no headings and does not persist", () => {
     cy.contains(".index-order-button", "Alphabetical").click();
-    cy.get("#alphabeticalSections").should("be.visible");
-    cy.get("#canonicalSections").should("not.be.visible");
-    cy.get("#chronoSections").should("not.be.visible");
+    cy.get("#homePicker .index-alphabetical").should("be.visible");
+    cy.get("#homePicker .index-canonical").should("not.be.visible");
+    cy.get("#homePicker .index-chronological").should("not.be.visible");
 
     // alphabetical list has no headings
-    cy.get("#alphabeticalSections .index-section-title").should("not.exist");
+    cy.get("#homePicker .index-alphabetical .index-section-title").should("not.exist");
 
     // first pill alphabetically is "1 Chronicles"
-    cy.get("#alphabeticalSections .index-book").first().should("contain", "1 Chronicles");
+    cy.get("#homePicker .index-alphabetical .index-book").first().should("contain", "1 Chronicles");
 
     // open a book and read a chapter
-    cy.get("[data-cy='alpha-Revelation']").click();
-    cy.get("[data-cy='alphaChapters-Revelation']").contains("1").click();
+    cy.get("[data-cy='homealpha-Revelation']").click();
+    cy.get("[data-cy='homealphaChapters-Revelation']").contains("1").click();
     cy.get("#chapter").should("contain", "Revelation 1 (YCB-CYL)");
 
     // the view stays alphabetical until reload
@@ -86,8 +86,8 @@ describe("bible order picker", () => {
     // reload falls back to the saved canonical order
     cy.reload();
     cy.contains(".index-order-button.active", "Canonical");
-    cy.get("#canonicalSections").should("be.visible");
-    cy.get("#alphabeticalSections").should("not.be.visible");
+    cy.get("#homePicker .index-canonical").should("be.visible");
+    cy.get("#homePicker .index-alphabetical").should("not.be.visible");
   });
 
   it("shows the chronological clock icon in the right places", () => {
@@ -102,7 +102,7 @@ describe("bible order picker", () => {
 
     // canonical mode: no clock icon on the nav arrows
     cy.contains("Genesis").click();
-    cy.get("[data-cy='Genesis']").contains("1").click();
+    cy.get("[data-cy='homeGenesis']").contains("1").click();
     cy.get("body").should("not.have.class", "chrono-nav");
     cy.get(".chapter-nav .chrono-corner").should("not.be.visible");
 
@@ -110,16 +110,16 @@ describe("bible order picker", () => {
     cy.get("#brand").click();
     cy.contains(".index-order-button", "Chronological").click();
     cy.get("body").should("have.class", "chrono-nav");
-    cy.get("[data-cy='chrono-0']").click();
-    cy.get("[data-cy='chronoChapters-0']").contains("10").click();
+    cy.get("[data-cy='homechrono-0']").click();
+    cy.get("[data-cy='homechronoChapters-0']").contains("10").click();
     cy.get("#chapter").should("contain", "Genesis 10 (YCB-CYL)");
     cy.get(".chapter-nav .chrono-corner").should("be.visible");
   });
 
   it("chapter arrows follow chronological order", () => {
     cy.contains(".index-order-button", "Chronological").click();
-    cy.get("[data-cy='chrono-0']").click();
-    cy.get("[data-cy='chronoChapters-0']").contains("10").click();
+    cy.get("[data-cy='homechrono-0']").click();
+    cy.get("[data-cy='homechronoChapters-0']").contains("10").click();
     cy.get("#chapter").should("contain", "Genesis 10 (YCB-CYL)");
 
     // next chronologically goes to Job 1 (Json places Job right after Gen 1-10)
@@ -133,8 +133,8 @@ describe("bible order picker", () => {
 
   it("chronological arrows wrap around the sequence", () => {
     cy.contains(".index-order-button", "Chronological").click();
-    cy.get("[data-cy='chrono-196']").click();
-    cy.get("[data-cy='chronoChapters-196']").contains("22").click();
+    cy.get("[data-cy='homechrono-196']").click();
+    cy.get("[data-cy='homechronoChapters-196']").contains("22").click();
     cy.get("#chapter").should("contain", "Revelation 22 (YCB-CYL)");
 
     // next after the last chapter wraps to the first
@@ -144,7 +144,7 @@ describe("bible order picker", () => {
 
   it("canonical arrows are unchanged", () => {
     cy.contains("Genesis").click();
-    cy.get("[data-cy='Genesis']").contains("50").click();
+    cy.get("[data-cy='homeGenesis']").contains("50").click();
     cy.get("#chapter").should("contain", "Genesis 50 (YCB-CYL)");
 
     cy.get("[data-cy=chapterRight]:first").click();
