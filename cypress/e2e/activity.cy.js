@@ -106,7 +106,7 @@ describe("activity types", () => {
 			const colour = hexToRgb(
 				win.getComputedStyle(pill).getPropertyValue("--activity-color"),
 			);
-			expect(colour).to.eq("rgb(138, 42, 99)");
+			expect(colour).to.eq("rgb(189, 42, 110)");
 			expect(win.getComputedStyle(pill).borderTopColor).to.eq(colour);
 			expect(win.getComputedStyle(swatch).backgroundColor).to.eq(colour);
 		});
@@ -135,6 +135,99 @@ describe("activity types", () => {
 					"Church",
 				]);
 			});
+	});
+
+	it("filters the history by activity type", () => {
+		cy.get("#homeActivity select").select("devotions");
+		cy.get("#homePicker").contains("Genesis").click();
+		cy.get("#homePicker [data-cy='homeGenesis']").contains("1").click();
+		cy.get("#chapter").should("contain", "Genesis 1 (YCB-CYL)");
+
+		cy.get("#brand").click();
+		cy.get("#homeActivity select").select("church");
+		// the book is still open in the picker from the first read
+		cy.get("#homePicker [data-cy='homeGenesis']").contains("2").click();
+		cy.get("#chapter").should("contain", "Genesis 2 (YCB-CYL)");
+
+		goToHistory();
+		cy.get(".history-entry").should("have.length", 2);
+		cy.get("#historyFilterSelect option").then(($options) => {
+			expect($options.toArray().map((o) => o.value)).to.deep.eq([
+				"all",
+				"devotions",
+				"church",
+			]);
+		});
+
+		cy.get("#historyFilterSelect").select("devotions");
+		cy.get("#historyFilterSelect").should("have.class", "act-devotions");
+		cy.get(".history-entry")
+			.should("have.length", 1)
+			.and("have.class", "act-devotions")
+			.and("contain", "Genesis 1");
+
+		cy.get("#historyFilterSelect").select("church");
+		cy.get(".history-entry").should("have.length", 1).and("contain", "Genesis 2");
+
+		cy.get("#historyFilterSelect").select("all");
+		cy.get(".history-entry").should("have.length", 2);
+	});
+
+	it("hides days with no entries for the filtered activity", () => {
+		cy.window().then((win) => {
+			win.localStorage.browseHistory = JSON.stringify([
+				{
+					name: "Genesis",
+					slug: "genesis",
+					chapter: 1,
+					date: "2026-09-25",
+					finished: false,
+					activity: "devotions",
+				},
+				{
+					name: "John",
+					slug: "john",
+					chapter: 1,
+					date: "2026-09-26",
+					finished: false,
+					activity: "church",
+				},
+			]);
+		});
+		cy.visit(base);
+
+		goToHistory();
+		cy.get(".history-entry").should("have.length", 2);
+		cy.get("#historyLinks h3").should("have.length", 2);
+
+		cy.get("#historyFilterSelect").select("devotions");
+		cy.get(".history-entry").should("have.length", 1).and("contain", "Genesis 1");
+		cy.get("#historyLinks h3").should("have.length", 1);
+	});
+
+	it("resumes the activity of the clicked history entry", () => {
+		cy.get("#homeActivity select").select("devotions");
+		cy.get("#homePicker").contains("Genesis").click();
+		cy.get("#homePicker [data-cy='homeGenesis']").contains("1").click();
+		cy.get("#chapter").should("contain", "Genesis 1 (YCB-CYL)");
+
+		cy.get("#brand").click();
+		cy.get("#homeActivity select").select("church");
+		cy.get("#homePicker [data-cy='homeGenesis']").contains("2").click();
+		cy.get("#chapter").should("contain", "Genesis 2 (YCB-CYL)");
+
+		goToHistory();
+		cy.get(".history-entry.act-devotions").contains("Genesis 1").click();
+		cy.get("#chapter").should("contain", "Genesis 1 (YCB-CYL)");
+		cy.window().should((win) => {
+			expect(win.settings.activity).to.eq("devotions");
+			expect(JSON.parse(win.localStorage.settings).activity).to.eq("devotions");
+		});
+
+		// the re-read chapter is recorded under the resumed activity
+		goToHistory();
+		cy.get(".history-entry.act-devotions").should("have.length", 2);
+		cy.get(".history-entry.act-church").should("have.length", 1);
 	});
 
 	it("switches to COTD from the home page and keeps it for the next chapter", () => {

@@ -419,89 +419,91 @@ a:hover {
 
 /* ---------- Activity types ----------
    One colour per activity type, plus a soft tint of it for pill backgrounds.
-   Classes rather than inline colours so the palette can differ per theme. */
+   Classes rather than inline colours so the palette can differ per theme.
+   The hues are kept as far apart as possible (grey, blue, green, violet,
+   red, orange, cyan, pink) so pills stay tellable apart at a glance. */
 .act-default {
-	--activity-color: #6b5f4a;
-	--activity-tint: rgb(107 95 74 / 0.16);
+	--activity-color: #7a7466;
+	--activity-tint: rgb(122 116 102 / 0.14);
 }
 
 .act-cotd {
-	--activity-color: #34507a;
-	--activity-tint: rgb(52 80 122 / 0.14);
+	--activity-color: #1e56a8;
+	--activity-tint: rgb(30 86 168 / 0.14);
 }
 
 .act-devotions {
-	--activity-color: #1c7263;
-	--activity-tint: rgb(28 114 99 / 0.14);
+	--activity-color: #2e7d32;
+	--activity-tint: rgb(46 125 50 / 0.14);
 }
 
 .act-biblestudy {
-	--activity-color: #6a3d99;
-	--activity-tint: rgb(106 61 153 / 0.14);
+	--activity-color: #6d28c6;
+	--activity-tint: rgb(109 40 198 / 0.14);
 }
 
 .act-church {
-	--activity-color: #a03c22;
-	--activity-tint: rgb(160 60 34 / 0.14);
+	--activity-color: #b3261e;
+	--activity-tint: rgb(179 38 30 / 0.14);
 }
 
 .act-other1 {
-	--activity-color: #8d6309;
-	--activity-tint: rgb(141 99 9 / 0.16);
+	--activity-color: #b45309;
+	--activity-tint: rgb(180 83 9 / 0.16);
 }
 
 .act-other2 {
-	--activity-color: #0f6f86;
-	--activity-tint: rgb(15 111 134 / 0.14);
+	--activity-color: #0e7490;
+	--activity-tint: rgb(14 116 144 / 0.14);
 }
 
 .act-other3 {
-	--activity-color: #8a2a63;
-	--activity-tint: rgb(138 42 99 / 0.14);
+	--activity-color: #bd2a6e;
+	--activity-tint: rgb(189 42 110 / 0.14);
 }
 
 body.dark .act-default {
-	--activity-color: #b0a48a;
-	--activity-tint: rgb(176 164 138 / 0.2);
+	--activity-color: #ada697;
+	--activity-tint: rgb(173 166 151 / 0.2);
 }
 
 body.dark .act-cotd {
-	--activity-color: #8fa9cd;
-	--activity-tint: rgb(143 169 205 / 0.2);
+	--activity-color: #6d9eeb;
+	--activity-tint: rgb(109 158 235 / 0.2);
 }
 
 body.dark .act-devotions {
-	--activity-color: #3fb8a3;
-	--activity-tint: rgb(63 184 163 / 0.18);
+	--activity-color: #4fc46a;
+	--activity-tint: rgb(79 196 106 / 0.18);
 }
 
 body.dark .act-biblestudy {
-	--activity-color: #b183e0;
-	--activity-tint: rgb(177 131 224 / 0.18);
+	--activity-color: #a88bfa;
+	--activity-tint: rgb(168 139 250 / 0.18);
 }
 
 body.dark .act-church {
-	--activity-color: #e0795a;
-	--activity-tint: rgb(224 121 90 / 0.18);
+	--activity-color: #ee5c4a;
+	--activity-tint: rgb(238 92 74 / 0.18);
 }
 
 body.dark .act-other1 {
-	--activity-color: #dfa63c;
-	--activity-tint: rgb(223 166 60 / 0.18);
+	--activity-color: #f2a53c;
+	--activity-tint: rgb(242 165 60 / 0.18);
 }
 
 body.dark .act-other2 {
-	--activity-color: #45b0cc;
-	--activity-tint: rgb(69 176 204 / 0.18);
+	--activity-color: #45c4e0;
+	--activity-tint: rgb(69 196 224 / 0.18);
 }
 
 body.dark .act-other3 {
-	--activity-color: #d973ab;
-	--activity-tint: rgb(217 115 171 / 0.18);
+	--activity-color: #ef69ae;
+	--activity-tint: rgb(239 105 174 / 0.18);
 }
 
-/* The activity select, in the gear dropdown and in the small page pickers. */
-#settingsDropdown select.activity-select,
+/* The activity select in the small page pickers. In the gear dropdown it
+   deliberately shares the plain #settingsDropdown select style. */
 .activity-picker select.activity-select {
 	color: var(--activity-color);
 	background-color: var(--activity-tint);
@@ -545,6 +547,55 @@ body.dark .act-other3 {
 	border-radius: 999px;
 	background-color: var(--surface);
 	font-size: 0.85rem;
+}
+
+/* In the chapter pickers (the home card heading and the index page top right)
+   the picker stays quiet: just a small colour dot and a plain select. */
+.home-card-head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 10px;
+	margin: 0 0 12px;
+}
+
+.home-card-head h2 {
+	margin: 0;
+}
+
+.activity-quiet .activity-picker {
+	gap: 6px;
+	padding: 0;
+	border: none;
+	background: none;
+}
+
+.activity-quiet .activity-picker::before {
+	content: "";
+	align-self: center;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background-color: var(--activity-color);
+}
+
+.activity-quiet .activity-picker-label {
+	display: none;
+}
+
+.activity-quiet .activity-picker select.activity-select {
+	padding: 2px 4px;
+	border-color: transparent;
+	border-radius: 6px;
+	background: transparent;
+	color: var(--text-secondary);
+	font-size: 0.8rem;
+	font-weight: 400;
+}
+
+.activity-quiet .activity-picker select.activity-select:hover {
+	border-color: var(--border);
+	background-color: var(--surface-soft);
 }
 
 /* ---------- Index: book picker ---------- */
@@ -1306,6 +1357,46 @@ h3 {
 #historyLinks p {
 	font-size: 1.05rem;
 	line-height: 1.6;
+}
+
+.history-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	flex-wrap: wrap;
+	margin-bottom: 0.4rem;
+}
+
+.history-header h2 {
+	margin: 0;
+}
+
+.history-filter {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	font-family: 'sourceSansPro', sans-serif;
+}
+
+.history-filter-label {
+	font-size: 0.7rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.16em;
+	color: var(--text-muted);
+}
+
+.history-filter-select {
+	padding: 4px 10px;
+	border: 1px solid var(--activity-color, var(--border));
+	border-radius: 999px;
+	background-color: var(--activity-tint, var(--surface));
+	color: var(--activity-color, var(--text-primary));
+	font-family: 'sourceSansPro', sans-serif;
+	font-size: 0.85rem;
+	font-weight: 700;
+	cursor: pointer;
 }
 
 .history-legend {

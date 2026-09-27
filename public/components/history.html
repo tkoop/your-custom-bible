@@ -2,6 +2,13 @@
 
 <script>
 
+var historyFilterValue = "all"
+
+function setHistoryFilter(value) {
+  historyFilterValue = value
+  recreateHistory()
+}
+
 function historyDayLabel(date) {
   return new Date(Date.parse(date)).toLocaleDateString('en-CA', {
     month: 'short', // this order has nothing to do with the output
@@ -10,18 +17,31 @@ function historyDayLabel(date) {
   })
 }
 
+function historyUsedActivityIds(entries) {
+  const used = {}
+  entries.forEach(entry => used[activityType(entry.activity).id] = true)
+  return ACTIVITY_TYPES.filter(type => used[type.id]).map(type => type.id)
+}
+
 function historyEntryHtml(entry) {
   let html = "<span class='history-entry " + activityClass(entry.activity) + "'>"
-  html += createLink(entry.name, entry.slug, entry.chapter, true)
+  html += "<a href='#' style='white-space:nowrap' data-slug='" + entry.slug + "'"
+  html += " data-book='" + entry.name + "' data-chapter='" + entry.chapter + "'"
+  html += " data-activity='" + activityType(entry.activity).id + "'"
+  html += " onclick='loadHistoryChapter(this); return false'>" + entry.name + " " + entry.chapter + "</a>"
   if (entry.finished) html += "<span class='history-finished'>*</span>"
   return html + "</span>"
 }
 
-// Only the activity types actually used are listed, so the legend stays short.
-function historyLegendHtml(entries) {
-  const used = {}
-  entries.forEach(entry => used[activityType(entry.activity).id] = true)
-  const ids = ACTIVITY_TYPES.filter(type => used[type.id]).map(type => type.id)
+// Reading an old chapter continues under the activity it was first read with,
+// so the next history entry joins the same activity.
+function loadHistoryChapter(element) {
+  fireEvent({ name: "setSetting", setting: "activity", value: element.dataset.activity })
+  loadChapter(element)
+}
+
+// Only the activity types actually used are offered, so the legend stays short.
+function historyLegendHtml(ids) {
   if (ids.length == 0) return ""
   let html = "<div class='history-legend'>"
   ids.forEach(id => {
@@ -31,18 +51,39 @@ function historyLegendHtml(entries) {
   return html + "</div>"
 }
 
+function historyFilterHtml(ids) {
+  let html = "<div class='history-filter'>"
+  html += "<label class='history-filter-label' for='historyFilterSelect'>Show</label>"
+  html += "<select id='historyFilterSelect' class='history-filter-select"
+  if (historyFilterValue != "all") html += " " + activityClass(historyFilterValue)
+  html += "' onchange='setHistoryFilter(this.value)'>"
+  html += "<option value='all'" + (historyFilterValue == "all" ? " selected" : "") + ">All activities</option>"
+  ids.forEach(id => {
+    html += "<option value='" + id + "'" + (historyFilterValue == id ? " selected" : "") + ">" + activityLabel(id) + "</option>"
+  })
+  return html + "</select></div>"
+}
+
 function recreateHistory() {
   const entries = settings.browseHistory.filter(entry => entry && entry.slug)
-  let html = "<h2>History</h2>"
+  let html = ""
 
   if (entries.length == 0) {
-    html += "<p style='font-style:italic'>No history</p>"
+    html = "<h2>History</h2><p style='font-style:italic'>No history</p>"
   } else {
+    const ids = historyUsedActivityIds(entries)
+    // a filter left over from a history that no longer has that activity
+    if (ids.indexOf(historyFilterValue) == -1) historyFilterValue = "all"
+    const shown = historyFilterValue == "all"
+      ? entries
+      : entries.filter(entry => activityType(entry.activity).id == historyFilterValue)
+
+    html += "<div class='history-header'><h2>History</h2>" + historyFilterHtml(ids) + "</div>"
     html += "<p style='font-style:italic;font-size:0.85em'>* = finished to the end of the chapter</p>"
-    html += historyLegendHtml(entries)
+    html += historyLegendHtml(ids)
     let previousDate = null
-    for (let i = entries.length - 1; i >= 0; i--) {
-      const entry = entries[i]
+    for (let i = shown.length - 1; i >= 0; i--) {
+      const entry = shown[i]
       if (entry.date != previousDate) {
         if (previousDate != null) html += "</div>"
         previousDate = entry.date
