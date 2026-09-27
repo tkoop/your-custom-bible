@@ -234,7 +234,8 @@
 
 			var ref = document.createElement("span");
 			ref.className = "search-ref";
-			ref.textContent = bookNames[rec[0]] + " " + rec[1] + ":" + rec[2];
+			ref.textContent =
+				chapterRefName(bookNames[rec[0]]) + " " + rec[1] + ":" + rec[2];
 
 			var text = document.createElement("span");
 			text.className = "search-text";

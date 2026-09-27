@@ -360,9 +360,9 @@
 				// the initial hash and back/forward navigation.
 				currentBookIndex = slugToIndex(slug);
 				currentChapter = parseInt(chapterNum) || 1;
-				var title = book
-					? book.name + " " + chapterNum
-					: titleCase(slug.replaceAll("-", " "));
+			var title = book
+				? chapterRefName(book.name) + " " + chapterNum
+				: titleCase(slug.replaceAll("-", " "));
 				title = title.replace(" Of ", " of "); // Song of Solomon
 				title = title + " (<span class='version'></span>)";
 				chapter.innerHTML = addArrows(text, title);
@@ -732,7 +732,7 @@ fireEvent({
 
 	function createLink(name, slug, chapter, includeBook) {
 		if (includeBook) {
-			return `<a href='#' style='white-space:nowrap' data-slug='${slug}' data-book='${name}' data-chapter='${chapter}' onclick='loadChapter(this); return false'>${name} ${chapter}</a>`;
+			return `<a href='#' style='white-space:nowrap' data-slug='${slug}' data-book='${name}' data-chapter='${chapter}' onclick='loadChapter(this); return false'>${chapterRefName(name)} ${chapter}</a>`;
 		} else {
 			return `<a href='#' data-slug='${slug}' data-book='${name}' data-chapter='${chapter}' onclick='loadChapter(this); return false'>${chapter}</a>`;
 		}
@@ -1007,10 +1007,14 @@ fireEvent({
 				console.warn("ChronoChapters: unknown book " + entry.book);
 				return;
 			}
-			var label =
-				book.name == "Psalms" && entry.chapter.length >= 100
-					? "Psalms (most)"
-					: book.name + " " + formatChapterList(entry.chapter);
+		var label =
+			book.name == "Psalms" && entry.chapter.length >= 100
+				? "Psalms (most)"
+				: (entry.chapter.length == 1
+						? chapterRefName(book.name)
+						: book.name) +
+					" " +
+					formatChapterList(entry.chapter);
 			var row = document.createElement("div");
 			row.className = "index-book-row";
 			row.innerHTML =
@@ -1595,7 +1599,7 @@ fireEvent({
 			if (!book) return;
 			var chapter = currentBookChapter();
 			var verseKey = "" + parseInt(chapter, 10) + ":" + verseNum;
-			var refName = book.name + " " + chapter + ":" + verseNum;
+			var refName = chapterRefName(book.name) + " " + chapter + ":" + verseNum;
 
 			// All DOM interrogation happens synchronously while the nodes are
 			// stable; only the word-data fetch is deferred.

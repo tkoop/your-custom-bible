@@ -57,7 +57,7 @@ describe("home page", () => {
 			const target = win.chapterIndexToBookAndChapter(win.todaysChapterIndex());
 			cy.get("#homeTodayChapter").should(
 				"contain",
-				target.book.name + " " + target.chapter,
+				win.chapterRefName(target.book.name) + " " + target.chapter,
 			);
 		});
 		cy.get("[data-cy='homeTodayButton']").click();
@@ -65,7 +65,10 @@ describe("home page", () => {
 			const target = win.chapterIndexToBookAndChapter(win.todaysChapterIndex());
 			cy.get("#chapter").should(
 				"contain",
-				target.book.name + " " + target.chapter + " (YCB-CYL)",
+				win.chapterRefName(target.book.name) +
+					" " +
+					target.chapter +
+					" (YCB-CYL)",
 			);
 			cy.location("hash").should(
 				"eq",
