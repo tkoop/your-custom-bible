@@ -27,8 +27,9 @@ npm script; the rest are run by hand when their inputs or logic change.
 Steps 2-4 all read `resources/bsb_tables.tsv`. **That file is a download, not
 a build output** - "BSB Translation Tables - tsv" from
 https://berean.bible/downloads.htm. Do not try to generate it; re-download it
-if it needs updating. `bsb_tables.xlsx` in the repo root is the same tables in
-Excel form and no script reads it.
+if it needs updating. The same download page offers the same tables as an
+xlsx; that one used to be committed as `bsb_tables.xlsx` and no script ever
+read it, so it was dropped from the repo along with the rest of the history.
 
 `resources/ChronoChapters.json` -> `public/chronoChapters.json` is a
 by-hand copy, there is no script for it.
@@ -50,7 +51,7 @@ Browsers cache this app's static assets aggressively:
 file under `public/` whose content changed.** Increment the number each time:
 
 - Start/raise any resource that has no version param yet (add `?version=1`).
-- `style.css` is currently at `?version=31`; leave it unless it changes.
+- `style.css` is currently at `?version=32`; leave it unless it changes.
 
 Files involved (all referenced from `public/index.html`):
 
@@ -59,8 +60,9 @@ Files involved (all referenced from `public/index.html`):
 - `manifest.json`
 - `framework.js`, `activity.js`, `settings.js`, `books.js`
 - Components fetched via `loadComponent()`: `components/menu.html`,
-  `components/chapter.html`, `components/about.html`,
-  `components/history.html`, `components/speedReader.html`
+  `components/chapter.html`, `components/home.html`, `components/about.html`,
+  `components/history.html`, `components/search.html`,
+  `components/settings.html`, `components/speedReader.html`
 - Fonts referenced from `style.css` via `@font-face`: files under `fonts/`
 - `serviceWorker.js` (bump its `?version=` too when its logic changes)
 

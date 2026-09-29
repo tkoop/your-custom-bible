@@ -44,7 +44,8 @@ It is 754,647 rows of 23 columns, one row per English word, with
 transliteration, parsing codes, Strong's numbers and the original text.
 
 The same download page also offers the same tables as an xlsx, which is what
-`bsb_tables.xlsx` in the repo root is. The build does not read it.
+`bsb_tables.xlsx` was. No script ever read it, so it has been removed from the
+repository.
 
 To rebuild the derived data:
 
