@@ -1488,11 +1488,14 @@ div.fn p.calibre2 {
 	display: none;
 }
 
-/* ---------- Headings (About / History) ---------- */
+/* ---------- Page headings (Home / Search / About / History) ----------
+   These are app chrome, not scripture, so they keep the UI font and must
+   not follow the reading font the gear menu picks. Scripture headings are
+   .hdg / .subhdg, which deliberately do follow it. */
 h1,
 h2,
 h3 {
-	font-family: var(--font-scripture);
+	font-family: var(--font-ui);
 	color: var(--text-primary);
 	font-weight: 700;
 	letter-spacing: 0.01em;

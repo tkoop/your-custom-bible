@@ -130,10 +130,10 @@ describe('template spec', () => {
     cy.get("#chapter").should("not.contain", "the LORD")
   })
 
-  it("reading font leaves the app chrome alone", () => {
-    // The gear menu's font picker is for scripture. It must not restyle the
-    // brand, which is chrome rather than scripture: the brand keeps its own
-    // font (--font-brand) no matter which reading font is chosen.
+  it("reading font leaves the brand alone", () => {
+    // The gear menu's font picker is for scripture. The brand is chrome
+    // rather than scripture, so it keeps its own font (--font-brand) no
+    // matter which reading font is chosen.
     const fontOf = (selector) =>
       cy.get(selector).then(($el) => getComputedStyle($el[0]).fontFamily)
 
@@ -154,6 +154,32 @@ describe('template spec', () => {
         fontOf("#body").should("contain", "OpenDyslexic")
       })
     })
+  })
+
+  it("reading font leaves the page headings alone", () => {
+    // About/Search use a bare <h1> and History a bare <h2>/<h3>, so those are
+    // the headings governed by the bare heading rule. (The home page's card
+    // headings set their own font and were never affected.)
+    const fontOf = (selector) =>
+      cy.get(selector).then(($el) => getComputedStyle($el[0]).fontFamily)
+
+    cy.get("div#settingsDropdown select#font").should("exist")
+    cy.get("#gearIcon").should("be.visible").click()
+    cy.get("div#settingsDropdown").should("be.visible")
+    cy.get("div#settingsDropdown select#font").select("openDyslexic")
+    cy.window().then((win) => win.document.fonts.ready)
+
+    // Chapter text still follows the picker, so the setting took effect.
+    fontOf("#body").should("contain", "OpenDyslexic")
+
+    cy.get("div#dropdown").should("exist")
+    cy.get("#menuIcon").should("be.visible").click()
+    cy.get("div#dropdown").should("be.visible")
+    cy.get("div#dropdown").contains("History").click()
+
+    cy.get("#history h2").contains("History").should("be.visible")
+    fontOf("#history h2").should("contain", "sourceSansPro")
+    fontOf("#history h2").should("not.contain", "OpenDyslexic")
   })
 
 })
