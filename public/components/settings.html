@@ -245,14 +245,14 @@
 	<div>Font Size</div>
 	<div class="buttonHolder">
 		<button
-			onclick="fireEvent({name:'setSetting', setting:'fontSize', value:settings.fontSize * 1.1}); event.stopPropagation()"
-		>
-			+
-		</button>
-		<button
 			onclick="fireEvent({name:'setSetting', setting:'fontSize', value:settings.fontSize / 1.1}); event.stopPropagation()"
 		>
 			-
+		</button>
+		<button
+			onclick="fireEvent({name:'setSetting', setting:'fontSize', value:settings.fontSize * 1.1}); event.stopPropagation()"
+		>
+			+
 		</button>
 	</div>
 </div>
