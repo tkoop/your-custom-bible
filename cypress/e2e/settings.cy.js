@@ -130,4 +130,30 @@ describe('template spec', () => {
     cy.get("#chapter").should("not.contain", "the LORD")
   })
 
+  it("reading font leaves the app chrome alone", () => {
+    // The gear menu's font picker is for scripture. It must not restyle the
+    // brand, which is chrome rather than scripture: the brand keeps its own
+    // font (--font-brand) no matter which reading font is chosen.
+    const fontOf = (selector) =>
+      cy.get(selector).then(($el) => getComputedStyle($el[0]).fontFamily)
+
+    cy.get("div#settingsDropdown select#font").should("exist")
+    cy.get("#gearIcon").should("be.visible").click()
+    cy.get("div#settingsDropdown").should("be.visible")
+    cy.get("div#settingsDropdown select#font").select("sourceSerif")
+    cy.window().then((win) => win.document.fonts.ready)
+
+    fontOf(".brand-title").then((brandBefore) => {
+      fontOf("#body").then((scriptureBefore) => {
+        // OpenDyslexic is a sans face, so the scripture stack really changes.
+        cy.get("div#settingsDropdown select#font").select("openDyslexic")
+        cy.window().then((win) => win.document.fonts.ready)
+
+        fontOf(".brand-title").should("equal", brandBefore)
+        fontOf("#body").should("not.equal", scriptureBefore)
+        fontOf("#body").should("contain", "OpenDyslexic")
+      })
+    })
+  })
+
 })

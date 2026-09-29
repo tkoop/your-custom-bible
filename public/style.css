@@ -206,6 +206,9 @@
 :root {
 	--font-ui: 'sourceSansPro', 'Segoe UI', system-ui, sans-serif;
 	--font-scripture: 'sourceSerif4', 'Sura', Georgia, 'Times New Roman', serif;
+	/* The brand is app chrome, not scripture: it must never follow the
+	   reading font the gear menu picks, so it gets its own stack. */
+	--font-brand: 'sourceSerif4', Georgia, 'Times New Roman', serif;
 	--background: #f4efe2;
 	--surface: #fffaf1;
 	--surface-soft: #f0e9d8;
@@ -421,7 +424,7 @@ a:hover {
 }
 
 .brand-title {
-	font-family: var(--font-scripture);
+	font-family: var(--font-brand);
 	font-size: 1.35rem;
 	font-weight: 700;
 	letter-spacing: 0.05em;
