@@ -33,6 +33,31 @@ npm run serve
 
 Then point your web browser to http://localhost:8000, which will serve out the /public directory.
 
+## Word Study Data (optional)
+
+The app's word study popup is backed by the Berean interlinear tables, which
+are built by a separate set of scripts. Their input is
+`resources/bsb_tables.tsv`, a **downloaded file, not a generated one** - the
+"BSB Translation Tables - tsv" from
+https://berean.bible/downloads.htm (https://bereanbible.com/bsb_tables.tsv).
+It is 754,647 rows of 23 columns, one row per English word, with
+transliteration, parsing codes, Strong's numbers and the original text.
+
+The same download page also offers the same tables as an xlsx, which is what
+`bsb_tables.xlsx` in the repo root is. The build does not read it.
+
+To rebuild the derived data:
+
+```
+node scripts/count-you.mjs resources/bsb_you_counts.tsv   # you/your singular vs plural, per verse
+node scripts/build-plurals.mjs                            # -> pluralYous.mjs, used by compile.mjs
+node tools/buildWordData.mjs                              # -> public/wordData/*.json, the word study popup
+```
+
+All three outputs are committed, so you only need to run these if you change
+the scripts or pick up a newer copy of the tables. They currently regenerate
+byte-for-byte identically from the committed `resources/bsb_tables.tsv`.
+
 ## License
 
 + The code is licensed under the MIT license (see `LICENSE`).

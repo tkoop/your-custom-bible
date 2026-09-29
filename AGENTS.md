@@ -8,6 +8,35 @@
 - Verify browser behavior with headless Chromium CDP when Cypress can't run
   (e.g. missing Xvfb).
 
+## Data pipeline
+
+There are four independent build pipelines. Only the first is wired to an
+npm script; the rest are run by hand when their inputs or logic change.
+
+1. `npm run compile` (`compile.mjs`) turns the unzipped BSB epub in `bsb/`
+   into `public/chapters/*.html` and `public/search.json`. It does not read
+   any file under `resources/`.
+2. `scripts/count-you.mjs <out.tsv>` resolves whether each `you`/`your`/`yours`
+   in a verse is 2nd-person singular or plural, from the parsing codes.
+   Output: `resources/bsb_you_counts.tsv`.
+3. `scripts/build-plurals.mjs` combines that with the tables to emit
+   `pluralYous.mjs`, which `compile.mjs` imports for the `youpl`/`yousg` spans.
+4. `tools/buildWordData.mjs` emits `public/wordData/<book>.json` for the word
+   study popup.
+
+Steps 2-4 all read `resources/bsb_tables.tsv`. **That file is a download, not
+a build output** - "BSB Translation Tables - tsv" from
+https://berean.bible/downloads.htm. Do not try to generate it; re-download it
+if it needs updating. `bsb_tables.xlsx` in the repo root is the same tables in
+Excel form and no script reads it.
+
+`resources/ChronoChapters.json` -> `public/chronoChapters.json` is a
+by-hand copy, there is no script for it.
+
+Every output above is committed and regenerates byte-for-byte from the
+committed inputs, so a clean `git status` after running a pipeline is the
+signal that nothing drifted.
+
 ## Cache-busting rule (IMPORTANT)
 
 Browsers cache this app's static assets aggressively:
