@@ -16,6 +16,8 @@ var settings = {
 	pageturning: false,
 	wordStudyLinks: false,
 	activity: "default",
+	readRate: 1,
+	readVoice: "",
 };
 
 // settings.fontSize is a preference, not a pixel count: it is rendered at
@@ -106,6 +108,11 @@ function loadSettingsFromLocalStorage() {
 	settings.activity = isActivityType(localStorageSettings?.activity)
 		? localStorageSettings.activity
 		: "default";
+	settings.readRate = Math.min(
+		2,
+		Math.max(0.5, Number(localStorageSettings?.readRate) || 1),
+	);
+	settings.readVoice = localStorageSettings?.readVoice ?? "";
 
 	fireEvent({ name: "settingsUpdated" });
 }
@@ -129,6 +136,8 @@ function saveSettingsToLocalStorage() {
 		pageturning: settings.pageturning,
 		wordStudyLinks: settings.wordStudyLinks,
 		activity: settings.activity,
+		readRate: settings.readRate,
+		readVoice: settings.readVoice,
 	};
 
 	localStorage.settings = JSON.stringify(localStorageSettings);

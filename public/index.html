@@ -5,7 +5,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="theme-color" content="#34507a" />
 		<title>Your Custom Bible</title>
-<link rel="stylesheet" href="style.css?version=37" />
+<link rel="stylesheet" href="style.css?version=38" />
 		<link rel="icon" type="image/png" href="images/logo.png?version=4" />
 		<link rel="manifest" href="manifest.json?version=2" />
 	</head>
@@ -72,16 +72,18 @@
 		</div>
 
 		<div id="speedReader" class="modal" style="display: none"></div>
+
+		<div id="readToMe" class="read-to-me" style="display: none"></div>
 	</body>
 
 	<script src="framework.js?version=1"></script>
 	<script src="activity.js?version=1"></script>
-	<script src="settings.js?version=10"></script>
+	<script src="settings.js?version=11"></script>
 	<script src="books.js?version=2"></script>
 
 	<script>
 		async function loadComponents() {
-await loadComponent("dropdown", "components/menu.html?version=12");
+await loadComponent("dropdown", "components/menu.html?version=13");
 			await loadComponent("chapter", "components/chapter.html?version=34");
 			await loadComponent("home", "components/home.html?version=5");
 			await loadComponent("about", "components/about.html?version=2");
@@ -92,6 +94,7 @@ await loadComponent("dropdown", "components/menu.html?version=12");
 				"components/settings.html?version=8"
 			);
 			await loadComponent("speedReader", "components/speedReader.html?version=9");
+			await loadComponent("readToMe", "components/readToMe.html?version=6");
 		}
 		loadComponents().then(() => {
 			// If the user already navigated while components were loading, the

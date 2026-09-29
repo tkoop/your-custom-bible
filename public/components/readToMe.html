@@ -1,0 +1,907 @@
+<div class="rtm-head">
+	<div class="rtm-now" id="rtmNow" data-cy="readToMeNow">Nothing to read</div>
+	<button
+		class="rtm-close"
+		id="rtmClose"
+		data-cy="readToMeClose"
+		onclick="fireEvent({name:'readToMeClose'})"
+		aria-label="Close read to me"
+		title="Close"
+	>
+		&#x2715;
+	</button>
+</div>
+
+<div class="rtm-progress" role="presentation">
+	<div class="rtm-progress-bar" id="rtmBar" data-cy="readToMeBar"></div>
+</div>
+
+<div class="rtm-row">
+	<div class="rtm-transport">
+		<button
+			class="rtm-btn"
+			id="rtmPrev"
+			data-cy="readToMePrev"
+			onclick="rtmJump(-1)"
+			aria-label="Previous verse"
+		>
+			<svg
+				width="20"
+				height="20"
+				viewBox="0 0 24 24"
+				fill="none"
+				xmlns="http://www.w3.org/2000/svg"
+			>
+				<path
+					d="M11 19V5L2 12L11 19ZM22 19V5L13 12L22 19Z"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				/>
+			</svg>
+		</button>
+		<button
+			class="rtm-btn rtm-btn-play"
+			id="rtmPlay"
+			data-cy="readToMePlay"
+			onclick="rtmToggle()"
+			aria-label="Read aloud"
+		></button>
+		<button
+			class="rtm-btn"
+			id="rtmNext"
+			data-cy="readToMeNext"
+			onclick="rtmJump(1)"
+			aria-label="Next verse"
+		>
+			<svg
+				width="20"
+				height="20"
+				viewBox="0 0 24 24"
+				fill="none"
+				xmlns="http://www.w3.org/2000/svg"
+			>
+				<path
+					d="M13 19V5L22 12L13 19ZM2 19V5L11 12L2 19Z"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				/>
+			</svg>
+		</button>
+		<button
+			class="rtm-btn"
+			id="rtmStop"
+			data-cy="readToMeStop"
+			onclick="rtmStop()"
+			aria-label="Stop"
+			title="Stop"
+		>
+			<svg
+				width="20"
+				height="20"
+				viewBox="0 0 24 24"
+				xmlns="http://www.w3.org/2000/svg"
+			>
+				<rect
+					x="6"
+					y="6"
+					width="12"
+					height="12"
+					rx="2"
+					fill="currentColor"
+				/>
+			</svg>
+		</button>
+	</div>
+
+	<div class="rtm-options">
+		<label class="rtm-field">
+			<span>Voice</span>
+			<select id="rtmVoice" data-cy="readToMeVoice"></select>
+		</label>
+		<label class="rtm-field">
+			<span>Speed <b id="rtmRateValue">1.0&times;</b></span>
+			<input
+				type="range"
+				id="rtmRate"
+				data-cy="readToMeRate"
+				min="0.5"
+				max="2"
+				step="0.1"
+				oninput="fireEvent({name:'readToMeRate', value:Number(this.value)})"
+			/>
+		</label>
+	</div>
+</div>
+
+<div class="rtm-note" id="rtmNote" data-cy="readToMeNote"></div>
+
+<script>
+	var rtmIcons = {
+		play:
+			'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+			'<path d="M5 4.98951C5 4.01835 5 3.53277 5.20249 3.2651C5.37889 3.03191 5.64852 2.88761 5.9404 2.87018C6.27544 2.85017 6.67946 3.11953 7.48752 3.65823L18.0031 10.6686C18.6708 11.1137 19.0046 11.3363 19.1209 11.6168C19.2227 11.8621 19.2227 12.1377 19.1209 12.383C19.0046 12.6635 18.6708 12.886 18.0031 13.3312L7.48752 20.3415C6.67946 20.8802 6.27544 21.1496 5.9404 21.1296C5.64852 21.1122 5.37889 20.9679 5.20249 20.7347C5 20.467 5 19.9814 5 19.0103V4.98951Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
+			"</svg>",
+		pause:
+			'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+			'<path d="M9.5 15V9M14.5 15V9M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
+			"</svg>",
+	};
+
+	// segments are read one after the other; index points at the one sounding.
+	var rtmSegments = [];
+	var rtmIndex = 0;
+	var rtmPlaying = false;
+	var rtmDone = false;
+	var rtmVoice = null;
+	// Bumped whenever a new run of utterances is queued, so the end/error
+	// handlers of a run we have already thrown away do nothing.
+	var rtmRun = 0;
+	var rtmMarks = null;
+
+	function rtmSupported() {
+		return (
+			"speechSynthesis" in window &&
+			typeof SpeechSynthesisUtterance !== "undefined"
+		);
+	}
+
+	// rtmSupported only proves the API is there. A browser with no speech
+	// engine still passes it and then hands back an empty list, so the list is
+	// the only honest test of whether the chapter can actually be spoken.
+	function rtmVoices() {
+		if (!rtmSupported()) return [];
+		return window.speechSynthesis.getVoices() || [];
+	}
+
+	var rtmNoVoices =
+		"This browser can't read aloud - no speech voices are available.";
+
+	function rtmNoVoicesMessage() {
+		return rtmVoices().length
+			? "Read aloud failed - this browser could not start its speech engine."
+			: rtmNoVoices;
+	}
+
+	function rtmSetNote(text) {
+		var note = document.getElementById("rtmNote");
+		if (!note) return;
+		note.textContent = text || "";
+		note.classList.toggle("rtm-note-warn", !!text);
+	}
+
+	function rtmPanel() {
+		return document.getElementById("readToMe");
+	}
+
+	function rtmIsOpen() {
+		var panel = rtmPanel();
+		return !!panel && panel.style.display !== "none";
+	}
+
+	// ---------- Following the reading ----------
+	//
+	// A verse is a run of text between two .reftext markers, but the words are
+	// not wrapped in anything of their own. Rather than reparent nodes - which
+	// would disturb the word-study links and the page-turn measurement - the
+	// verse is located with a Range and drawn as an overlay, so nothing in the
+	// chapter's markup is touched.
+
+	// The verse number is read from the range, not the other way round: the
+	// reference segment and any chapter without verse markers have no range.
+	function rtmRangeForVerse(verse) {
+		if (verse == null) return null;
+		var text = document.getElementById("chapterText");
+		var ref = document.getElementById("v" + verse);
+		if (!text || !ref) return null;
+
+		// the verse runs from just after its own marker to just before the next
+		var walker = document.createTreeWalker(text, NodeFilter.SHOW_ELEMENT);
+		var following = null;
+		var node;
+		while ((node = walker.nextNode())) {
+			if (node === ref || !node.classList.contains("reftext")) continue;
+			if (ref.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING) {
+				following = node;
+				break;
+			}
+		}
+
+		var range = document.createRange();
+		range.setStartAfter(ref);
+		if (following) range.setEndBefore(following);
+		else range.setEnd(text, text.childNodes.length);
+		return range;
+	}
+
+	// The slice of the screen the scripture is actually visible in: below the
+	// fixed header, above the read-to-me panel, and inside the page-turn
+	// viewport when that mode is on.
+	function rtmVisibleClip() {
+		var clip = {
+			top: 90, // clears the 72px fixed header
+			bottom: window.innerHeight,
+			left: 0,
+			right: window.innerWidth,
+		};
+
+		var viewport = document.getElementById("pageTurnViewport");
+		if (viewport) {
+			var box = viewport.getBoundingClientRect();
+			clip.top = Math.max(clip.top, box.top);
+			clip.bottom = Math.min(clip.bottom, box.bottom);
+			clip.left = Math.max(clip.left, box.left);
+			clip.right = Math.min(clip.right, box.right);
+		}
+		if (rtmIsOpen()) {
+			clip.bottom = Math.min(clip.bottom, rtmPanel().getBoundingClientRect().top);
+		}
+		return clip;
+	}
+
+	// One bar per line of the verse, in the left gutter. getClientRects()
+	// The rule belongs in the left margin of the text column, not beside the
+	// verse. Measured off the verse it creeps in towards the text for a verse
+	// that is only a line high, or one that starts part way along a line.
+	function rtmGutter() {
+		// in page-turn mode the visible page *is* the column, wherever the
+		// column has been translated to
+		var viewport = document.getElementById("pageTurnViewport");
+		if (viewport) {
+			return Math.max(viewport.getBoundingClientRect().left - 12, 6);
+		}
+		var text = document.getElementById("chapterText");
+		return Math.max((text ? text.getBoundingClientRect().left : 0) - 12, 6);
+	}
+
+	// Bars are reused rather than rebuilt, because a CSS transition can only
+	// animate away from a position the browser has already painted.
+	function rtmPaintBars(overlay, bars, gutter, animate) {
+		overlay.classList.toggle("rtm-jump", !animate);
+
+		while (overlay.children.length < bars.length) {
+			var bar = document.createElement("div");
+			bar.className = "rtm-mark";
+			overlay.appendChild(bar);
+		}
+		while (overlay.children.length > bars.length) {
+			overlay.removeChild(overlay.lastChild);
+		}
+		for (var i = 0; i < bars.length; i++) {
+			var el = overlay.children[i];
+			el.style.left = gutter + "px";
+			el.style.top = bars[i].top + "px";
+			el.style.height = bars[i].height + "px";
+		}
+
+		if (!animate) {
+			// commit the new position before the transition is re-armed, or the
+			// cut turns into a slide
+			void overlay.offsetHeight;
+			requestAnimationFrame(function () {
+				overlay.classList.remove("rtm-jump");
+			});
+		}
+	}
+
+	// Two boxes are on the same visual line when they overlap vertically by
+	// most of the smaller one. Comparing their tops is not enough: a superscript
+	// or a differently sized word sits a few pixels proud of the line box, and
+	// line boxes are separated by only a few pixels of leading, so a fixed
+	// offset either splits one line in two or welds two together.
+	function rtmSameLine(a, b) {
+		var overlap = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
+		var smallest = Math.min(a.bottom - a.top, b.bottom - b.top);
+		return smallest > 0 && overlap >= smallest * 0.5;
+	}
+
+	// returns a rect per text fragment rather than per line, and the BSB wraps
+	// every capitalisation variant in its own span, so a single word can
+	// contribute several rects. Rects sharing a line are merged into one band
+	// first, or the rule comes out as a row of disconnected stubs.
+	function rtmDrawMarker(range) {
+		var overlay = rtmOverlay();
+		var runs = [];
+
+		if (range) {
+			var rects = range.getClientRects();
+			var lines = [];
+			for (var i = 0; i < rects.length; i++) {
+				var rect = rects[i];
+				if (rect.width <= 0 || rect.height <= 0) continue;
+				var line = null;
+				for (var j = 0; j < lines.length; j++) {
+					if (rtmSameLine(lines[j], rect)) {
+						line = lines[j];
+						break;
+					}
+				}
+				if (!line) {
+					line = {
+						top: rect.top,
+						bottom: rect.bottom,
+						left: rect.left,
+						right: rect.right,
+					};
+					lines.push(line);
+				}
+				line.top = Math.min(line.top, rect.top);
+				line.bottom = Math.max(line.bottom, rect.bottom);
+				line.left = Math.min(line.left, rect.left);
+				line.right = Math.max(line.right, rect.right);
+			}
+
+			// A band below the run carries on the same rule, including across the
+			// gap between two paragraphs, so the line stays unbroken. Only a band
+			// that starts higher up than the run does - which is what the far
+			// side of a page looks like, since the column carries on at the top
+			// again - begins a new one: there is nothing to draw through.
+			var clip = rtmVisibleClip();
+			for (var k = 0; k < lines.length; k++) {
+				var band = lines[k];
+				// skip a line belonging to another page
+				if (band.right <= clip.left || band.left >= clip.right) continue;
+				var run = runs.length ? runs[runs.length - 1] : null;
+				if (run && band.top >= run.top) {
+					run.bottom = Math.max(run.bottom, band.bottom);
+					continue;
+				}
+				runs.push({ top: band.top, bottom: band.bottom });
+			}
+		}
+
+		var clip = rtmVisibleClip();
+		var bars = [];
+		for (var b = 0; b < runs.length; b++) {
+			var top = Math.max(runs[b].top, clip.top);
+			var bottom = Math.min(runs[b].bottom, clip.bottom);
+			if (bottom - top >= 3) bars.push({ top: top, height: bottom - top });
+		}
+
+		// A verse one or two lines from the last one slides across. A page turn
+		// or a jump scroll has to cut, or the rule smears across the screen on
+		// its way to the new place.
+		var first = overlay.firstElementChild;
+		var previous = first ? parseFloat(first.style.top) : NaN;
+		var animate =
+			bars.length > 0 && !isNaN(previous) && Math.abs(bars[0].top - previous) < 150;
+
+		rtmPaintBars(overlay, bars, rtmGutter(), animate);
+	}
+
+	function rtmOverlay() {
+		if (!rtmMarks) {
+			rtmMarks = document.createElement("div");
+			rtmMarks.className = "rtm-marks";
+			document.body.appendChild(rtmMarks);
+		}
+		return rtmMarks;
+	}
+
+	// Which page a range falls on. This works from the verse's own rects
+	// rather than from its number marker: the marker is display:none unless
+	// the reader has verse numbers switched on, so it has no box to measure.
+	function rtmPageForRange(range) {
+		var textWrap = document.getElementById("chapterText");
+		var viewport = document.getElementById("pageTurnViewport");
+		if (!textWrap || !viewport || !range) return null;
+		var step =
+			viewport.clientWidth +
+			(typeof pageTurning != "undefined" ? pageTurning.pageGap : 0);
+		if (!step) return null;
+
+		var rects = range.getClientRects();
+		var left = null;
+		for (var i = 0; i < rects.length; i++) {
+			if (left === null || rects[i].left < left) left = rects[i].left;
+		}
+		if (left === null) return null;
+
+		var offset = left - textWrap.getBoundingClientRect().left;
+		return Math.max(0, Math.floor(offset / step));
+	}
+
+	// Keep the verse being read on screen: turn the page in page-turn mode,
+	// scroll in normal mode, and only when it is not already comfortably
+	// visible so the page does not lurch on every verse.
+	function rtmFollow(range) {
+		if (!range) return;
+
+		if (typeof pageTurning != "undefined" && pageTurning.enabled) {
+			var page = rtmPageForRange(range);
+			if (
+				page != null &&
+				page !== pageTurning.page &&
+				typeof goToPage == "function"
+			) {
+				// allowFinish is left off: following the reading is not the
+				// reader reaching the end of the chapter
+				goToPage(page);
+				rtmScheduleSync();
+			}
+			return;
+		}
+
+		var panelRoom = rtmIsOpen() ? rtmPanel().offsetHeight + 24 : 24;
+		var top = 100; // under the fixed header
+		var bottom = window.innerHeight - panelRoom;
+		var rect = range.getBoundingClientRect();
+		if (rect.top >= top && rect.bottom <= bottom) return;
+
+		// put the verse a little above the middle of what is showing
+		window.scrollBy({
+			top: rect.top - top - (bottom - top) * 0.3,
+			behavior: "smooth",
+		});
+	}
+
+	function rtmSyncMarker() {
+		var segment = rtmSegments[rtmIndex];
+		var range = rtmRangeForVerse(segment ? segment.verse : null);
+		rtmFollow(range);
+		// after the follow, because a page turn or scroll moves the rects
+		rtmDrawMarker(range);
+	}
+
+	var rtmSyncQueued = false;
+	function rtmScheduleSync() {
+		if (rtmSyncQueued) return;
+		rtmSyncQueued = true;
+		requestAnimationFrame(function () {
+			rtmSyncQueued = false;
+			rtmSyncMarker();
+		});
+	}
+
+	// The chapter reference, without the "(YCB-...)" version tag the title
+	// carries, so the panel and the speech both say "John 1".
+	function rtmReference() {
+		var el = document.querySelector("#chapterTitle .title-text");
+		if (!el) return "";
+		var clone = el.cloneNode(true);
+		clone.querySelectorAll(".version").forEach(function (v) {
+			v.remove();
+		});
+		return clone.textContent
+			.replace(/\s*\([^)]*\)\s*$/, "")
+			.replace(/\s+/g, " ")
+			.trim();
+	}
+
+	// Sits around each verse number while the chapter is flattened to text, so
+	// the split points survive being read as one string.
+	var rtmMark = "\u0000";
+
+	function rtmNormalise(text) {
+		return text
+			.replace(/\s+/g, " ")
+			// Speech reads a mark as part of the word before it, so "who are
+			// you ?" has to become "who are you?" and "Father ’s" "Father’s".
+			.replace(/\s+([,.;:!?%…])/g, "$1")
+			.replace(/([“‘(\[])\s+/g, "$1")
+			.replace(/\s+([”’)\]])/g, "$1")
+			.trim();
+	}
+
+	// The chapter as the reader sees it. applySettings has already hidden the
+	// case/spelling variants that are switched off, so the flattened text is
+	// exactly what is on screen - and the spacing is left as the source wrote
+	// it, because a space added around a span would turn "Word</span>," into
+	// the word "Word ,".
+	function rtmBuildSegments() {
+		var text = document.getElementById("chapterText");
+		if (!text) return [];
+
+		var clone = text.cloneNode(true);
+		clone.querySelectorAll("*").forEach(function (el) {
+			// the verse markers are hidden unless verses are on, but they are
+			// still the boundaries the panel navigates by
+			if (
+				el.style.display === "none" &&
+				!el.classList.contains("reftext")
+			) {
+				el.remove();
+			}
+		});
+		// the "(pl)"/"(sg)" grammar notes and the footnote reference letters
+		// are annotations, not part of the sentence
+		clone.querySelectorAll("sup, .fn").forEach(function (el) {
+			el.remove();
+		});
+		// textContent alone runs the last word of a block into the first word
+		// of the next one
+		clone.querySelectorAll("p, div, br").forEach(function (el) {
+			el.appendChild(document.createTextNode("\n"));
+		});
+		clone.querySelectorAll(".reftext").forEach(function (el) {
+			var verse = parseInt(el.textContent, 10) || 0;
+			el.textContent = rtmMark + verse + rtmMark;
+		});
+
+		// split on the markers: the text between marker n+1 and marker n+2 is
+		// the verse numbered n+1
+		var pieces = clone.textContent.split(rtmMark);
+		var segments = [];
+		for (var i = 1; i + 1 < pieces.length; i += 2) {
+			var body = rtmNormalise(pieces[i + 1]);
+			if (body) segments.push({ verse: parseInt(pieces[i], 10), text: body });
+		}
+		return segments;
+	}
+
+	function rtmLabel(segment) {
+		var ref = rtmReference();
+		if (segment.verse == null) return ref;
+		return ref ? ref + ":" + segment.verse : "Verse " + segment.verse;
+	}
+
+	// Chrome stops speaking an utterance after about fifteen seconds, so every
+	// segment goes out as a queue of short pieces split on punctuation.
+	function rtmChunks(text) {
+		var max = 180;
+		var pieces = text.match(/[^.!?…]*[.!?…]+["')\]]*\s*|[^.!?…]+/g) || [text];
+		var chunks = [];
+		var buffer = "";
+
+		function flush() {
+			if (buffer.trim()) chunks.push(buffer.trim());
+			buffer = "";
+		}
+
+		pieces.forEach(function (piece) {
+			if (buffer && buffer.length + piece.length + 1 > max) flush();
+			if (piece.length <= max) {
+				buffer = buffer ? buffer + " " + piece : piece;
+				return;
+			}
+			// A single sentence longer than the limit: pack it by words.
+			piece.split(/\s+/).forEach(function (word) {
+				if (buffer && buffer.length + word.length + 1 > max) flush();
+				buffer = buffer ? buffer + " " + word : word;
+			});
+		});
+		flush();
+		return chunks;
+	}
+
+	function rtmSpeak(index, run) {
+		var segment = rtmSegments[index];
+		if (!segment) {
+			rtmFinish();
+			return;
+		}
+
+		var chunks = rtmChunks(segment.text);
+		if (!chunks.length) {
+			rtmAdvance(run);
+			return;
+		}
+
+		chunks.forEach(function (text, i) {
+			var utterance = new SpeechSynthesisUtterance(text);
+			utterance.rate = settings.readRate;
+			utterance.lang = rtmVoice ? rtmVoice.lang : "";
+			if (rtmVoice) utterance.voice = rtmVoice;
+			utterance.onend = function () {
+				if (run != rtmRun) return;
+				// the rest of the chunks are already queued behind this one
+				if (i < chunks.length - 1) return;
+				rtmAdvance(run);
+			};
+			utterance.onerror = function (event) {
+				if (run != rtmRun) return;
+				if (event.error == "interrupted" || event.error == "canceled") return;
+				// the engine refusing to speak at all is worth saying out loud;
+				// anything else just ends the run
+				if (
+					event.error == "voice-unavailable" ||
+					event.error == "synthesis-unavailable" ||
+					event.error == "synthesis-failed"
+				) {
+					rtmSetNote(rtmNoVoicesMessage());
+				}
+				rtmFinish();
+			};
+			window.speechSynthesis.speak(utterance);
+		});
+	}
+
+	function rtmAdvance(run) {
+		if (run != rtmRun || !rtmPlaying) return;
+		if (rtmIndex + 1 >= rtmSegments.length) {
+			rtmFinish();
+			return;
+		}
+		rtmIndex++;
+		rtmRender();
+		rtmSpeak(rtmIndex, run);
+	}
+
+	function rtmRender() {
+		var play = document.getElementById("rtmPlay");
+		play.innerHTML = rtmPlaying ? rtmIcons.pause : rtmIcons.play;
+		play.setAttribute("aria-label", rtmPlaying ? "Pause" : "Read aloud");
+
+		var now = document.getElementById("rtmNow");
+		var segment = rtmSegments[rtmIndex];
+		now.textContent = segment
+			? rtmLabel(segment)
+			: rtmReference() || "Nothing to read";
+
+		var bar = document.getElementById("rtmBar");
+		var percent = rtmSegments.length
+			? Math.round(((rtmIndex + 1) / rtmSegments.length) * 100)
+			: 0;
+		bar.style.width = percent + "%";
+
+		var rate = document.getElementById("rtmRate");
+		if (document.activeElement != rate) rate.value = settings.readRate;
+		document.getElementById("rtmRateValue").textContent =
+			Number(settings.readRate).toFixed(1) + "×";
+
+		document.getElementById("rtmPrev").disabled = rtmIndex <= 0;
+		document.getElementById("rtmNext").disabled =
+			!rtmSegments.length || rtmIndex >= rtmSegments.length - 1;
+
+		rtmSyncMarker();
+	}
+
+	function rtmSyncLayout() {
+		var open = rtmIsOpen();
+		document.body.classList.toggle("rtm-open", open);
+		document.body.style.setProperty(
+			"--rtm-panel-h",
+			(open ? rtmPanel().offsetHeight : 0) + "px",
+		);
+		// the panel steals height from the page-turn viewport, so the column
+		// layout has to be measured again
+		if (
+			typeof recalcPages == "function" &&
+			typeof pageTurning != "undefined" &&
+			pageTurning.enabled
+		) {
+			recalcPages();
+		}
+		// the visible band the marker is drawn in just changed
+		rtmSyncMarker();
+	}
+
+	function rtmCancel() {
+		if (rtmSupported()) window.speechSynthesis.cancel();
+	}
+
+	function rtmLoad() {
+		if (!rtmSupported()) return;
+		var verses = rtmBuildSegments();
+		// the reference is read out first, so the listener knows what they are
+		// about to hear
+		var ref = rtmReference();
+		rtmSegments = ref ? [{ verse: null, text: ref }].concat(verses) : verses;
+		rtmIndex = 0;
+		rtmDone = false;
+		rtmRender();
+	}
+
+	// Whether the reader wants the panel up, which is not the same as whether
+	// it is currently up: the panel is hidden while a non-chapter page is
+	// showing, and this remembers it was wanted so returning restores it.
+	var rtmWanted = false;
+
+	function rtmOpen(startReading) {
+		if (!rtmSupported()) return;
+		rtmPanel().style.display = "block";
+		rtmSyncLayout();
+		rtmLoad();
+		// start from a clean note; a refusal to speak is reported on play
+		rtmSetNote("");
+		if (startReading) rtmPlay();
+	}
+
+	function rtmClose() {
+		if (!rtmIsOpen()) return;
+		rtmStop();
+		rtmPanel().style.display = "none";
+		rtmSyncLayout();
+	}
+
+	function rtmPlay() {
+		if (!rtmSupported() || !rtmSegments.length) return;
+		// Nothing to speak with. Say so rather than flicking the button and
+		// leaving the reader wondering whether it is working.
+		if (!rtmVoices().length) {
+			rtmStop();
+			rtmSetNote(rtmNoVoices);
+			return;
+		}
+		// reading ran out on the last verse: play again from the top
+		if (rtmDone) rtmIndex = 0;
+		rtmDone = false;
+		rtmPlaying = true;
+		rtmSetNote("");
+		rtmRender();
+
+		var run = ++rtmRun;
+		// Chrome drops an utterance queued in the same tick as cancel(), and
+		// cancel() is what clears a paused queue, so always take this route.
+		rtmCancel();
+		setTimeout(function () {
+			if (run != rtmRun) return;
+			rtmSpeak(rtmIndex, run);
+		}, 60);
+	}
+
+	function rtmPause() {
+		rtmPlaying = false;
+		// left running on purpose: a resumed run re-speaks the segment from its
+		// start anyway, so this only covers browsers that pause cleanly
+		if (rtmSupported()) window.speechSynthesis.pause();
+		rtmRender();
+	}
+
+	function rtmStop() {
+		rtmPlaying = false;
+		rtmDone = false;
+		rtmRun++;
+		rtmCancel();
+		rtmIndex = 0;
+		rtmRender();
+	}
+
+	// The chapter ran out. Leave the last verse showing so the reader can see
+	// where it stopped; the next play starts over.
+	function rtmFinish() {
+		rtmPlaying = false;
+		rtmDone = true;
+		rtmRun++;
+		rtmCancel();
+		rtmRender();
+	}
+
+	function rtmToggle() {
+		if (rtmPlaying) rtmPause();
+		else rtmPlay();
+	}
+
+	function rtmJump(delta) {
+		if (!rtmSegments.length) return;
+		rtmIndex = Math.max(
+			0,
+			Math.min(rtmIndex + delta, rtmSegments.length - 1),
+		);
+		rtmDone = false;
+		if (rtmPlaying) rtmPlay();
+		else rtmRender();
+	}
+
+	function rtmPopulateVoices() {
+		var select = document.getElementById("rtmVoice");
+		var voices = rtmVoices();
+		// voiceschanged can fire before the engine has any to give, and again
+		// once it does; only the second one is worth complaining about
+		if (!voices.length) {
+			rtmSetNote(rtmNoVoices);
+			return;
+		}
+		rtmSetNote("");
+
+		// English first, because that is what the scripture is, then by name.
+		voices.sort(function (a, b) {
+			var aEn = /^en/i.test(a.lang) ? 0 : 1;
+			var bEn = /^en/i.test(b.lang) ? 0 : 1;
+			return aEn - bEn || a.name.localeCompare(b.name);
+		});
+
+		select.innerHTML = "";
+		voices.forEach(function (voice) {
+			var option = document.createElement("option");
+			option.value = voice.voiceURI;
+			option.textContent = voice.name + " (" + voice.lang + ")";
+			select.appendChild(option);
+		});
+
+		rtmVoice =
+			voices.find(function (voice) {
+				return voice.voiceURI == settings.readVoice;
+			}) ||
+			voices.find(function (voice) {
+				return /^en/i.test(voice.lang);
+			}) ||
+			voices[0];
+
+		select.value = rtmVoice.voiceURI;
+		if (settings.readVoice != rtmVoice.voiceURI) {
+			fireEvent({
+				name: "setSetting",
+				setting: "readVoice",
+				value: rtmVoice.voiceURI,
+			});
+		}
+	}
+
+	registerEventListener(
+		(e) => e.name == "readToMeClicked",
+		function () {
+			rtmWanted = true;
+			// the point of asking for it is to hear the chapter, so start now
+			rtmOpen(true);
+		},
+	);
+
+	registerEventListener(
+		(e) => e.name == "readToMeClose",
+		function () {
+			// the X is the only thing that turns it off for good
+			rtmWanted = false;
+			rtmClose();
+		},
+	);
+
+	registerEventListener(
+		(e) => e.name == "readToMeRate",
+		function (event) {
+			// each utterance picks the rate up when it is queued, so a change
+			// lands on the next verse without interrupting the one sounding
+			fireEvent({
+				name: "setSetting",
+				setting: "readRate",
+				value: event.value,
+			});
+			rtmRender();
+		},
+	);
+
+	registerEventListener(
+		(e) => e.name == "showPage",
+		function (event) {
+			if (event.page != "chapter") {
+				// off screen, but rtmWanted is deliberately left alone so
+				// coming back to a chapter brings it back
+				rtmClose();
+				return;
+			}
+			var wasPlaying = rtmPlaying;
+			// the chapter text is in place by the time this fires
+			rtmStop();
+			rtmLoad();
+			rtmPanel().style.display = rtmWanted ? "block" : "none";
+			rtmSyncLayout();
+			// turning to the next chapter mid-sentence should keep going, but a
+			// restored panel waits to be asked
+			if (wasPlaying) rtmPlay();
+		},
+	);
+
+	window.addEventListener("resize", function () {
+		if (rtmIsOpen()) rtmSyncLayout();
+	});
+
+	// the marker is positioned from live client rects, so anything that moves
+	// the text has to redraw it
+	window.addEventListener("scroll", rtmScheduleSync, { passive: true });
+	window.addEventListener("resize", rtmScheduleSync);
+
+	// a page turn animates the column across, so the rects only settle at the
+	// end of the transition
+	document.addEventListener("transitionend", function (event) {
+		if (event.target && event.target.id == "chapterText") rtmScheduleSync();
+	});
+
+	// No click-outside handler on purpose: the panel stays up until the X is
+	// used, or until the reader leaves the chapter.
+
+	if (rtmSupported()) {
+		// The list is populated asynchronously, so an empty one on first look
+		// is not yet a verdict. rtmPopulateVoices decides when it is.
+		window.speechSynthesis.addEventListener("voiceschanged", function () {
+			rtmPopulateVoices();
+		});
+		rtmPopulateVoices();
+	} else {
+		rtmSetNote("This browser has no speech synthesis.");
+	}
+
+	rtmRender();
+</script>

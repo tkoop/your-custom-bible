@@ -1938,6 +1938,254 @@ hr {
 	padding: 0;
 }
 
+/* ---------- Read to me ---------- */
+.read-to-me {
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 900;
+	background-color: var(--surface);
+	border-top: 1px solid var(--border);
+	box-shadow: var(--shadow-lg);
+	padding: 12px 20px;
+	color: var(--text-primary);
+	font-family: var(--font-ui);
+}
+
+/* The panel is pinned to the viewport, so the reading column has to be told
+   how much room is left below it. The height comes from the panel itself
+   (set as --rtm-panel-h by the component) because it reflows on narrow
+   screens. */
+body.rtm-open #body {
+	padding-bottom: calc(var(--rtm-panel-h, 0px) + 16px);
+}
+
+body.rtm-open #chapter.page-turn {
+	height: calc(100vh - 96px - var(--rtm-panel-h, 0px) - 16px);
+	height: calc(100dvh - 96px - var(--rtm-panel-h, 0px) - 16px);
+}
+
+.rtm-head {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	max-width: 760px;
+	margin: 0 auto;
+}
+
+.rtm-now {
+	flex: 1 1 auto;
+	min-width: 0;
+	font-family: var(--font-scripture);
+	font-size: 1.05rem;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.rtm-close {
+	flex: 0 0 auto;
+	border: none;
+	background: none;
+	color: var(--text-muted);
+	font-size: 18px;
+	line-height: 1;
+	cursor: pointer;
+	padding: 6px 8px;
+	border-radius: var(--radius-sm);
+}
+
+.rtm-close:hover {
+	color: var(--text-primary);
+	background: var(--surface-soft);
+}
+
+.rtm-progress {
+	max-width: 760px;
+	margin: 8px auto 0;
+	height: 3px;
+	border-radius: 2px;
+	background: var(--border-light);
+	overflow: hidden;
+}
+
+.rtm-progress-bar {
+	height: 100%;
+	width: 0;
+	background: var(--primary);
+	transition: width 0.25s ease;
+}
+
+.rtm-row {
+	display: flex;
+	align-items: center;
+	gap: 20px;
+	flex-wrap: wrap;
+	max-width: 760px;
+	margin: 12px auto 0;
+}
+
+.rtm-transport {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.rtm-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 40px;
+	height: 40px;
+	padding: 0;
+	border: 1px solid var(--border);
+	background: var(--surface-soft);
+	color: var(--text-secondary);
+	border-radius: 50%;
+	cursor: pointer;
+	flex-shrink: 0;
+	transition: all 0.2s ease;
+}
+
+.rtm-btn:hover:not(:disabled) {
+	border-color: var(--primary);
+	color: var(--primary);
+}
+
+.rtm-btn:disabled {
+	opacity: 0.35;
+	cursor: default;
+	pointer-events: none;
+}
+
+.rtm-btn-play {
+	width: 52px;
+	height: 52px;
+	background: var(--primary);
+	border-color: var(--primary);
+	color: var(--surface);
+}
+
+.rtm-btn-play:hover:not(:disabled) {
+	color: var(--surface);
+	filter: brightness(1.12);
+}
+
+.rtm-options {
+	display: flex;
+	align-items: center;
+	gap: 18px;
+	flex: 1 1 240px;
+	min-width: 0;
+}
+
+.rtm-field {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
+	font-size: 0.78rem;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--text-muted);
+}
+
+.rtm-field > span {
+	white-space: nowrap;
+}
+
+.rtm-field b {
+	color: var(--text-secondary);
+	font-weight: 600;
+	letter-spacing: 0;
+}
+
+.rtm-field select {
+	max-width: 210px;
+	padding: 6px 8px;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	background: var(--surface);
+	color: var(--text-primary);
+	font-family: 'sourceSansPro', sans-serif;
+	font-size: 0.85rem;
+	letter-spacing: normal;
+	text-transform: none;
+	cursor: pointer;
+}
+
+.rtm-field input[type='range'] {
+	flex: 1 1 auto;
+	min-width: 90px;
+	accent-color: var(--primary);
+}
+
+.rtm-note {
+	max-width: 760px;
+	margin: 8px auto 0;
+	font-size: 0.8rem;
+	color: var(--text-muted);
+}
+
+.rtm-note:empty {
+	display: none;
+}
+
+/* A refusal to read aloud, or an engine that failed to start. */
+.rtm-note.rtm-note-warn {
+	color: var(--woc);
+	font-weight: 600;
+}
+
+/* The verse being read is marked in the text itself. It is a fixed overlay
+   positioned from the verse's client rects rather than a wrapper element, so
+   the chapter markup - and the word-study links built inside it - is never
+   restructured. */
+.rtm-marks {
+	position: fixed;
+	inset: 0;
+	z-index: 50;
+	pointer-events: none;
+}
+
+.rtm-mark {
+	position: absolute;
+	width: 3px;
+	margin-left: -1.5px;
+	border-radius: 2px;
+	background-color: var(--gold);
+	opacity: 0.7;
+	/* the bars are reused, so this slides the rule from the verse just read to
+	   the one being read instead of jumping */
+	transition: top 0.35s ease, height 0.35s ease, left 0.35s ease;
+}
+
+/* A page turn or a jump scroll has to cut rather than slide. */
+.rtm-marks.rtm-jump .rtm-mark {
+	transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.rtm-mark {
+		transition: none;
+	}
+}
+
+@media (max-width: 560px) {
+	.read-to-me {
+		padding: 10px 14px;
+	}
+
+	.rtm-row {
+		gap: 12px;
+	}
+
+	.rtm-options {
+		flex: 1 1 100%;
+	}
+}
+
 /* ---------- Word lookup popup ---------- */
 .word-link {
 	text-decoration: underline dotted;
