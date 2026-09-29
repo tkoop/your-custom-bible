@@ -1,4 +1,6 @@
-<div id="speedWord">&nbsp;</div>
+<div id="speedWordFrame">
+	<span id="speedWord">&nbsp;</span>
+</div>
 
 <button id="pausePlayBtn" class="sr-button">
 	&#x23F8;
@@ -139,7 +141,7 @@
 
 	function updateDisplay() {
 		if (index < words.length) {
-			document.getElementById("speedWord").innerText = words[index];
+			showWord(words[index]);
 			const currentVerseStart = verseStarts.filter((v) => v <= index).pop();
 			if (currentVerseStart !== undefined) {
 				const verseIndex = verseStarts.indexOf(currentVerseStart);
@@ -147,6 +149,38 @@
 				document.getElementById("currentVerse").innerText = "Verse " + verseNum;
 			}
 		}
+	}
+
+	function orpPosition(word) {
+		const leading = word.match(/^[^\p{L}\p{N}]+/u);
+		const trailing = word.match(/[^\p{L}\p{N}]+$/u);
+		const start = leading ? leading[0].length : 0;
+		const end = trailing ? word.length - trailing[0].length : word.length;
+		const core = word.slice(start, end);
+		if (core.length === 0) return Math.min(start, word.length - 1);
+		let offset = 0;
+		if (core.length > 1) offset = 1;
+		if (core.length > 5) offset = 2;
+		if (core.length > 9) offset = 3;
+		if (core.length > 13) offset = 4;
+		return start + Math.min(offset, core.length - 1);
+	}
+
+	function showWord(word) {
+		const element = document.getElementById("speedWord");
+		const position = orpPosition(word);
+		const orp = document.createElement("span");
+		orp.className = "orp";
+		orp.textContent = word.charAt(position);
+		element.replaceChildren(
+			document.createTextNode(word.slice(0, position)),
+			orp,
+			document.createTextNode(word.slice(position + 1)),
+		);
+		const wordBox = element.getBoundingClientRect();
+		const orpBox = orp.getBoundingClientRect();
+		element.style.transform =
+			"translateX(" + -(orpBox.left + orpBox.width / 2 - wordBox.left) + "px)";
 	}
 
 	function nextWord() {
@@ -265,12 +299,9 @@
 
 		const reader = document.getElementById("speedReader");
 
-		// Find the longest word to set fixed width
-		const longestWord = words.reduce(
-			(longest, current) =>
-				current.length > longest.length ? current : longest,
-			"",
-		);
+		// The word hangs off its ORP, so the reader has to reach the character
+		// furthest from that point in either direction, not half the longest
+		// word. Measure every word in one batch to keep it to a single layout.
 		const tempDiv = document.createElement("div");
 		tempDiv.style.fontSize = "48px";
 		// measure with the same face the word is displayed in
@@ -279,14 +310,37 @@
 		).fontFamily;
 		tempDiv.style.position = "absolute";
 		tempDiv.style.visibility = "hidden";
-		tempDiv.innerText = longestWord;
+		tempDiv.style.whiteSpace = "pre";
 		document.body.appendChild(tempDiv);
-		const wordWidth = tempDiv.offsetWidth;
+
+		const probes = words.map((word) => {
+			const probe = document.createElement("span");
+			probe.textContent = word;
+			tempDiv.appendChild(probe);
+			return probe;
+		});
+		const orpRange = document.createRange();
+		const tailRange = document.createRange();
+		let extent = 0;
+		probes.forEach((probe, i) => {
+			const text = probe.firstChild;
+			const position = orpPosition(words[i]);
+			orpRange.setStart(text, 0);
+			orpRange.setEnd(text, position + 1);
+			tailRange.setStart(text, position);
+			tailRange.setEnd(text, text.length);
+			extent = Math.max(
+				extent,
+				orpRange.getBoundingClientRect().width,
+				tailRange.getBoundingClientRect().width,
+			);
+		});
 		document.body.removeChild(tempDiv);
+
 		const maxReaderWidth = Math.max(window.innerWidth - 40, 0);
 		reader.style.boxSizing = "border-box";
 		reader.style.maxWidth = maxReaderWidth + "px";
-		reader.style.width = Math.min(wordWidth + 40, maxReaderWidth) + "px"; // 40px for padding
+		reader.style.width = Math.min(extent * 2 + 40, maxReaderWidth) + "px"; // 40px for padding
 
 		isPaused = false;
 		timeoutId = null;

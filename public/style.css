@@ -220,6 +220,8 @@
 	--primary: #34507a; /* deep Oxford blue */
 	--primary-dark: #263c60;
 	--primary-light: #6d87a8;
+	--orp: #1558b0; /* speed reader fixation letter: a brighter blue than --primary,
+	   which is too close to the scripture text to read as a highlight */
 	--accent-soft: #e6ebf2;
 	--secondary: #a0772c; /* muted gold */
 	--gold: #a0772c;
@@ -272,6 +274,7 @@ body.dark {
 	--primary: #9fb6d4;
 	--primary-dark: #7e97bc;
 	--primary-light: #c7d5ea;
+	--orp: #8ec5ff;
 	--accent-soft: #2a333f;
 	--secondary: #d8bb6e;
 	--gold: #d8bb6e;
@@ -1865,11 +1868,24 @@ hr {
 	text-align: center;
 }
 
-#speedWord {
+#speedWordFrame {
+	position: relative;
+	min-height: 1.2em;
 	font-family: var(--font-scripture);
 	font-size: 48px;
 	line-height: 1.2;
-	min-height: 1.2em;
+}
+
+#speedWord {
+	position: absolute;
+	top: 0;
+	left: 50%;
+	white-space: nowrap;
+	will-change: transform;
+}
+
+#speedWord .orp {
+	color: var(--orp);
 }
 
 .sr-button {
