@@ -1205,7 +1205,9 @@ fireEvent({
 		return m ? m[2] : null;
 	}
 
-	function visibleTextNodes(p) {
+	// stopEl, when given, ends the scan: the next verse can start inside the
+	// same paragraph, so its text is not part of the verse being built.
+	function visibleTextNodes(p, stopEl) {
 		if (!p || p.tagName != "P") return [];
 		if (
 			p.classList.contains("hdg") ||
@@ -1217,6 +1219,7 @@ fireEvent({
 		var walker = document.createTreeWalker(p, NodeFilter.SHOW_TEXT);
 		var node;
 		while ((node = walker.nextNode())) {
+			if (stopEl && stopEl.contains(node)) break;
 			var el = node.parentNode;
 			if (el && el.classList && el.classList.contains("fn")) continue;
 			if (el && el.classList && el.classList.contains("cross1")) continue;
@@ -1241,9 +1244,13 @@ fireEvent({
 		for (var i = 0; i < ps.length; i++) {
 			var p = ps[i];
 			if (p == from) scanning = true;
-			if (to && p == to) break;
 			if (!scanning) continue;
-			var nodes = visibleTextNodes(p);
+			var endsVerse = to && p == to;
+			// A verse number only marks the end of the previous verse when it
+			// sits in a later paragraph. When both numbers share a paragraph,
+			// stop at the next number instead, or the verse is skipped whole.
+			if (endsVerse && p != from) break;
+			var nodes = visibleTextNodes(p, endsVerse ? nextRef : null);
 			for (var n = 0; n < nodes.length; n++) {
 				var text = nodes[n].nodeValue;
 				var re = /[a-z']+/gi;
@@ -1253,6 +1260,7 @@ fireEvent({
 					pos.push({ node: nodes[n], start: m.index });
 				}
 			}
+			if (endsVerse) break;
 		}
 		return { tokens: tokens, pos: pos };
 	}
