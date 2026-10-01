@@ -1366,12 +1366,30 @@ fireEvent({
 		var vt = buildVerseTokens(refEl);
 		if (vt.pos.length == 0) return;
 		var nodes = [];
-		for (var i = 0; i < vt.pos.length; i++) {
-			if (!findVerseEntry(entries, vt, i, vt.tokens[i])) continue;
-			var p = vt.pos[i];
-			var rawLen = rawTokenLength(p.node.nodeValue, p.start);
-			if (rawLen <= 0) continue;
-			pushRange(nodes, p.node, p.start, p.start + rawLen);
+		var i = 0;
+		while (i < vt.pos.length) {
+			var entry = findVerseEntry(entries, vt, i, vt.tokens[i]);
+			if (!entry) {
+				i++;
+				continue;
+			}
+			// One original word is often rendered as several English words.
+			// Underline the whole run as a single link, otherwise the reader
+			// sees two separate underlines for one Hebrew or Greek term.
+			var last = i;
+			while (
+				last + 1 < vt.pos.length &&
+				findVerseEntry(entries, vt, last + 1, vt.tokens[last + 1]) === entry &&
+				sameTextRun(vt, last, last + 1)
+			) {
+				last++;
+			}
+			var from = vt.pos[i];
+			var to = rawTokenEnd(vt.pos[last]);
+			if (to > from.start && !insideWordLink(from.node)) {
+				pushRange(nodes, from.node, from.start, to);
+			}
+			i = last + 1;
 		}
 		nodes.forEach(function (g) {
 			g.ranges.sort(function (a, b) {
@@ -1379,6 +1397,29 @@ fireEvent({
 			});
 			wrapNodeRanges(g.node, g.ranges);
 		});
+	}
+
+	// A verse's token window starts at the top of its paragraph, so it also
+	// covers the words of the preceding verse. Wrapping those again would
+	// nest one span inside another, so leave them to the verse that owns them.
+	function insideWordLink(node) {
+		for (var el = node.parentNode; el; el = el.parentNode) {
+			if (el.classList && el.classList.contains("word-link")) return true;
+		}
+		return false;
+	}
+
+	// Two tokens can share one span only when they sit in the same text node
+	// and nothing but punctuation separates them.
+	function sameTextRun(vt, a, b) {
+		var pa = vt.pos[a];
+		var pb = vt.pos[b];
+		if (pa.node !== pb.node || pb.start <= pa.start) return false;
+		return !/[a-z0-9]/i.test(pa.node.nodeValue.slice(rawTokenEnd(pa), pb.start));
+	}
+
+	function rawTokenEnd(p) {
+		return p.start + rawTokenLength(p.node.nodeValue, p.start);
 	}
 
 	function pushRange(nodes, node, start, end) {
