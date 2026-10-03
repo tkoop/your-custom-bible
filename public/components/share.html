@@ -1,0 +1,250 @@
+<div
+	class="share-backdrop"
+	id="shareBackdrop"
+	data-cy="shareBackdrop"
+	onclick="closeShare()"
+></div>
+
+<div
+	class="share-sheet"
+	id="shareSheet"
+	role="dialog"
+	aria-modal="true"
+	aria-labelledby="shareHeading"
+	tabindex="-1"
+>
+	<div class="share-head">
+		<h2 class="share-title" id="shareHeading">Share</h2>
+		<button
+			class="share-close"
+			id="shareClose"
+			data-cy="shareClose"
+			onclick="closeShare()"
+			aria-label="Close share"
+			title="Close"
+		>
+			&#x2715;
+		</button>
+	</div>
+
+	<p class="share-ref">
+		<span id="shareRef" data-cy="shareRef"></span>
+		<span class="share-tag" id="shareTag" data-cy="shareTag"></span>
+	</p>
+
+	<p class="share-note" id="shareNote" data-cy="shareNote">
+		The link carries your spelling, God's name, case and plural you, so it
+		opens the way you see it.
+	</p>
+
+	<!-- Where the browser offers a share sheet, that is the better answer, so
+	     it leads. Everywhere else the link field below is the whole dialog. -->
+	<button
+		class="share-btn share-btn-primary"
+		id="shareNative"
+		data-cy="shareNative"
+		onclick="shareChapter()"
+	>
+		Share&hellip;
+	</button>
+
+	<div class="share-url-row">
+		<input
+			class="share-url"
+			id="shareUrl"
+			data-cy="shareUrl"
+			type="text"
+			readonly
+			inputmode="url"
+			enterkeyhint="done"
+			aria-label="Link to this chapter"
+			onclick="this.select()"
+		/>
+		<button
+			class="share-btn"
+			id="shareCopy"
+			data-cy="shareCopy"
+			onclick="copyShareLink()"
+		>
+			Copy
+		</button>
+	</div>
+
+	<p class="share-status" id="shareStatus" data-cy="shareStatus" role="status" aria-live="polite"></p>
+</div>
+
+<script>
+	// Sharing is a dialog over the chapter rather than a menu item: it needs
+	// room for the link, and on a phone it wants the whole bottom of the screen.
+	function sharePanel() {
+		return document.getElementById("sharePanel");
+	}
+
+	// The chapter title already holds the reference and the version tag, in spans
+	// of their own, so both are read from what is on screen rather than rebuilt
+	// from the book and chapter numbers.
+	function shareTitle() {
+		var el = document.querySelector("#chapterTitle .title-text");
+		if (!el) return { reference: "", tag: "" };
+		var clone = el.cloneNode(true);
+		var version = clone.querySelector(".version");
+		var tag = version ? version.textContent.trim() : "";
+		clone.querySelectorAll(".version, .version-shared").forEach(function (v) {
+			v.remove();
+		});
+		// The tag sits in its own span but its brackets are plain text, so
+		// taking the span away leaves them behind.
+		var reference = clone.textContent.replace(/\(\s*\)\s*$/, "").trim();
+		return { reference: reference, tag: tag };
+	}
+
+	function shareLink() {
+		var base = location.origin + location.pathname;
+		// The address bar holds the chapter being read, with any settings a
+		// shared link brought after a "?".
+		var hash = location.hash.split("?")[0];
+		if (!hash || hash == "#") return base;
+		// The four settings go in whatever the reader got here by, so the link
+		// opens as the sender sees it.
+		return base + hash + versionQuery();
+	}
+
+	function setShareStatus(text, good) {
+		var el = document.getElementById("shareStatus");
+		el.textContent = text || "";
+		el.classList.toggle("share-status-good", !!good);
+	}
+
+	var shareStatusTimer = null;
+
+	function setShareStatusForAWhile(text, good) {
+		clearTimeout(shareStatusTimer);
+		setShareStatus(text, good);
+		if (text) {
+			shareStatusTimer = setTimeout(function () {
+				setShareStatus("");
+			}, 4000);
+		}
+	}
+
+	function flashCopied() {
+		var btn = document.getElementById("shareCopy");
+		btn.textContent = "Copied";
+		btn.classList.add("share-btn-done");
+		setTimeout(function () {
+			btn.textContent = "Copy";
+			btn.classList.remove("share-btn-done");
+		}, 2000);
+	}
+
+	// The async clipboard needs a secure context, which a Bible served over
+	// plain http on a home network is not, so there is an older path behind it.
+	function copyShareLink() {
+		var field = document.getElementById("shareUrl");
+		var link = field.value;
+
+		var copying =
+			navigator.clipboard && window.isSecureContext
+				? navigator.clipboard.writeText(link)
+				: Promise.reject();
+
+		copying.then(
+			function () {
+				flashCopied();
+				setShareStatusForAWhile("Link copied.", true);
+			},
+			function () {
+				if (legacyCopy(field)) {
+					flashCopied();
+					setShareStatusForAWhile("Link copied.", true);
+					return;
+				}
+				// Nothing to copy with: leave the link selected so a long press
+				// or Ctrl+C still gets it.
+				field.focus();
+				field.select();
+				setShareStatusForAWhile(
+					"Could not reach the clipboard. The link is selected - copy it.",
+				);
+			},
+		);
+	}
+
+	function legacyCopy(field) {
+		field.focus();
+		field.select();
+		field.setSelectionRange(0, field.value.length);
+		try {
+			return document.execCommand("copy");
+		} catch (e) {
+			return false;
+		}
+	}
+
+	// navigator.share is the phone's own share sheet. It has to be called
+	// straight from the tap, before anything is awaited, or the browser has
+	// already spent the gesture and refuses.
+	function shareChapter() {
+		var data = {
+			title: "Your Custom Bible",
+			text: document.getElementById("shareRef").textContent,
+			url: document.getElementById("shareUrl").value,
+		};
+
+		navigator.share(data).then(closeShare, function (error) {
+			// Closing the sheet is a choice, not a failure.
+			if (error && error.name == "AbortError") return;
+			setShareStatusForAWhile("Could not open the share sheet.");
+		});
+	}
+
+	function openShare() {
+		var title = shareTitle();
+		document.getElementById("shareRef").textContent = title.reference;
+		document.getElementById("shareTag").textContent = title.tag
+			? " (" + title.tag + ")"
+			: "";
+		document.getElementById("shareUrl").value = shareLink();
+		document.getElementById("shareNative").style.display =
+			typeof navigator.share == "function" ? "" : "none";
+		document.getElementById("shareCopy").textContent = "Copy";
+		document.getElementById("shareCopy").classList.remove("share-btn-done");
+		setShareStatus("");
+
+		sharePanel().style.display = "block";
+		document.body.classList.add("share-open");
+
+		// The dialog takes the focus, not the link field: focusing that would
+		// throw the keyboard up over it on a phone.
+		document.getElementById("shareSheet").focus();
+	}
+
+	function closeShare() {
+		if (sharePanel().style.display == "none") return;
+		sharePanel().style.display = "none";
+		document.body.classList.remove("share-open");
+		clearTimeout(shareStatusTimer);
+		setShareStatus("");
+	}
+
+	registerEventListener(
+		(e) => e.name == "shareClicked",
+		function () {
+			openShare();
+		},
+	);
+
+	// Escape and a change of page both dismiss it, as the word popup does.
+	document.addEventListener("keydown", function (event) {
+		if (event.key != "Escape") return;
+		if (sharePanel().style.display == "none") return;
+		closeShare();
+	});
+
+	registerEventListener(
+		(e) => e.name == "showPage",
+		function () {
+			closeShare();
+		},
+	);
+</script>

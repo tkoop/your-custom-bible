@@ -197,6 +197,13 @@
 			document
 				.querySelectorAll(".version")
 				.forEach((el) => (el.innerHTML = getVersion()));
+			// The tag alone does not say where the settings behind it came from.
+			document
+				.querySelectorAll(".version-shared")
+				.forEach(
+					(el) =>
+						(el.style.display = usingSharedSettings() ? "" : "none"),
+				);
 		}
 
 		document.getElementById("body").style.fontSize =
@@ -218,7 +225,9 @@
 		window.__userNavigated = true;
 		var url = "./chapters/" + slug + "-" + chapter + ".html";
 		var bookObj = books.find((b) => b.slug === slug);
-		var hash = "#" + bookObj.abbr + "-" + chapter;
+		// The settings a shared link brought ride along in the address bar, so
+		// the version on screen survives a reload or a bookmark.
+		var hash = "#" + bookObj.abbr + "-" + chapter + sharedSettingsQuery();
 		history.pushState(hash, "", hash);
 
 		updatePage(hash);
@@ -368,7 +377,11 @@
 				? chapterRefName(book.name) + " " + chapterNum
 				: titleCase(slug.replaceAll("-", " "));
 				title = title.replace(" Of ", " of "); // Song of Solomon
-				title = title + " (<span class='version'></span>)";
+				// The marker sits outside the brackets: the tag is a version string, and the
+		// word beside it is a note about where the settings behind it came from.
+		title =
+			title +
+			" (<span class='version'></span>)<span class='version-shared' title='These settings came from a shared link' style='display: none'> shared</span>";
 				chapter.innerHTML = addArrows(text, title);
 				applySettings();
 				applyWordStudyLinks(book ? book.slug : null, chapterNum);
@@ -377,7 +390,7 @@
 fireEvent({
 				name: "showPage",
 				page: "chapter",
-				hash: book ? book.abbr + "-" + chapterNum : "",
+				hash: book ? book.abbr + "-" + chapterNum + sharedSettingsQuery() : "",
 				skipHistory: !!skipHistory,
 			});
 

@@ -73,7 +73,32 @@
 	</div>
 </div>
 
-<div style="display: flex">
+<!-- A shared link's four settings are the sharer's, so they are shown as a
+     notice with the two ways out of it, and the four rows they stand in for
+     step aside until one of the two is taken. -->
+<div class="shared-note" id="sharedNote" data-cy="sharedNote" style="display: none">
+	<div class="shared-note-label">Using shared settings</div>
+	<div class="shared-note-actions">
+		<button
+			id="adoptShared"
+			data-cy="adoptShared"
+			onclick="adoptSharedSettings(); event.stopPropagation()"
+			title="Keep these as your own settings"
+		>
+			Adopt
+		</button>
+		<button
+			id="discardShared"
+			data-cy="discardShared"
+			onclick="discardSharedSettings(); event.stopPropagation()"
+			title="Go back to your own settings"
+		>
+			Discard
+		</button>
+	</div>
+</div>
+
+<div class="version-setting" style="display: flex">
 	<div>Spelling</div>
 	<div>
 		<select
@@ -89,7 +114,7 @@
 	</div>
 </div>
 
-<div style="display: flex">
+<div class="version-setting" style="display: flex">
 	<div>God's Name</div>
 	<div>
 		<select
@@ -112,7 +137,7 @@
 	</div>
 </div>
 
-<div style="display: flex">
+<div class="version-setting" style="display: flex">
 	<div>Case</div>
 	<div>
 		<select
@@ -128,7 +153,7 @@
 	</div>
 </div>
 
-<div style="display: flex">
+<div class="version-setting" style="display: flex">
 	<div>Plural You</div>
 	<div>
 		<select
@@ -189,27 +214,52 @@
 		hideSettingsDropDown();
 	});
 
-	document.querySelectorAll("select#spelling option").forEach((op) => {
-		if (op.value == settings.spelling) op.selected = true;
-	});
+	// The menu is built once, so it is re-synced whenever the settings change
+	// underneath it - a shared link applies its own four before the reader has
+	// opened the menu at all.
+	function applySettingsToMenu() {
+		// A shared link's settings are not the reader's to change while they are
+		// in use, so the notice says so and the four rows give way to it. The
+		// values themselves are still in the version tag beside the chapter.
+		var shared = usingSharedSettings();
+		document.getElementById("sharedNote").style.display = shared ? "" : "none";
+		document
+			.querySelectorAll("#settingsDropdown .version-setting")
+			.forEach((row) => (row.style.display = shared ? "none" : ""));
 
-	document.querySelectorAll("select#name option").forEach((op) => {
-		if (op.value == settings.name) op.selected = true;
-	});
+		document.querySelectorAll("select#spelling option").forEach((op) => {
+			if (op.value == settings.spelling) op.selected = true;
+		});
 
-	document.querySelectorAll("select#case option").forEach((op) => {
-		if (op.value == settings.case) op.selected = true;
-	});
+		document.querySelectorAll("select#name option").forEach((op) => {
+			if (op.value == settings.name) op.selected = true;
+		});
 
-	document.querySelectorAll("select#you option").forEach((op) => {
-		if (op.value == settings.you) op.selected = true;
-	});
+		document.querySelectorAll("select#case option").forEach((op) => {
+			if (op.value == settings.case) op.selected = true;
+		});
 
-	document.querySelector("input[data-value=titles]").checked = settings.titles;
-	document.querySelector("input[data-value=footnotes]").checked =
-		settings.footnotes;
-	document.querySelector("input[data-value=references]").checked =
-		settings.references;
-	document.querySelector("input[data-value=verses]").checked = settings.verses;
-	document.querySelector("input[data-value=woc]").checked = settings.woc;
+		document.querySelectorAll("select#you option").forEach((op) => {
+			if (op.value == settings.you) op.selected = true;
+		});
+
+		document.querySelector("input[data-value=titles]").checked =
+			settings.titles;
+		document.querySelector("input[data-value=footnotes]").checked =
+			settings.footnotes;
+		document.querySelector("input[data-value=references]").checked =
+			settings.references;
+		document.querySelector("input[data-value=verses]").checked =
+			settings.verses;
+		document.querySelector("input[data-value=woc]").checked = settings.woc;
+	}
+
+	registerEventListener(
+		(e) => e.name == "settingsUpdated",
+		function () {
+			applySettingsToMenu();
+		},
+	);
+
+	applySettingsToMenu();
 </script>

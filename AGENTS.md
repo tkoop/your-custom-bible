@@ -38,6 +38,29 @@ Every output above is committed and regenerates byte-for-byte from the
 committed inputs, so a clean `git status` after running a pipeline is the
 signal that nothing drifted.
 
+## Shared links (chapter URL)
+
+A chapter hash may carry the four settings the `YCB-` version tag is built
+from, after a `?`:
+
+    #Gen-1?s=us&n=YHWH&c=upper&y=youall
+
+`settings.js` owns this: `shareableSettings` maps the short keys to setting
+names, `shareableValues` lists the values the gear menu offers, and
+`applySharedSettings()` is called from `updatePage()` in `index.html` before the
+chapter is fetched. A URL is untrusted input, so a value not on those lists is
+ignored - `settings.name` reaches the page through `innerHTML` and
+`settings.spelling` through a CSS selector.
+
+Settings from a link are applied but never saved: the reader's own values stay
+in `localStorage`. The gear menu says so - a "Using shared settings" notice
+stands in for the four rows, and a muted `shared` marker sits beside the version
+tag in the chapter title. The reader either `adoptSharedSettings()`, which keeps
+what the link brought as their own and drops the query from the address bar, or
+`discardSharedSettings()`, which puts their own values back. Neither happens by
+accident: nothing else writes to `sharedSettings`, and the four rows are hidden
+while it holds anything.
+
 ## Cache-busting rule (IMPORTANT)
 
 Browsers cache this app's static assets aggressively:
@@ -62,7 +85,9 @@ Files involved (all referenced from `public/index.html`):
 - Components fetched via `loadComponent()`: `components/menu.html`,
   `components/chapter.html`, `components/home.html`, `components/about.html`,
   `components/history.html`, `components/search.html`,
-  `components/settings.html`, `components/speedReader.html`
+  `components/settings.html`, `components/advanced.html`,
+  `components/speedReader.html`, `components/readToMe.html`,
+  `components/share.html`
 - Fonts referenced from `style.css` via `@font-face`: files under `fonts/`
 - `serviceWorker.js` (bump its `?version=` too when its logic changes)
 

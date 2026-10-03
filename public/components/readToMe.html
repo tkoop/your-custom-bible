@@ -457,12 +457,13 @@
 	}
 
 	// The chapter reference, without the "(YCB-...)" version tag the title
-	// carries, so the panel and the speech both say "John 1".
+	// carries - or the "shared" marker beside it - so the panel and the speech
+	// both say "John 1".
 	function rtmReference() {
 		var el = document.querySelector("#chapterTitle .title-text");
 		if (!el) return "";
 		var clone = el.cloneNode(true);
-		clone.querySelectorAll(".version").forEach(function (v) {
+		clone.querySelectorAll(".version, .version-shared").forEach(function (v) {
 			v.remove();
 		});
 		return clone.textContent

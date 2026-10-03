@@ -5,7 +5,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="theme-color" content="#34507a" />
 		<title>Your Custom Bible</title>
-<link rel="stylesheet" href="style.css?version=39" />
+<link rel="stylesheet" href="style.css?version=43" />
 		<link rel="icon" type="image/png" href="images/logo.png?version=4" />
 		<link rel="manifest" href="manifest.json?version=2" />
 	</head>
@@ -102,44 +102,70 @@
 		<div id="speedReader" class="modal" style="display: none"></div>
 
 		<div id="readToMe" class="read-to-me" style="display: none"></div>
+
+		<div id="sharePanel" class="share-overlay" style="display: none"></div>
 	</body>
 
 	<script src="framework.js?version=1"></script>
 	<script src="activity.js?version=1"></script>
-		<script src="settings.js?version=12"></script>
+		<script src="settings.js?version=16"></script>
 	<script src="books.js?version=2"></script>
 
 	<script>
 		async function loadComponents() {
 			await loadComponent("dropdown", "components/menu.html?version=14");
-			await loadComponent("chapter", "components/chapter.html?version=36");
+			await loadComponent("chapter", "components/chapter.html?version=41");
 			await loadComponent("home", "components/home.html?version=5");
 			await loadComponent("about", "components/about.html?version=2");
 			await loadComponent("history", "components/history.html?version=5");
 			await loadComponent("search", "components/search.html?version=4");
 			await loadComponent(
 				"settingsDropdown",
-				"components/settings.html?version=12"
+				"components/settings.html?version=14"
 			);
-			await loadComponent("advancedDropdown", "components/advanced.html?version=1");
-			await loadComponent("speedReader", "components/speedReader.html?version=9");
-			await loadComponent("readToMe", "components/readToMe.html?version=6");
+			await loadComponent("advancedDropdown", "components/advanced.html?version=2");
+await loadComponent("speedReader", "components/speedReader.html?version=9");
+		await loadComponent("readToMe", "components/readToMe.html?version=7");
+		await loadComponent("sharePanel", "components/share.html?version=2");
 		}
 		loadComponents().then(() => {
+			// A URL that arrives with a fragment gets a popstate before any of this
+			// is here to handle it - the chapter fetcher lives in a component - so
+			// the router stays shut until now, and the initial location is routed
+			// by hand below.
+			window.__routerReady = true;
+
 			// If the user already navigated while components were loading, the
 			// chapter/render is in flight; don't clobber it.
 			if (window.__userNavigated) return;
-			if (window.location.hash) {
-				history.replaceState(window.location.hash, "", window.location.hash);
-				updatePage(window.location.hash);
-			} else {
-				history.replaceState("#", "", "#");
-				updatePage("#");
-			}
+			var hash = window.location.hash || "#";
+			history.replaceState(hash, "", hash);
+			updatePage(hash);
 		});
 
-		window.addEventListener("popstate", (event) => {
-			updatePage(event.state);
+		// Moving to another hash reaches the router here: a history back, a
+		// chapter link, a shared link pasted into the address bar. The move is
+		// reported twice - popstate, then hashchange, and for a link the state is
+		// empty - so the hash is read from the location, which is the one thing
+		// both events agree on, and the pair is handled once.
+		let fromHistory = false;
+		function routeLocation() {
+			if (!window.__routerReady) return;
+			updatePage(window.location.hash || "#");
+		}
+
+		window.addEventListener("popstate", () => {
+			fromHistory = true;
+			routeLocation();
+			// The pair arrives together, so the mark only has to outlive it.
+			setTimeout(() => {
+				fromHistory = false;
+			}, 0);
+		});
+
+		window.addEventListener("hashchange", () => {
+			if (fromHistory) return;
+			routeLocation();
 		});
 
 		function updatePage(state) {
@@ -154,8 +180,13 @@
 			} else if (state === "#about") {
 				fireEvent({ name: "showPage", page: "about", skipHistory: true });
 			} else if (state && state.startsWith("#")) {
-				// chapter hash like #Gen-1
-				const hash = state.slice(1); // remove #
+				// A chapter hash, which a shared link extends with the settings
+				// that make up the version: "#Gen-1?s=us&n=YHWH&c=upper&y=youall".
+				// They go in before the chapter is fetched, so it renders as it
+				// was shared; a hash without them hands the reader their own back.
+				var queryAt = state.indexOf("?");
+				applySharedSettings(queryAt == -1 ? "" : state.slice(queryAt));
+				const hash = (queryAt == -1 ? state : state.slice(0, queryAt)).slice(1); // remove #
 				const parts = hash.split("-");
 				const abbr = parts[0].toUpperCase();
 				const chapter = parts.slice(1).join("-");
