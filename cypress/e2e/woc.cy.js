@@ -114,8 +114,12 @@ describe("Words of Christ in Red", () => {
 	});
 
 	it("remembers the setting across a reload", () => {
+		openMatthew5();
 		turnOn();
-		cy.get("#menuIcon").click();
+
+		// back to the home page, so the reload starts from there
+		cy.get("#brand").click();
+		cy.get("#home").should("be.visible");
 
 		cy.reload();
 		cy.get("body").should("not.have.class", "woc-off");

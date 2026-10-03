@@ -18,6 +18,7 @@ var settings = {
 	activity: "default",
 	readRate: 1,
 	readVoice: "",
+	showAdvanced: false,
 };
 
 // settings.fontSize is a preference, not a pixel count: it is rendered at
@@ -113,6 +114,7 @@ function loadSettingsFromLocalStorage() {
 		Math.max(0.5, Number(localStorageSettings?.readRate) || 1),
 	);
 	settings.readVoice = localStorageSettings?.readVoice ?? "";
+	settings.showAdvanced = localStorageSettings?.showAdvanced ?? false;
 
 	fireEvent({ name: "settingsUpdated" });
 }
@@ -138,6 +140,7 @@ function saveSettingsToLocalStorage() {
 		activity: settings.activity,
 		readRate: settings.readRate,
 		readVoice: settings.readVoice,
+		showAdvanced: settings.showAdvanced,
 	};
 
 	localStorage.settings = JSON.stringify(localStorageSettings);

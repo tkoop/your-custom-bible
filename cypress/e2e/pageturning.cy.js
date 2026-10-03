@@ -8,12 +8,19 @@ describe("page turning", () => {
 		cy.get("#index").should("be.visible");
 	});
 
+	// The advanced menu is chapter-only, so page turning is switched on with
+	// the chapter already open. Empty header chrome dismisses the menu again
+	// without navigating anywhere.
 	function enablePageTurning() {
 		cy.get("input[data-value=pageturning]").should("exist");
-		cy.get("#gearIcon").click();
-		cy.get("#settingsDropdown").should("be.visible");
+		cy.openAdvancedMenu();
 		cy.get("input[data-value=pageturning]").check({ force: true });
-		cy.get("#menuIcon").click(); // close dropdown
+		cy.get("#header").click("left");
+	}
+
+	function openFromIndex(book, chapter) {
+		cy.get("#index").contains(book).click();
+		cy.get(`[data-cy='${book}'] a[data-chapter='${chapter}']`).click();
 	}
 
 	// A touch swipe across the page-turn viewport: press at (x1, y1), release at
@@ -45,11 +52,9 @@ describe("page turning", () => {
 	}
 
 	it("pagination on, off, and page navigation", () => {
-		enablePageTurning();
-
 // Open Psalm 119 (176 verses -> multiple pages)
-		cy.get("#index").contains("Psalms").click();
-		cy.get("[data-cy='Psalms'] a[data-chapter='119']").click();
+		openFromIndex("Psalms", "119");
+		enablePageTurning();
 
 		cy.get("#chapter").should("have.class", "page-turn");
 		cy.get("#pageTurnViewport").should("be.visible");
@@ -85,9 +90,9 @@ describe("page turning", () => {
 		});
 
 		// toggle off -> normal scroll layout restored
-		cy.get("#gearIcon").click();
+		cy.openAdvancedMenu();
 		cy.get("input[data-value=pageturning]").uncheck({ force: true });
-		cy.get("#menuIcon").click();
+		cy.get("#header").click("left");
 		cy.get("#chapter").should("not.have.class", "page-turn");
 		cy.get("#pageTurnViewport").should("not.exist");
 		cy.get("#pageTurnControls").should("not.exist");
@@ -100,9 +105,8 @@ describe("page turning", () => {
 	});
 
 	it("recalculates pages on window resize", () => {
+		openFromIndex("Psalms", "119");
 		enablePageTurning();
-		cy.get("#index").contains("Psalms").click();
-		cy.get("[data-cy='Psalms'] a[data-chapter='119']").click();
 		cy.get("#chapter").should("have.class", "page-turn");
 
 		cy.get("#pageTurnCount").invoke("text").then((before) => {
@@ -118,9 +122,8 @@ describe("page turning", () => {
 	});
 
 	it("keeps the paging UI when moving between chapters with the nav arrows", () => {
+		openFromIndex("Genesis", "1");
 		enablePageTurning();
-		cy.get("#index").contains("Genesis").click();
-		cy.get("[data-cy='Genesis'] a[data-chapter='1']").click();
 		cy.get("#chapter").should("have.class", "page-turn");
 		cy.get("#pageTurnControls").should("be.visible");
 
@@ -142,9 +145,8 @@ describe("page turning", () => {
 	});
 
 	it("does not mark a chapter finished until the last page is reached", () => {
+		openFromIndex("Psalms", "119");
 		enablePageTurning();
-		cy.get("#index").contains("Psalms").click();
-		cy.get("[data-cy='Psalms'] a[data-chapter='119']").click();
 		cy.get("#chapter").should("have.class", "page-turn");
 		cy.get(".page-turn-dot").should("have.length.greaterThan", 1);
 
@@ -164,9 +166,8 @@ describe("page turning", () => {
 	});
 
 	it("pages on a horizontal swipe and ignores other gestures", () => {
+		openFromIndex("Psalms", "119");
 		enablePageTurning();
-		cy.get("#index").contains("Psalms").click();
-		cy.get("[data-cy='Psalms'] a[data-chapter='119']").click();
 		cy.get("#chapter").should("have.class", "page-turn");
 
 		// swipe left -> next page
@@ -192,9 +193,8 @@ describe("page turning", () => {
 	});
 
 	it("does not page when a mouse drag selects text", () => {
+		openFromIndex("Psalms", "119");
 		enablePageTurning();
-		cy.get("#index").contains("Psalms").click();
-		cy.get("[data-cy='Psalms'] a[data-chapter='119']").click();
 		cy.get("#chapter").should("have.class", "page-turn");
 
 		cy.get("#pageTurnCount").invoke("text").should("match", /^1 \/ \d+$/);

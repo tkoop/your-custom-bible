@@ -98,9 +98,8 @@ describe("word lookup popup", () => {
   });
 
   it("shows dotted underlines with pointer cursor when Word study links is on", () => {
-    cy.get("#gearIcon").should("be.visible").click();
-    cy.get("#settingsDropdown").should("be.visible");
-    cy.get("#settingsDropdown").contains("Word study links").click();
+    cy.openAdvancedMenu();
+    cy.get("#advancedDropdown").contains("Word study links").click();
 
     cy.get("#chapter .word-link", { timeout: 10000 }).should("exist");
     cy.get("#chapter .word-link")
@@ -115,25 +114,24 @@ describe("word lookup popup", () => {
   });
 
   it("removes underlines when Word study links is off but popup still works", () => {
-    cy.get("#gearIcon").should("be.visible").click();
-    cy.get("#settingsDropdown").should("be.visible");
-    cy.get("#settingsDropdown").contains("Word study links").click();
+    cy.openAdvancedMenu();
+    cy.get("#advancedDropdown").contains("Word study links").click();
     cy.get("#chapter .word-link", { timeout: 10000 }).should("exist");
 
-    cy.get("#settingsDropdown").should("be.visible");
-    cy.get("#settingsDropdown").contains("Word study links").click();
+    cy.get("#advancedDropdown").should("be.visible");
+    cy.get("#advancedDropdown").contains("Word study links").click();
     cy.get("#chapter .word-link").should("not.exist");
 
-    cy.get("#settingsDropdown").should("be.visible");
-    cy.get("#settingsDropdown").contains("Word study links").click();
+    cy.get("#advancedDropdown").should("be.visible");
+    cy.get("#advancedDropdown").contains("Word study links").click();
     cy.get("#chapter .word-link", { timeout: 10000 }).should("exist");
 
-    cy.get("#settingsDropdown").should("be.visible");
-    cy.get("#settingsDropdown").contains("Word study links").click();
+    cy.get("#advancedDropdown").should("be.visible");
+    cy.get("#advancedDropdown").contains("Word study links").click();
     cy.get("#chapter .word-link").should("not.exist");
 
     cy.get("#gearIcon").click();
-    cy.get("#settingsDropdown").should("not.be.visible");
+    cy.get("#settingsDropdown").should("be.visible");
 
     cy.get("#chapter p.reg1")
       .first()

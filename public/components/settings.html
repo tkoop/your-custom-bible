@@ -1,48 +1,3 @@
-<div style="display: flex">
-	<div>Activity</div>
-	<div>
-		<select
-			style="padding: 6px; border-radius: 6px"
-			id="activity"
-			class="activity-select"
-			aria-label="Activity type"
-		></select>
-	</div>
-</div>
-
-<div
-	style="display: flex"
-	onclick="var i = this.querySelector('input').click(); event.stopPropagation()"
->
-	<div
-		class="chrono-label"
-		style="display: flex; align-items: center; gap: 6px"
-	>Chronological
-		<svg
-			width="15"
-			height="15"
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			stroke-width="2.2"
-			stroke-linecap="round"
-			stroke-linejoin="round"
-			aria-hidden="true"
-		>
-			<circle cx="12" cy="12" r="9"></circle>
-			<path d="M12 7v5l3 2"></path>
-		</svg>
-	</div>
-	<div>
-		<input
-			type="checkbox"
-			data-value="order"
-			onchange="fireEvent({name:'setSetting', setting:'order', value:this.checked?'chronological':'canonical'})"
-			onclick="event.stopPropagation()"
-		/>
-	</div>
-</div>
-
 <div
 	style="display: flex"
 	onclick="var i = this.querySelector('input').click(); event.stopPropagation()"
@@ -113,36 +68,6 @@
 			type="checkbox"
 			data-value="woc"
 			onchange="fireEvent({name:'setSetting', setting:'woc', value:this.checked})"
-			onclick="event.stopPropagation()"
-		/>
-	</div>
-</div>
-
-<div
-	style="display: flex"
-	onclick="var i = this.querySelector('input').click(); event.stopPropagation()"
->
-	<div>Page Turning</div>
-	<div>
-		<input
-			type="checkbox"
-			data-value="pageturning"
-			onchange="fireEvent({name:'setSetting', setting:'pageturning', value:this.checked})"
-			onclick="event.stopPropagation()"
-		/>
-	</div>
-</div>
-
-<div
-	style="display: flex"
-	onclick="var i = this.querySelector('input').click(); event.stopPropagation()"
->
-	<div>Word study links</div>
-	<div>
-		<input
-			type="checkbox"
-			data-value="wordStudyLinks"
-			onchange="fireEvent({name:'setSetting', setting:'wordStudyLinks', value:this.checked})"
 			onclick="event.stopPropagation()"
 		/>
 	</div>
@@ -222,80 +147,41 @@
 	</div>
 </div>
 
-<div>
-	<div>Font</div>
-	<div>
-		<select
-			style="padding: 6px; border-radius: 6px"
-			id="font"
-			onclick="event.stopPropagation()"
-			onchange="fireEvent({name:'setSetting', setting:'font', value:this.options[this.selectedIndex].value}); event.stopPropagation()"
-		>
-			<option value="sourceSerif">Source Serif (default)</option>
-			<option value="ebGaramond">EB Garamond</option>
-			<option value="literata">Literata</option>
-			<option value="sura">Sura</option>
-			<option value="atkinson">Atkinson Hyperlegible</option>
-			<option value="openDyslexic">OpenDyslexic</option>
-		</select>
-	</div>
-</div>
+<hr class="menu-divider" />
 
-<div>
-	<div>Font Size</div>
-	<div class="buttonHolder">
-		<button
-			onclick="fireEvent({name:'setSetting', setting:'fontSize', value:settings.fontSize / 1.1}); event.stopPropagation()"
-		>
-			-
-		</button>
-		<button
-			onclick="fireEvent({name:'setSetting', setting:'fontSize', value:settings.fontSize * 1.1}); event.stopPropagation()"
-		>
-			+
-		</button>
-	</div>
-</div>
-
-<div>
-	<div>Mode</div>
-	<div class="buttonHolder">
-		<button
-			class="mode-btn"
-			data-mode="auto"
-			onclick="fireEvent({name:'setSetting', setting:'mode', value:'auto'}); event.stopPropagation()"
-		>
-			Auto
-		</button>
-		<button
-			class="mode-btn"
-			data-mode="dark"
-			onclick="fireEvent({name:'setSetting', setting:'mode', value:'dark'}); event.stopPropagation()"
-		>
-			Dark
-		</button>
-		<button
-			class="mode-btn"
-			data-mode="light"
-			onclick="fireEvent({name:'setSetting', setting:'mode', value:'light'}); event.stopPropagation()"
-		>
-			Light
-		</button>
-	</div>
-</div>
+<div onclick="fireEvent({name:'advancedMenuRequested', eventObject:event})">Advanced</div>
 
 <script>
+	// Every setting here changes how a chapter reads, so the gear menu only
+	// exists on a chapter page: the icon goes away with the rest of the chrome
+	// elsewhere, and the menu is dismissed if you navigate away mid-read.
+	// Component scripts share the global scope, so this reads the page the
+	// router published rather than keeping a copy that can fall behind.
 	function hideSettingsDropDown() {
 		document.getElementById("settingsDropdown").style.display = "none";
+	}
+
+	function applyGearIcon() {
+		document.getElementById("gearIcon").style.display =
+			window.currentPage === "chapter" ? "block" : "none";
 	}
 
 	registerEventListener(
 		(e) => e.name == "gearIconClicked",
 		function (event) {
+			if (window.currentPage !== "chapter") return;
 			document.getElementById("dropdown").style.display = "none";
 			event.eventObject.stopPropagation();
 			const dd = document.getElementById("settingsDropdown");
 			dd.style.display = dd.style.display === "block" ? "none" : "block";
+		}
+	);
+
+	registerEventListener(
+		(e) => e.name == "showPage",
+		function (event) {
+			applyGearIcon();
+			if (window.currentPage !== "chapter") hideSettingsDropDown();
 		}
 	);
 
@@ -319,10 +205,6 @@
 		if (op.value == settings.you) op.selected = true;
 	});
 
-	document.querySelectorAll("select#font option").forEach((op) => {
-		if (op.value == settings.font) op.selected = true;
-	});
-
 	document.querySelector("input[data-value=titles]").checked = settings.titles;
 	document.querySelector("input[data-value=footnotes]").checked =
 		settings.footnotes;
@@ -330,28 +212,4 @@
 		settings.references;
 	document.querySelector("input[data-value=verses]").checked = settings.verses;
 	document.querySelector("input[data-value=woc]").checked = settings.woc;
-	document.querySelector("input[data-value=pageturning]").checked =
-		settings.pageturning;
-	document.querySelector("input[data-value=wordStudyLinks]").checked =
-		settings.wordStudyLinks;
-	document.querySelector("input[data-value=order]").checked =
-		settings.order == "chronological";
-
-	function updateModeButtons() {
-		document.querySelectorAll(".mode-btn").forEach((btn) => {
-			btn.classList.toggle("selected", btn.dataset.mode === settings.mode);
-		});
-	}
-
-	registerEventListener(
-		(e) => e.name == "settingsUpdated",
-		function (event) {
-			updateModeButtons();
-			document.querySelector("input[data-value=order]").checked =
-				settings.order == "chronological";
-		}
-	);
-
-	updateModeButtons();
-	applyActivityControls();
 </script>

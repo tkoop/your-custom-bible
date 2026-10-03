@@ -454,21 +454,24 @@ a:hover {
 }
 
 #menuIcon,
-#gearIcon {
+#gearIcon,
+#advancedIcon {
 	cursor: pointer;
 	color: var(--text-secondary);
 	transition: color 0.2s ease, transform 0.2s ease;
 }
 
 #menuIcon:hover,
-#gearIcon:hover {
+#gearIcon:hover,
+#advancedIcon:hover {
 	color: var(--primary);
 	transform: scale(1.05);
 }
 
 /* ---------- Dropdown menu ---------- */
 #dropdown,
-#settingsDropdown {
+#settingsDropdown,
+#advancedDropdown {
 	position: absolute;
 	top: 78px;
 	background-color: var(--surface);
@@ -493,8 +496,13 @@ a:hover {
 	right: 54px;
 }
 
+#advancedDropdown {
+	right: 90px;
+}
+
 #dropdown > div,
-#settingsDropdown > div {
+#settingsDropdown > div,
+#advancedDropdown > div {
 	padding: 10px 14px;
 	cursor: pointer;
 	display: flex;
@@ -508,7 +516,8 @@ a:hover {
 }
 
 #dropdown > div:hover,
-#settingsDropdown > div:hover {
+#settingsDropdown > div:hover,
+#advancedDropdown > div:hover {
 	background-color: var(--surface-soft);
 }
 
@@ -519,14 +528,16 @@ a:hover {
 }
 
 #dropdown .buttonHolder,
-#settingsDropdown .buttonHolder {
+#settingsDropdown .buttonHolder,
+#advancedDropdown .buttonHolder {
 	display: flex;
 	justify-content: flex-end;
 	gap: 8px;
 }
 
 #dropdown button,
-#settingsDropdown button {
+#settingsDropdown button,
+#advancedDropdown button {
 	border: 1px solid var(--border);
 	background: var(--surface);
 	color: var(--text-primary);
@@ -539,21 +550,24 @@ a:hover {
 }
 
 #dropdown button:hover,
-#settingsDropdown button:hover {
+#settingsDropdown button:hover,
+#advancedDropdown button:hover {
 	background: var(--primary);
 	color: #fff;
 	border-color: var(--primary);
 }
 
 #dropdown .buttonHolder button.selected,
-#settingsDropdown .buttonHolder button.selected {
+#settingsDropdown .buttonHolder button.selected,
+#advancedDropdown .buttonHolder button.selected {
 	background: var(--primary-dark);
 	color: #fff;
 	border-color: var(--primary-dark);
 }
 
 #dropdown select,
-#settingsDropdown select {
+#settingsDropdown select,
+#advancedDropdown select {
 	padding: 7px 10px;
 	border-radius: var(--radius-sm);
 	border: 1px solid var(--border);
@@ -566,19 +580,22 @@ a:hover {
 }
 
 #dropdown select:hover,
-#settingsDropdown select:hover {
+#settingsDropdown select:hover,
+#advancedDropdown select:hover {
 	border-color: var(--primary);
 }
 
 #dropdown select:focus,
-#settingsDropdown select:focus {
+#settingsDropdown select:focus,
+#advancedDropdown select:focus {
 	outline: none;
 	border-color: var(--primary);
 	box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 #dropdown input[type="checkbox"],
-#settingsDropdown input[type="checkbox"] {
+#settingsDropdown input[type="checkbox"],
+#advancedDropdown input[type="checkbox"] {
 	display: block;
 	width: 18px;
 	height: 18px;
@@ -672,8 +689,8 @@ body.dark .act-other3 {
 	--activity-tint: rgb(239 105 174 / 0.18);
 }
 
-/* The activity select in the small page pickers. In the gear dropdown it
-   deliberately shares the plain #settingsDropdown select style. */
+/* The activity select in the small page pickers. In the advanced dropdown it
+   deliberately shares the plain #advancedDropdown select style. */
 .activity-picker select.activity-select {
 	color: var(--activity-color);
 	background-color: var(--activity-tint);

@@ -1,8 +1,10 @@
 const base = "http://localhost:8000";
 
-function openGear() {
-	cy.get("#gearIcon").click();
-	cy.get("#settingsDropdown").should("be.visible");
+// The gear and advanced menus are chapter-only, so open a chapter before
+// reaching for the activity picker that now lives in the advanced menu.
+function openActivityMenu() {
+	cy.openChapter();
+	cy.openAdvancedMenu();
 }
 
 function waitForComponents() {
@@ -32,9 +34,9 @@ describe("activity types", () => {
 		cy.get("#home").should("be.visible");
 	});
 
-	it("lists the eight activity types in the gear dropdown", () => {
-		openGear();
-		cy.get("#settingsDropdown select#activity")
+	it("lists the eight activity types in the advanced dropdown", () => {
+		openActivityMenu();
+		cy.get("#advancedDropdown select#activity")
 			.find("option")
 			.should("have.length", 8)
 			.then(($options) => {
@@ -49,7 +51,7 @@ describe("activity types", () => {
 					"Other 3",
 				]);
 			});
-		cy.get("#settingsDropdown select#activity").should("have.value", "default");
+		cy.get("#advancedDropdown select#activity").should("have.value", "default");
 	});
 
 	it("has a small activity selector on the home and index pages", () => {
@@ -67,16 +69,16 @@ describe("activity types", () => {
 	it("keeps every selector in sync and stores the choice", () => {
 		cy.get("#homeActivity select").select("church");
 
-		openGear();
-		cy.get("#settingsDropdown select#activity").should("have.value", "church");
+		openActivityMenu();
+		cy.get("#advancedDropdown select#activity").should("have.value", "church");
 		// picking an option must not close the dropdown
-		cy.get("#settingsDropdown").should("be.visible");
+		cy.get("#advancedDropdown").should("be.visible");
 		cy.window().then((win) => {
 			expect(win.settings.activity).to.eq("church");
 			expect(JSON.parse(win.localStorage.settings).activity).to.eq("church");
 		});
 
-		cy.get("#settingsDropdown select#activity").select("biblestudy");
+		cy.get("#advancedDropdown select#activity").select("biblestudy");
 		cy.get("#homeActivity select").should("have.value", "biblestudy");
 		cy.get("#index select").should("have.value", "biblestudy");
 	});

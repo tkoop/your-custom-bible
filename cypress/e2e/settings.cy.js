@@ -131,22 +131,22 @@ describe('template spec', () => {
   })
 
   it("reading font leaves the brand alone", () => {
-    // The gear menu's font picker is for scripture. The brand is chrome
+    // The advanced menu's font picker is for scripture. The brand is chrome
     // rather than scripture, so it keeps its own font (--font-brand) no
     // matter which reading font is chosen.
     const fontOf = (selector) =>
       cy.get(selector).then(($el) => getComputedStyle($el[0]).fontFamily)
 
-    cy.get("div#settingsDropdown select#font").should("exist")
-    cy.get("#gearIcon").should("be.visible").click()
-    cy.get("div#settingsDropdown").should("be.visible")
-    cy.get("div#settingsDropdown select#font").select("sourceSerif")
+    cy.openChapter("Genesis", "50")
+    cy.get("div#advancedDropdown select#font").should("exist")
+    cy.openAdvancedMenu()
+    cy.get("div#advancedDropdown select#font").select("sourceSerif")
     cy.window().then((win) => win.document.fonts.ready)
 
     fontOf(".brand-title").then((brandBefore) => {
       fontOf("#body").then((scriptureBefore) => {
         // OpenDyslexic is a sans face, so the scripture stack really changes.
-        cy.get("div#settingsDropdown select#font").select("openDyslexic")
+        cy.get("div#advancedDropdown select#font").select("openDyslexic")
         cy.window().then((win) => win.document.fonts.ready)
 
         fontOf(".brand-title").should("equal", brandBefore)
@@ -163,10 +163,10 @@ describe('template spec', () => {
     const fontOf = (selector) =>
       cy.get(selector).then(($el) => getComputedStyle($el[0]).fontFamily)
 
-    cy.get("div#settingsDropdown select#font").should("exist")
-    cy.get("#gearIcon").should("be.visible").click()
-    cy.get("div#settingsDropdown").should("be.visible")
-    cy.get("div#settingsDropdown select#font").select("openDyslexic")
+    cy.openChapter("Genesis", "50")
+    cy.get("div#advancedDropdown select#font").should("exist")
+    cy.openAdvancedMenu()
+    cy.get("div#advancedDropdown select#font").select("openDyslexic")
     cy.window().then((win) => win.document.fonts.ready)
 
     // Chapter text still follows the picker, so the setting took effect.

@@ -5,7 +5,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="theme-color" content="#34507a" />
 		<title>Your Custom Bible</title>
-<link rel="stylesheet" href="style.css?version=38" />
+<link rel="stylesheet" href="style.css?version=39" />
 		<link rel="icon" type="image/png" href="images/logo.png?version=4" />
 		<link rel="manifest" href="manifest.json?version=2" />
 	</head>
@@ -13,6 +13,32 @@
 	<body>
 		<div id="header">
 			<div id="rightIcons">
+				<svg
+					id="advancedIcon"
+					style="display: none"
+					onclick="fireEvent({ name: 'advancedIconClicked', eventObject: event })"
+					xmlns="http://www.w3.org/2000/svg"
+					width="24"
+					height="24"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					aria-label="Advanced menu"
+				>
+					<line x1="4" y1="21" x2="4" y2="14"></line>
+					<line x1="4" y1="10" x2="4" y2="3"></line>
+					<line x1="12" y1="21" x2="12" y2="12"></line>
+					<line x1="12" y1="8" x2="12" y2="3"></line>
+					<line x1="20" y1="21" x2="20" y2="16"></line>
+					<line x1="20" y1="12" x2="20" y2="3"></line>
+					<line x1="1" y1="14" x2="7" y2="14"></line>
+					<line x1="9" y1="8" x2="15" y2="8"></line>
+					<line x1="17" y1="16" x2="23" y2="16"></line>
+				</svg>
+
 				<svg
 					id="gearIcon"
 					onclick="fireEvent({ name: 'gearIconClicked', eventObject: event })"
@@ -50,6 +76,8 @@
 
 			<div id="settingsDropdown" style="text-align: left"></div>
 
+			<div id="advancedDropdown" style="text-align: left"></div>
+
 			<div
 				id="brand"
 				onclick="fireEvent({ name: 'showPage', page: 'home' })"
@@ -78,12 +106,12 @@
 
 	<script src="framework.js?version=1"></script>
 	<script src="activity.js?version=1"></script>
-	<script src="settings.js?version=11"></script>
+		<script src="settings.js?version=12"></script>
 	<script src="books.js?version=2"></script>
 
 	<script>
 		async function loadComponents() {
-await loadComponent("dropdown", "components/menu.html?version=13");
+			await loadComponent("dropdown", "components/menu.html?version=14");
 			await loadComponent("chapter", "components/chapter.html?version=35");
 			await loadComponent("home", "components/home.html?version=5");
 			await loadComponent("about", "components/about.html?version=2");
@@ -91,8 +119,9 @@ await loadComponent("dropdown", "components/menu.html?version=13");
 			await loadComponent("search", "components/search.html?version=4");
 			await loadComponent(
 				"settingsDropdown",
-				"components/settings.html?version=8"
+				"components/settings.html?version=11"
 			);
+			await loadComponent("advancedDropdown", "components/advanced.html?version=1");
 			await loadComponent("speedReader", "components/speedReader.html?version=9");
 			await loadComponent("readToMe", "components/readToMe.html?version=6");
 		}
@@ -173,6 +202,9 @@ await loadComponent("dropdown", "components/menu.html?version=13");
 		registerEventListener(
 			(event) => event.name == "showPage",
 			function (event) {
+				// Published first, so listeners further down the fan-out (the
+				// chapter-only gear and advanced menus) see the new page.
+				window.currentPage = event.page;
 				if (!event.skipHistory) {
 					let hash;
 					if (event.page === "home") hash = "#";

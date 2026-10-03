@@ -38,19 +38,27 @@ describe("bible order picker", () => {
     cy.get("input[data-value=order]").should("be.checked");
   });
 
-  it("gear menu sets and syncs the order", () => {
-    cy.get("#settingsDropdown").should("contain", "Chronological");
-    cy.get("#gearIcon").click();
-    cy.get("#settingsDropdown").should("be.visible");
-    cy.get("#settingsDropdown").contains("Chronological").should("be.visible");
-    cy.get("#settingsDropdown input[data-value=order]").check();
+  it("advanced menu sets and syncs the order", () => {
+    cy.openChapter();
+    cy.get("#advancedDropdown").should("contain", "Chronological");
+    cy.openAdvancedMenu();
+    cy.get("#advancedDropdown").contains("Chronological").should("be.visible");
+    cy.get("#advancedDropdown input[data-value=order]").check();
 
+    // The picker it drives is on the home page, and the advanced menu is
+    // chapter-only, so the two are checked in turn.
+    cy.get("#brand").click();
+    cy.get("#home").should("be.visible");
     cy.get("#homePicker .index-chronological").should("be.visible");
     cy.get("#homePicker .index-canonical").should("not.be.visible");
     cy.get("#order-canonical").should("not.have.class", "active");
     cy.get("#order-chronological").should("have.class", "active");
 
-    cy.get("#settingsDropdown input[data-value=order]").uncheck();
+    cy.openChapter();
+    cy.openAdvancedMenu();
+    cy.get("#advancedDropdown input[data-value=order]").uncheck();
+    cy.get("#brand").click();
+    cy.get("#home").should("be.visible");
     cy.get("#homePicker .index-canonical").should("be.visible");
     cy.get("#homePicker .index-chronological").should("not.be.visible");
     cy.get("#order-canonical").should("have.class", "active");
@@ -77,14 +85,19 @@ describe("bible order picker", () => {
     cy.get("#brand").click();
     cy.contains(".index-order-button.active", "Alphabetical");
 
-    // the saved order setting is untouched (still canonical)
-    cy.get("#settingsDropdown").should("contain", "Chronological");
-    cy.get("#gearIcon").click();
+    // the saved order setting is untouched (still canonical), and reading it
+    // needs a chapter because the advanced menu is chapter-only
+    cy.openChapter("Genesis", "50");
+    cy.get("#advancedDropdown").should("contain", "Chronological");
+    cy.openAdvancedMenu();
     cy.get("input[data-value=order]").should("not.be.checked");
     cy.get("#gearIcon").click();
 
-    // reload falls back to the saved canonical order
+    // reload falls back to the saved canonical order. It restores the chapter
+    // hash, so step back to the picker to look at it.
     cy.reload();
+    cy.get("#brand").click();
+    cy.get("#home").should("be.visible");
     cy.contains(".index-order-button.active", "Canonical");
     cy.get("#homePicker .index-canonical").should("be.visible");
     cy.get("#homePicker .index-alphabetical").should("not.be.visible");
@@ -94,15 +107,16 @@ describe("bible order picker", () => {
     // index picker button has the clock icon after the word
     cy.get("#order-chronological svg").should("exist");
 
-    // gear menu shows the icon after "Chronological"
-    cy.get("#settingsDropdown").should("contain", "Chronological");
-    cy.get("#gearIcon").click();
-    cy.get("#settingsDropdown .chrono-label svg").should("exist");
+    // advanced menu shows the icon after "Chronological"
+    cy.openChapter();
+    cy.get("#advancedDropdown").should("contain", "Chronological");
+    cy.openAdvancedMenu();
+    cy.get("#advancedDropdown .chrono-label svg").should("exist");
     cy.get("#gearIcon").click();
 
     // canonical mode: no clock icon on the nav arrows
-    cy.contains("Genesis").click();
-    cy.get("[data-cy='homeGenesis']").contains("1").click();
+    cy.get("#brand").click();
+    cy.openChapter("Genesis", "1");
     cy.get("body").should("not.have.class", "chrono-nav");
     cy.get(".chapter-nav .chrono-corner").should("not.be.visible");
 

@@ -10,12 +10,6 @@
 
 <hr class="menu-divider" />
 
-<div id="readToMeItem" data-cy="readToMeItem" style="display:none" onclick="fireEvent({name:'readToMeClicked'})">Read to me</div>
-
-<div id="speedReadItem" style="display:none" onclick="fireEvent({name:'dotIconClicked'})">Speed Read</div>
-
-<hr class="menu-divider" />
-
 <div onclick="fireEvent({name:'showPage', page:'about'})">About</div>
 
 <script>
@@ -37,22 +31,4 @@
 		hideDropDown();
 		document.getElementById("settingsDropdown").style.display = "none";
 	});
-
-	// Both reading modes act on the chapter, so they only show on one.
-	// Read to me also needs a browser that can speak.
-	registerEventListener(
-		(e) => e.name == "showPage",
-		function (event) {
-			var onChapter = event.page === "chapter";
-			document.getElementById("speedReadItem").style.display = onChapter
-				? "flex"
-				: "none";
-			document.getElementById("readToMeItem").style.display =
-				onChapter &&
-				typeof rtmSupported == "function" &&
-				rtmSupported()
-					? "flex"
-					: "none";
-		}
-	);
 </script>
