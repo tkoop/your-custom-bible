@@ -11,7 +11,7 @@ This project is not associated with the creators of the Berean Bible.
 
 Download the Berean Study Bible from https://berean.bible/downloads.htm as an epub file.  (This has already been done for you and lives in the root directory as brb.docx)  Rename it to .zip and unzip it.  (This also has been done for you and lives in the root directory as /brb)
 
-Run this command to parse the chapter html files into individual chapter files that will be put into public/chapters.
+Run this command to parse the chapter html files into individual chapter files that will be put into public/translations/bsb.
 
 ```
 npm run compile

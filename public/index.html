@@ -110,11 +110,12 @@
 	<script src="activity.js?version=1"></script>
 		<script src="settings.js?version=16"></script>
 	<script src="books.js?version=2"></script>
+	<script src="translations.js?version=1"></script>
 
 	<script>
 		async function loadComponents() {
 			await loadComponent("dropdown", "components/menu.html?version=14");
-			await loadComponent("chapter", "components/chapter.html?version=41");
+			await loadComponent("chapter", "components/chapter.html?version=43");
 			await loadComponent("home", "components/home.html?version=5");
 			await loadComponent("about", "components/about.html?version=2");
 			await loadComponent("history", "components/history.html?version=5");
@@ -192,8 +193,7 @@ await loadComponent("speedReader", "components/speedReader.html?version=9");
 				const chapter = parts.slice(1).join("-");
 				const book = books.find((b) => b.abbr.toUpperCase() === abbr);
 				if (book && chapter) {
-					const url = "chapters/" + book.slug + "-" + chapter + ".html";
-					loadURL(url, true);
+					loadURL(chapterUrl(book.slug, chapter), true);
 				} else {
 					// invalid hash, go to home
 					fireEvent({ name: "showPage", page: "home", skipHistory: true });

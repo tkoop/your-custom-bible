@@ -223,7 +223,7 @@
 
 	function loadThisChapter(book, slug, chapter) {
 		window.__userNavigated = true;
-		var url = "./chapters/" + slug + "-" + chapter + ".html";
+		var url = chapterUrl(slug, chapter);
 		var bookObj = books.find((b) => b.slug === slug);
 		// The settings a shared link brought ride along in the address bar, so
 		// the version on screen survives a reload or a bookmark.
