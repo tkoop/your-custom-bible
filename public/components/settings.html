@@ -90,22 +90,6 @@
 </div>
 
 <div style="display: flex">
-	<div>Case</div>
-	<div>
-		<select
-			style="padding: 6px; border-radius: 6px"
-			id="case"
-			onclick="event.stopPropagation()"
-			onchange="fireEvent({name:'setSetting', setting:'case', value:this.options[this.selectedIndex].value}); event.stopPropagation()"
-		>
-			<option value="lower">Mostly lower case</option>
-			<option value="upper">Upper case</option>
-			<option value="bsb">BSB</option>
-		</select>
-	</div>
-</div>
-
-<div style="display: flex">
 	<div>God's Name</div>
 	<div>
 		<select
@@ -124,6 +108,22 @@
 			<option value="Elohim">Elohim</option>
 			<option value="G-d">G-d</option>
 			<option value="God">God</option>
+		</select>
+	</div>
+</div>
+
+<div style="display: flex">
+	<div>Case</div>
+	<div>
+		<select
+			style="padding: 6px; border-radius: 6px"
+			id="case"
+			onclick="event.stopPropagation()"
+			onchange="fireEvent({name:'setSetting', setting:'case', value:this.options[this.selectedIndex].value}); event.stopPropagation()"
+		>
+			<option value="lower">Mostly lower case</option>
+			<option value="upper">Upper case</option>
+			<option value="bsb">BSB</option>
 		</select>
 	</div>
 </div>

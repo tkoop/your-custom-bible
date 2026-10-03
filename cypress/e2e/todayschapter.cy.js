@@ -67,7 +67,7 @@ describe("Today's Chapter", () => {
 				"contain",
 				win.chapterRefName(target.book.name) + " " + target.chapter,
 			);
-			cy.get("#chapter").should("contain", "YCB-CYL");
+			cy.get("#chapter").should("contain", "YCB-CYLP");
 			cy.location("hash").should(
 				"eq",
 				"#" + target.book.abbr + "-" + target.chapter,

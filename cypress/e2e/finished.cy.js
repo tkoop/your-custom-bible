@@ -8,7 +8,7 @@ describe("chapter finished tracking", () => {
     // load a long chapter (Psalm 119) without reaching the end
     cy.contains("Psalms").click();
     cy.get("[data-cy='homePsalms']").contains("119").click();
-    cy.get("#chapter").should("contain", "Psalm 119 (YCB-CYL)");
+    cy.get("#chapter").should("contain", "Psalm 119 (YCB-CYLP)");
 
     // the stored date uses a parseable YYYY-MM-DD format, not the legacy one
     cy.then(() => {
@@ -26,7 +26,7 @@ describe("chapter finished tracking", () => {
 
     // go back to the chapter and scroll to the very end
     cy.go("back");
-    cy.get("#chapter").should("contain", "Psalm 119 (YCB-CYL)");
+    cy.get("#chapter").should("contain", "Psalm 119 (YCB-CYLP)");
     cy.scrollTo("bottom");
     cy.wait(300);
 

@@ -426,7 +426,27 @@ fireEvent({
 
 		var upperLower = settings.case[0].toUpperCase();
 
-		return "YCB-" + letter + nameLetter + upperLower;
+		return "YCB-" + letter + nameLetter + upperLower + youLetter();
+	}
+
+	// Plural You is the last tag letter because it is the last setting the
+	// menu offers that rewrites the words: Y = "you", P = (pl)/(sg) marks,
+	// A = "you all", V = "y'all", G = "you guys", C = coloured (blue) "you".
+	function youLetter() {
+		switch (settings.you) {
+			case "youall":
+				return "A";
+			case "yall":
+				return "V";
+			case "youguys":
+				return "G";
+			case "youcoloured":
+				return "C";
+			case "youpl":
+				return "P";
+			default:
+				return "Y";
+		}
 	}
 
 	function addArrows(html, title) {

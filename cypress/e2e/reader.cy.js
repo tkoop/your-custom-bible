@@ -9,7 +9,7 @@ describe('template spec', () => {
     cy.contains("50").click()
 
     // Chapter 50
-    cy.contains("Genesis 50 (YCB-CYL)")
+    cy.contains("Genesis 50 (YCB-CYLP)")
     cy.contains("Then Joseph fell")
     cy.get("[data-cy=chapterLeft]:first").click()
 
@@ -24,7 +24,7 @@ describe('template spec', () => {
 
     // Exodus 1
     cy.contains("These are the names of the sons of Israel who went to Egypt")
-    cy.contains("Exodus 1 (YCB-CYL)")
+    cy.contains("Exodus 1 (YCB-CYLP)")
 
   })
 

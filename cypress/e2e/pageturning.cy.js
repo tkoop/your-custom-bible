@@ -129,7 +129,7 @@ describe("page turning", () => {
 
 		// next chapter via the top nav arrow
 		cy.get("[data-cy=chapterRight]").first().click();
-		cy.get("#chapter").should("contain", "Genesis 2 (YCB-CYL)");
+		cy.get("#chapter").should("contain", "Genesis 2 (YCB-CYLP)");
 		cy.get("#chapter").should("have.class", "page-turn");
 		cy.get("#pageTurnViewport").should("be.visible");
 		cy.get("#pageTurnControls").should("be.visible");
@@ -137,7 +137,7 @@ describe("page turning", () => {
 
 		// previous chapter via the top nav arrow
 		cy.get("[data-cy=chapterLeft]").first().click();
-		cy.get("#chapter").should("contain", "Genesis 1 (YCB-CYL)");
+		cy.get("#chapter").should("contain", "Genesis 1 (YCB-CYLP)");
 		cy.get("#chapter").should("have.class", "page-turn");
 		cy.get("#pageTurnViewport").should("be.visible");
 		cy.get("#pageTurnControls").should("be.visible");

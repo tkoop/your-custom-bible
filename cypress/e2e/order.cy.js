@@ -27,7 +27,7 @@ describe("bible order picker", () => {
     cy.get("[data-cy='homechronoChapters-0']").should("be.visible");
     cy.get("[data-cy='homechronoChapters-0']").contains("10").click();
 
-    cy.get("#chapter").should("contain", "Genesis 10 (YCB-CYL)");
+    cy.get("#chapter").should("contain", "Genesis 10 (YCB-CYLP)");
   });
 
   it("remembers the chosen order", () => {
@@ -79,7 +79,7 @@ describe("bible order picker", () => {
     // open a book and read a chapter
     cy.get("[data-cy='homealpha-Revelation']").click();
     cy.get("[data-cy='homealphaChapters-Revelation']").contains("1").click();
-    cy.get("#chapter").should("contain", "Revelation 1 (YCB-CYL)");
+    cy.get("#chapter").should("contain", "Revelation 1 (YCB-CYLP)");
 
     // the view stays alphabetical until reload
     cy.get("#brand").click();
@@ -126,7 +126,7 @@ describe("bible order picker", () => {
     cy.get("body").should("have.class", "chrono-nav");
     cy.get("[data-cy='homechrono-0']").click();
     cy.get("[data-cy='homechronoChapters-0']").contains("10").click();
-    cy.get("#chapter").should("contain", "Genesis 10 (YCB-CYL)");
+    cy.get("#chapter").should("contain", "Genesis 10 (YCB-CYLP)");
     cy.get(".chapter-nav .chrono-corner").should("be.visible");
   });
 
@@ -134,34 +134,34 @@ describe("bible order picker", () => {
     cy.contains(".index-order-button", "Chronological").click();
     cy.get("[data-cy='homechrono-0']").click();
     cy.get("[data-cy='homechronoChapters-0']").contains("10").click();
-    cy.get("#chapter").should("contain", "Genesis 10 (YCB-CYL)");
+    cy.get("#chapter").should("contain", "Genesis 10 (YCB-CYLP)");
 
     // next chronologically goes to Job 1 (Json places Job right after Gen 1-10)
     cy.get("[data-cy=chapterRight]:first").click();
-    cy.get("#chapter").should("contain", "Job 1 (YCB-CYL)");
+    cy.get("#chapter").should("contain", "Job 1 (YCB-CYLP)");
 
     // back to Genesis 10
     cy.get("[data-cy=chapterLeft]:first").click();
-    cy.get("#chapter").should("contain", "Genesis 10 (YCB-CYL)");
+    cy.get("#chapter").should("contain", "Genesis 10 (YCB-CYLP)");
   });
 
   it("chronological arrows wrap around the sequence", () => {
     cy.contains(".index-order-button", "Chronological").click();
     cy.get("[data-cy='homechrono-196']").click();
     cy.get("[data-cy='homechronoChapters-196']").contains("22").click();
-    cy.get("#chapter").should("contain", "Revelation 22 (YCB-CYL)");
+    cy.get("#chapter").should("contain", "Revelation 22 (YCB-CYLP)");
 
     // next after the last chapter wraps to the first
     cy.get("[data-cy=chapterRight]:first").click();
-    cy.get("#chapter").should("contain", "Genesis 1 (YCB-CYL)");
+    cy.get("#chapter").should("contain", "Genesis 1 (YCB-CYLP)");
   });
 
   it("canonical arrows are unchanged", () => {
     cy.contains("Genesis").click();
     cy.get("[data-cy='homeGenesis']").contains("50").click();
-    cy.get("#chapter").should("contain", "Genesis 50 (YCB-CYL)");
+    cy.get("#chapter").should("contain", "Genesis 50 (YCB-CYLP)");
 
     cy.get("[data-cy=chapterRight]:first").click();
-    cy.get("#chapter").should("contain", "Exodus 1 (YCB-CYL)");
+    cy.get("#chapter").should("contain", "Exodus 1 (YCB-CYLP)");
   });
 });

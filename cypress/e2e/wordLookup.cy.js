@@ -2,7 +2,7 @@ describe("word lookup popup", () => {
   beforeEach(() => {
     cy.clearLocalStorage();
     cy.visit("http://localhost:8000/#Gen-1");
-    cy.get("#chapter").should("contain", "Genesis 1 (YCB-CYL)");
+    cy.get("#chapter").should("contain", "Genesis 1 (YCB-CYLP)");
     cy.get("#chapter .reftext#v1").should("exist");
     cy.window().then((win) => win.document.fonts.ready);
   });

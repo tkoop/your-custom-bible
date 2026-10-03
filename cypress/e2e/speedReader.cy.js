@@ -21,7 +21,7 @@ describe("speed reader optimal recognition position", () => {
   beforeEach(() => {
     cy.clearLocalStorage();
     cy.visit("http://localhost:8000/#Gen-1");
-    cy.get("#chapter").should("contain", "Genesis 1 (YCB-CYL)");
+    cy.get("#chapter").should("contain", "Genesis 1 (YCB-CYLP)");
     cy.window().then((win) => win.document.fonts.ready);
   });
 
