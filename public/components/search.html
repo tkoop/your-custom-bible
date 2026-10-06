@@ -18,6 +18,9 @@
 			><input type="radio" name="searchMode" value="words" /> Each
 			word</label
 		>
+		<label class="search-partial"
+			><input type="checkbox" id="searchPartial" checked /> Partial</label
+		>
 	</div>
 </div>
 
@@ -110,8 +113,22 @@
 		if (el) el.checked = true;
 	}
 
+	var partialEl = document.getElementById("searchPartial");
+
+	function currentPartial() {
+		return partialEl.checked;
+	}
+
+	function setPartial(value) {
+		partialEl.checked = value !== false;
+	}
+
 	var savedMode = localStorage.searchMode;
 	if (savedMode === "words" || savedMode === "phrase") setMode(savedMode);
+	var savedPartial = localStorage.searchPartial;
+	setPartial(
+		savedPartial === null || savedPartial === undefined || savedPartial === "1"
+	);
 
 	registerEventListener(
 		(e) => e.name == "showPage" && e.page == "search",
@@ -169,14 +186,43 @@
 			runSearch(inputEl.value, false);
 		});
 	});
+	partialEl.addEventListener("change", function () {
+		localStorage.searchPartial = partialEl.checked ? "1" : "0";
+		runSearch(inputEl.value, false);
+	});
+
+	var WORD_CHAR = /[A-Za-z0-9'’-]/;
+
+	function isWordChar(ch) {
+		return ch !== "" && WORD_CHAR.test(ch);
+	}
+
+	function isWholeWord(text, start, len) {
+		return (
+			!isWordChar(start > 0 ? text.charAt(start - 1) : "") &&
+			!isWordChar(start + len < text.length ? text.charAt(start + len) : "")
+		);
+	}
+
+	function findTerm(text, term, partial, from) {
+		for (
+			var i = text.indexOf(term, from);
+			i >= 0;
+			i = text.indexOf(term, i + 1)
+		) {
+			if (partial || isWholeWord(text, i, term.length)) return i;
+		}
+		return -1;
+	}
 
 	function runSearch(query, record) {
 		query = (query || "").trim().toLowerCase();
 		var mode = currentMode();
+		var partial = currentPartial();
 		var scope = scopeSelect.value;
 		var slugs = currentScopeSlugs();
 		var slugSet = slugs ? new Set(slugs) : null;
-		lastSearch = { q: query, mode: mode, scope: scope };
+		lastSearch = { q: query, mode: mode, scope: scope, partial: partial };
 		var status = document.getElementById("searchStatus");
 		var box = document.getElementById("searchResults");
 		box.innerHTML = "";
@@ -201,7 +247,7 @@
 					var lower = rec[3].toLowerCase();
 					var match = true;
 					for (var j = 0; j < terms.length; j++) {
-						if (lower.indexOf(terms[j]) < 0) {
+						if (findTerm(lower, terms[j], partial, 0) < 0) {
 							match = false;
 							break;
 						}
@@ -216,14 +262,14 @@
 					" \u00b7 " +
 					ms +
 					" ms";
-				renderResults(box, hits, terms);
+				renderResults(box, hits, terms, partial);
 			})
 			.catch(function () {
 				status.textContent = "Could not load the search index.";
 			});
 	}
 
-	function renderResults(box, hits, terms) {
+	function renderResults(box, hits, terms, partial) {
 		var MAX_RESULTS = 200;
 		var frag = document.createDocumentFragment();
 
@@ -239,7 +285,7 @@
 
 			var text = document.createElement("span");
 			text.className = "search-text";
-			text.appendChild(highlight(rec[3], terms));
+			text.appendChild(highlight(rec[3], terms, partial));
 
 			row.appendChild(ref);
 			row.appendChild(text);
@@ -263,7 +309,7 @@
 		}
 	}
 
-	function highlight(text, terms) {
+	function highlight(text, terms, partial) {
 		var lower = text.toLowerCase();
 		var frag = document.createDocumentFragment();
 		var pos = 0;
@@ -272,7 +318,7 @@
 			var len = 0;
 			for (var i = 0; i < terms.length; i++) {
 				var t = terms[i];
-				var j = lower.indexOf(t, pos);
+				var j = findTerm(lower, t, partial, pos);
 				if (
 					j >= 0 &&
 					(idx < 0 || j < idx || (j == idx && t.length > len))
@@ -311,14 +357,21 @@
 
 	function recordSearch(entry) {
 		if (!entry || !entry.q) return;
+		var partial = entry.partial !== false;
 		var list = getSearchHistory().filter(function (e) {
 			return !(
 				e.q === entry.q &&
 				e.mode === entry.mode &&
-				e.scope === entry.scope
+				e.scope === entry.scope &&
+				(e.partial !== false) === partial
 			);
 		});
-		list.unshift({ q: entry.q, mode: entry.mode, scope: entry.scope });
+		list.unshift({
+			q: entry.q,
+			mode: entry.mode,
+			scope: entry.scope,
+			partial: partial,
+		});
 		if (list.length > HISTORY_LIMIT) list.length = HISTORY_LIMIT;
 		localStorage[HISTORY_KEY] = JSON.stringify(list);
 		renderSearchHistory();
@@ -367,6 +420,12 @@
 				wmeta.textContent = " \u00b7 each word";
 				chip.appendChild(wmeta);
 			}
+			if (entry.partial !== false) {
+				var pmeta = document.createElement("span");
+				pmeta.className = "search-history-meta";
+				pmeta.textContent = " \u00b7 partial";
+				chip.appendChild(pmeta);
+			}
 			chip.onclick = (function (entry) {
 				return function () {
 					inputEl.value = entry.q;
@@ -378,6 +437,7 @@
 					)
 						scopeSelect.value = entry.scope;
 					setMode(entry.mode || "phrase");
+					setPartial(entry.partial !== false);
 					runSearch(entry.q, true);
 				};
 			})(entry);
