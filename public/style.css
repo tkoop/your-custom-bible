@@ -2304,6 +2304,513 @@ body.rtm-open #chapter.page-turn {
 	padding-top: 8px;
 }
 
+/* The way through to the page for this word, across the foot of the popup.
+   Words the tables leave without a Strong's number have no page, and the
+   button is hidden for those. */
+.word-popup-study {
+	display: block;
+	width: 100%;
+	margin-top: 10px;
+	padding: 9px 10px;
+	background: none;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	color: var(--primary);
+	font-family: var(--font-ui);
+	font-size: 0.88rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.word-popup-study:hover {
+	background: var(--accent-soft);
+	border-color: var(--primary);
+}
+
+/* ---------- Word study page ---------- */
+/* App chrome, so the UI font; the script and the English words are set back to
+   the reading font where they belong. */
+.word-page {
+	font-family: var(--font-ui);
+	max-width: 44rem;
+	margin: 0 auto;
+	padding-bottom: 40px;
+}
+
+.word-page-bar {
+	margin-bottom: 14px;
+}
+
+.word-back {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 8px 14px 8px 10px;
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: 999px;
+	color: var(--text-secondary);
+	font-family: var(--font-ui);
+	font-size: 0.88rem;
+	font-weight: 600;
+	cursor: pointer;
+	box-shadow: var(--shadow-sm);
+	transition: all 0.2s ease;
+}
+
+.word-back:hover {
+	color: var(--primary);
+	border-color: var(--primary);
+	transform: translateY(-1px);
+}
+
+.word-status {
+	font-size: 0.95rem;
+	color: var(--text-muted);
+	margin-bottom: 12px;
+}
+
+.word-card {
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-lg);
+	box-shadow: var(--shadow-sm);
+	padding: 20px 22px;
+	margin-bottom: 8px;
+}
+
+.word-headword {
+	font-family: var(--font-scripture), 'Noto Serif Hebrew', serif;
+	font-size: 2.6rem;
+	line-height: 1.35;
+	margin: 0;
+	word-break: break-word;
+}
+
+.word-headword[dir='rtl'] {
+	text-align: right;
+}
+
+.word-transliteration {
+	font-family: var(--font-scripture);
+	font-size: 1.15rem;
+	font-style: italic;
+	color: var(--text-secondary);
+	margin: 2px 0 10px;
+}
+
+.word-meta,
+.word-stats {
+	margin: 0 0 4px;
+	font-size: 0.9rem;
+	color: var(--text-muted);
+}
+
+.word-strong {
+	font-weight: 700;
+	color: var(--primary);
+}
+
+.word-dot {
+	margin: 0 8px;
+	opacity: 0.6;
+}
+
+.word-origin {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+	margin: 14px 0 4px;
+	font-size: 0.9rem;
+	color: var(--text-muted);
+}
+
+.word-origin-link {
+	background: var(--accent-soft);
+	border: 1px solid var(--border-light);
+	border-radius: var(--radius-sm);
+	padding: 5px 12px;
+	color: var(--primary);
+	font-family: var(--font-ui);
+	font-size: 0.88rem;
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.word-origin-link:hover {
+	border-color: var(--primary);
+}
+
+.word-section {
+	margin-top: 30px;
+}
+
+.word-section h2 {
+	font-size: 1.15rem;
+	text-transform: uppercase;
+	letter-spacing: 0.14em;
+	color: var(--text-muted);
+	margin-bottom: 12px;
+}
+
+.word-section-head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+
+.word-count {
+	font-size: 0.85rem;
+	color: var(--text-muted);
+}
+
+.word-definition {
+	font-size: 1.1rem;
+	line-height: 1.65;
+	color: var(--text-primary);
+	margin: 0 0 8px;
+}
+
+.word-definition-main {
+	font-family: var(--font-scripture);
+	font-size: 1.25rem;
+	font-style: italic;
+	color: var(--primary);
+}
+
+.word-note {
+	font-size: 0.85rem;
+	line-height: 1.55;
+	color: var(--text-muted);
+	margin: 10px 0 0;
+}
+
+/* One row per English rendering: the words, a bar for their share, the count.
+   Rows that still have verses are buttons, so the whole row is the target. */
+.word-rendering {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 8px 10px;
+	border-radius: var(--radius-sm);
+	border: 1px solid transparent;
+	background: none;
+	font-family: var(--font-ui);
+	font-size: 1rem;
+	color: var(--text-primary);
+	cursor: pointer;
+	text-align: left;
+	width: 100%;
+	transition: background-color 0.15s ease;
+}
+
+.word-rendering:hover {
+	background: var(--surface-soft);
+}
+
+.word-rendering.selected {
+	background: var(--accent-soft);
+	border-color: var(--primary);
+}
+
+.word-rendering.plain {
+	cursor: default;
+	opacity: 0.75;
+}
+
+.word-rendering.plain:hover {
+	background: none;
+}
+
+.word-rendering-text {
+	font-family: var(--font-scripture);
+	font-style: italic;
+	flex: 0 1 auto;
+	min-width: 40%;
+}
+
+.word-rendering-bar {
+	flex: 1 1 auto;
+	height: 6px;
+	border-radius: 3px;
+	background: var(--surface-soft);
+	overflow: hidden;
+}
+
+.word-rendering-fill {
+	display: block;
+	height: 100%;
+	background: var(--secondary);
+}
+
+.word-rendering-count {
+	flex: 0 0 auto;
+	font-size: 0.85rem;
+	color: var(--text-muted);
+	font-variant-numeric: tabular-nums;
+}
+
+/* The renderings past the first few, folded away: a common word has hundreds
+   of them and they would bury the verses. */
+.word-more {
+	margin-top: 4px;
+	border-top: 1px solid var(--border-light);
+	padding-top: 4px;
+}
+
+.word-more-summary {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 10px;
+	border-radius: var(--radius-sm);
+	color: var(--primary);
+	font-size: 0.9rem;
+	font-weight: 600;
+	cursor: pointer;
+	list-style: none;
+	user-select: none;
+}
+
+.word-more-summary::-webkit-details-marker {
+	display: none;
+}
+
+.word-more-summary::after {
+	content: "";
+	flex: 0 0 auto;
+	width: 9px;
+	height: 9px;
+	margin-left: auto;
+	border-right: 2px solid currentColor;
+	border-bottom: 2px solid currentColor;
+	transform: rotate(45deg) translate(-2px, -2px);
+	transition: transform 0.2s ease;
+}
+
+.word-more[open] .word-more-summary::after {
+	transform: rotate(-135deg) translate(-2px, -2px);
+}
+
+.word-more-summary:hover {
+	background: var(--surface-soft);
+}
+
+/* The row is the button, so it holds no text of its own: it is a wide, short
+   hit area over the row rather than a label inside it. */
+.word-rendering-choose {
+	position: absolute;
+	inset: 0;
+	background: none;
+	border: none;
+	border-radius: var(--radius-sm);
+	cursor: pointer;
+	padding: 0;
+}
+
+.word-rendering-choose:focus-visible {
+	outline: 2px solid var(--primary);
+	outline-offset: 1px;
+}
+
+.word-forms {
+	margin-bottom: 18px;
+}
+
+.word-forms h3 {
+	font-size: 0.78rem;
+	text-transform: uppercase;
+	letter-spacing: 0.18em;
+	color: var(--text-muted);
+	margin: 0 0 8px;
+}
+
+.word-form-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.word-form-list li {
+	display: flex;
+	align-items: baseline;
+	gap: 8px;
+	background: var(--surface);
+	border: 1px solid var(--border-light);
+	border-radius: var(--radius-sm);
+	padding: 6px 10px;
+	font-size: 1rem;
+}
+
+.word-form-list li[dir='rtl'] {
+	text-align: right;
+}
+
+.word-form-text[dir='rtl'] {
+	direction: rtl;
+	unicode-bidi: isolate;
+}
+
+.word-form-text {
+	font-family: var(--font-scripture);
+}
+
+.word-form-list .word-form-code .word-form-text {
+	font-family: var(--font-ui);
+	font-size: 0.9rem;
+	color: var(--text-secondary);
+}
+
+.word-form-count {
+	font-size: 0.78rem;
+	color: var(--text-muted);
+	font-variant-numeric: tabular-nums;
+}
+
+.word-filter {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+	background: var(--accent-soft);
+	border: 1px solid var(--border-light);
+	border-radius: var(--radius-sm);
+	padding: 8px 12px;
+	margin: 0 0 12px;
+	font-size: 0.9rem;
+}
+
+.word-filter-label {
+	font-family: var(--font-scripture);
+	font-style: italic;
+}
+
+.word-filter-clear {
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	padding: 4px 12px;
+	color: var(--primary);
+	font-family: var(--font-ui);
+	font-size: 0.85rem;
+	font-weight: 600;
+	cursor: pointer;
+}
+
+/* One closed list per book, opened on demand: a common word has thousands of
+   references and rendering them all at once would swamp the page. */
+.word-book {
+	border: 1px solid var(--border-light);
+	border-radius: var(--radius-sm);
+	background: var(--surface);
+	margin-bottom: 8px;
+	overflow: hidden;
+}
+
+.word-book-name {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 10px 14px;
+	cursor: pointer;
+	font-size: 1rem;
+	font-weight: 600;
+	color: var(--text-primary);
+	list-style: none;
+	user-select: none;
+}
+
+.word-book-name::-webkit-details-marker {
+	display: none;
+}
+
+.word-book-name::after {
+	content: "";
+	flex: 0 0 auto;
+	width: 9px;
+	height: 9px;
+	border-right: 2px solid var(--text-muted);
+	border-bottom: 2px solid var(--text-muted);
+	transform: rotate(45deg) translate(-2px, -2px);
+	transition: transform 0.2s ease;
+}
+
+.word-book[open] .word-book-name::after {
+	transform: rotate(-135deg) translate(-2px, -2px);
+}
+
+.word-book-name:hover {
+	color: var(--primary);
+}
+
+.word-book-count {
+	font-size: 0.82rem;
+	color: var(--text-muted);
+	font-weight: 400;
+	margin-left: auto;
+	font-variant-numeric: tabular-nums;
+}
+
+.word-book-verses {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	padding: 0 14px 14px;
+}
+
+.word-verse {
+	background: var(--background);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	padding: 4px 9px;
+	color: var(--text-primary);
+	font-family: var(--font-ui);
+	font-size: 0.85rem;
+	font-weight: 600;
+	cursor: pointer;
+	font-variant-numeric: tabular-nums;
+	transition: all 0.15s ease;
+}
+
+.word-verse:hover {
+	background: var(--primary);
+	border-color: var(--primary);
+	color: #fff;
+}
+
+@media (max-width: 560px) {
+	.word-headword {
+		font-size: 2.1rem;
+	}
+
+	.word-card {
+		padding: 16px;
+	}
+
+	.word-rendering-text {
+		min-width: 30%;
+	}
+
+	.word-rendering-bar {
+		display: none;
+	}
+
+	/* Without the bar there is nothing holding the count to the right, so it
+	   lines up as a column of its own instead of trailing each word. */
+	.word-rendering-count {
+		margin-left: auto;
+	}
+}
+
 /* ---------- Shared settings notice ---------- */
 /* Sits in the gear menu where the four settings it stands in for would be. It
    is a notice about the page rather than a setting, so it reads as a block and

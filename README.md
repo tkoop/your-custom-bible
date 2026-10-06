@@ -53,11 +53,16 @@ To rebuild the derived data:
 node scripts/count-you.mjs resources/bsb_you_counts.tsv   # you/your singular vs plural, per verse
 node scripts/build-plurals.mjs                            # -> pluralYous.mjs, used by compile.mjs
 node tools/buildWordData.mjs                              # -> public/wordData/*.json, the word study popup
+node tools/buildLexicon.mjs                               # -> public/lexicon/*.json, the word study page (run after buildWordData)
 ```
 
-All three outputs are committed, so you only need to run these if you change
-the scripts or pick up a newer copy of the tables. They currently regenerate
+All four outputs are committed, so you only need to run these if you change the
+scripts or pick up a newer copy of the tables. They currently regenerate
 byte-for-byte identically from the committed `resources/bsb_tables.tsv`.
+
+The word study popup and the word study page both read the BSB's own tables and
+neither carries a dictionary definition, because the tables hold none: every
+number they show is counted out of the BSB's use of the word.
 
 ## License
 

@@ -10,7 +10,7 @@
 
 ## Data pipeline
 
-There are four independent build pipelines. Only the first is wired to an
+There are five independent build pipelines. Only the first is wired to an
 npm script; the rest are run by hand when their inputs or logic change.
 
 1. `npm run compile` turns the unzipped BSB epub in `bsb/` into
@@ -23,6 +23,9 @@ npm script; the rest are run by hand when their inputs or logic change.
    `pluralYous.mjs`, which `compile.mjs` imports for the `youpl`/`yousg` spans.
 4. `tools/buildWordData.mjs` emits `public/wordData/<book>.json` for the word
    study popup.
+5. `tools/buildLexicon.mjs` reads that back and emits
+   `public/lexicon/<Key>.json`, one file per Strong's number, for the word study
+   page. Run it after step 4.
 
 ## Chapter build, stage 1 and stage 2
 
@@ -73,6 +76,36 @@ Every output above is committed and regenerates byte-for-byte from the
 committed inputs, so a clean `git status` after running a pipeline is the
 signal that nothing drifted.
 
+## Word study page (`public/lexicon/`)
+
+The popup answers "what is this word *here*"; the page answers "what is this
+word". A page is keyed on the Strong's number - `H0430`, `G2424` - because the
+same inflected word appears in thousands of verses and the number is the only
+thing they share. About 4,000 rows in the tables (Hebrew particles mostly) carry
+no Strong's number at all and have no page: they stay popup-only, and the
+popup's "Word study" button is hidden for them.
+
+One file per word, fetched whole by `components/word.html`, so a page is one
+request whatever the word's size. The fields are all counts taken from the BSB's
+own use of the word - there is no dictionary entry anywhere in
+`bsb_tables.tsv`, so nothing here is a lexicon definition:
+
+- `k` `s` `l` - the key, the Strong's number, the language.
+- `n` `vc` `bc` `vs` `vd` - occurrences, distinct verses, distinct books, verse
+  references in this file, and the verses this file does not list.
+- `rc` `rd` `oc` `tc` `pc` - distinct English renderings (total, and how many
+  were cut), and the same for spellings, transliterations and parsing codes.
+- `o` `t` `p` - the spellings in the original script, the transliterations and
+  the parsing codes, each most used first.
+- `g` - one record per English rendering: `e` the rendering, `n` its count, `b`
+  the books it appears in paired with that book's verse keys.
+
+Every cut list keeps its true total alongside it, and the page says what it is
+not showing. Renderings are grouped on their bare words - a row's English text
+carries the punctuation of the sentence it sits in, so "Jesus", "Jesus," and
+"Jesus." are one rendering - and are shown under the spelling the BSB used most,
+so a name keeps its capitals.
+
 ## Shared links (chapter URL)
 
 A chapter hash may carry the four settings the `YCB-` version tag is built
@@ -109,7 +142,7 @@ Browsers cache this app's static assets aggressively:
 file under `public/` whose content changed.** Increment the number each time:
 
 - Start/raise any resource that has no version param yet (add `?version=1`).
-- `style.css` is currently at `?version=34`; leave it unless it changes.
+- `style.css` is currently at `?version=44`; leave it unless it changes.
 
 Files involved (all referenced from `public/index.html`):
 
@@ -118,13 +151,17 @@ Files involved (all referenced from `public/index.html`):
 - `manifest.json`
 - `framework.js`, `activity.js`, `settings.js`, `books.js`, `translations.js`
 - Components fetched via `loadComponent()`: `components/menu.html`,
-  `components/chapter.html`, `components/home.html`, `components/about.html`,
+  `components/chapter.html`, `components/word.html`,
+  `components/home.html`, `components/about.html`,
   `components/history.html`, `components/search.html`,
   `components/settings.html`, `components/advanced.html`,
   `components/speedReader.html`, `components/readToMe.html`,
   `components/share.html`
 - Fonts referenced from `style.css` via `@font-face`: files under `fonts/`
 - `serviceWorker.js` (bump its `?version=` too when its logic changes)
+
+`public/wordData/*.json` and `public/lexicon/*.json` are fetched with their own
+`?version=1`, inside `chapter.html` and `word.html`.
 
 If a change does not touch any cached file (e.g. only tests or docs), no bump
 is needed.

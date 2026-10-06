@@ -1502,7 +1502,7 @@ fireEvent({
 		return "";
 	}
 
-	function openWordPopup(entry, ref, x, y) {
+	function openWordPopup(entry, ref, x, y, context) {
 		window.__popupOpenScrollY = window.scrollY;
 		var popup = document.getElementById("wordPopup");
 		if (!popup) {
@@ -1545,8 +1545,24 @@ fireEvent({
 			gloss.className = "word-popup-gloss";
 			popup.appendChild(gloss);
 
+			// The way through to the page for this word. It is built here and
+			// filled in per click, because a popup is reused for every word and
+			// only some of them have a page.
+			var study = document.createElement("button");
+			study.type = "button";
+			study.className = "word-popup-study";
+			study.setAttribute("data-cy", "wordPopupStudy");
+			study.addEventListener("click", function (e) {
+				e.stopPropagation();
+				openWordStudy(popup.__entry, popup.__context);
+			});
+			popup.appendChild(study);
+
 			document.body.appendChild(popup);
 		}
+
+		popup.__entry = entry;
+		popup.__context = context;
 
 		var isHebrew =
 			entry.l == "Hebrew" || entry.l == "Aramaic" || entry.l == "Aramaic (Biblical)";
@@ -1561,9 +1577,20 @@ fireEvent({
 			.setAttribute("lang", isHebrew ? "he" : "el");
 		popup.querySelector(".word-popup-translit").textContent = entry.t;
 		popup.querySelector(".word-popup-parse").textContent = entry.p;
-		popup.querySelector(".word-popup-strong").textContent =
-			"Strong's " + strongLetter(entry.l) + entry.s;
 		popup.querySelector(".word-popup-gloss").textContent = entry.e;
+
+		// The tables leave the Hebrew particles unnumbered, and a word page is
+		// keyed on the Strong's number, so those words stop at the popup.
+		var study = popup.querySelector(".word-popup-study");
+		if (entry.s && entry.s != "") {
+			popup.querySelector(".word-popup-strong").textContent =
+				"Strong's " + strongLetter(entry.l) + entry.s;
+			study.textContent = "Word study ›";
+			study.style.display = "";
+		} else {
+			popup.querySelector(".word-popup-strong").textContent = "No Strong's number";
+			study.style.display = "none";
+		}
 
 		popup.style.display = "block";
 		var rect = popup.getBoundingClientRect();
@@ -1706,7 +1733,15 @@ fireEvent({
 					if (!entries) return;
 					var entry = findVerseEntry(entries, vt, clickedIndex, clickedWord);
 					if (!entry) return;
-					openWordPopup(entry, refName, ev.clientX, ev.clientY);
+					// The popup hands this on to the word's page, which needs to
+					// know which verse the reader is standing in so its back
+					// button and its "opened from" link can get them there.
+					openWordPopup(entry, refName, ev.clientX, ev.clientY, {
+						chapterLabel: chapterRefName(book.name) + " " + chapter,
+						ref: refName,
+						bookIndex: books.indexOf(book),
+						verseKey: verseKey,
+					});
 				})
 				.catch(function (e) {
 					console.error("word lookup failed", e);
