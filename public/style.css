@@ -2443,6 +2443,52 @@ body.rtm-open #chapter.page-turn {
 	border-color: var(--primary);
 }
 
+/* Strong's own entry for the number, in the card: the headword it is listed
+   under, its transliteration and its pronunciation. A definition list because
+   that is what it is - pairs of names and values. */
+.word-dictionary {
+	display: grid;
+	grid-template-columns: max-content 1fr;
+	gap: 6px 16px;
+	margin: 18px 0 0;
+	padding-top: 14px;
+	border-top: 1px solid var(--border-light);
+}
+
+.word-dictionary dt {
+	font-size: 0.78rem;
+	text-transform: uppercase;
+	letter-spacing: 0.16em;
+	color: var(--text-muted);
+	align-self: center;
+}
+
+.word-dictionary dd {
+	margin: 0;
+	font-family: var(--font-scripture);
+	font-size: 1.05rem;
+	color: var(--text-primary);
+}
+
+.word-dictionary dd[dir='rtl'] {
+	text-align: right;
+	unicode-bidi: isolate;
+}
+
+/* A Strong's number inside a definition or a derivation: a link to that word's
+   own page. */
+.word-ref {
+	font-variant-numeric: tabular-nums;
+	color: var(--primary);
+	text-decoration: none;
+	border-bottom: 1px dotted var(--primary-light);
+}
+
+.word-ref:hover {
+	color: var(--primary-dark);
+	border-bottom-style: solid;
+}
+
 .word-section {
 	margin-top: 30px;
 }
@@ -2468,18 +2514,75 @@ body.rtm-open #chapter.page-turn {
 	color: var(--text-muted);
 }
 
-.word-definition {
-	font-size: 1.1rem;
+/* Strong's entry itself: the real definition, kept a size above the notes
+   because it is what the reader came for. */
+.word-definition-strong {
+	font-size: 1.12rem;
 	line-height: 1.65;
 	color: var(--text-primary);
-	margin: 0 0 8px;
+	margin: 0 0 4px;
+}
+
+/* What the BSB does with the word, under the definition rather than instead of
+   it: a second answer, from this translation rather than from a dictionary. */
+.word-usage {
+	margin-top: 14px;
+	padding: 12px 14px;
+	background: var(--surface-soft);
+	border-radius: var(--radius-sm);
+}
+
+.word-usage-text {
+	margin: 0;
+	font-size: 1rem;
+	line-height: 1.6;
+	color: var(--text-secondary);
+}
+
+.word-usage-label {
+	font-size: 0.78rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.14em;
+	color: var(--text-muted);
+	margin-right: 6px;
 }
 
 .word-definition-main {
 	font-family: var(--font-scripture);
-	font-size: 1.25rem;
+	font-size: 1.15rem;
 	font-style: italic;
 	color: var(--primary);
+}
+
+.word-derivation,
+.word-kjv {
+	margin: 0;
+	font-size: 1.05rem;
+	line-height: 1.6;
+	color: var(--text-primary);
+}
+
+.word-kjv {
+	font-style: italic;
+	color: var(--text-secondary);
+}
+
+/* Strong's marks in the KJV word list, so the note under it has something to
+   point at. */
+.word-kjv-mark {
+	font-style: normal;
+	font-weight: 700;
+	color: var(--primary);
+}
+
+/* The dictionary is someone else's work under CC-BY-SA, so the page that quotes
+   it says where it came from. */
+.word-credit {
+	margin: 12px 0 0;
+	font-size: 0.78rem;
+	line-height: 1.5;
+	color: var(--text-muted);
 }
 
 .word-note {

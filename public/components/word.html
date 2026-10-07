@@ -194,6 +194,10 @@ content.appendChild(renderWordHead(entry));
 		content.appendChild(renderWordOrigin());
 	}
 		content.appendChild(renderWordDefinition(entry));
+		var derivation = renderWordDerivation(entry);
+		if (derivation) content.appendChild(derivation);
+		var kjv = renderWordKjv(entry);
+		if (kjv) content.appendChild(kjv);
 		content.appendChild(renderWordTranslations(entry));
 		content.appendChild(renderWordForms(entry));
 		content.appendChild(renderWordVerses(entry));
@@ -216,9 +220,7 @@ content.appendChild(renderWordHead(entry));
 		}
 
 		var meta = el("p", "word-meta");
-		meta.appendChild(
-			el("span", "word-strong", "Strong's " + entry.k),
-		);
+		meta.appendChild(el("span", "word-strong", "Strong's " + entry.k));
 		meta.appendChild(el("span", "word-dot", "·"));
 		meta.appendChild(el("span", null, entry.l));
 		meta.setAttribute("data-cy", "wordStrong");
@@ -251,7 +253,34 @@ content.appendChild(renderWordHead(entry));
 		);
 		card.appendChild(stats);
 
+		card.appendChild(renderWordStrongsEntry(entry));
+
 		return card;
+	}
+
+	// Strong's own entry for the number: the headword as the dictionary lists it,
+	// its transliteration, and - where the dictionary gives one - how it is
+	// pronounced. These are the dictionary's forms, which is not the same thing
+	// as the forms the BSB's text is written in further down the page.
+	function renderWordStrongsEntry(entry) {
+		var rows = [];
+		if (entry.m) rows.push(["Headword", entry.m, hebrewWord(entry.l)]);
+		if (entry.x) rows.push(["Transliterated", entry.x, false]);
+		if (entry.pr) rows.push(["Pronounced", entry.pr, false]);
+		if (!rows.length) return el("div");
+
+		var list = el("dl", "word-dictionary");
+		list.setAttribute("data-cy", "wordStrongsEntry");
+		rows.forEach(function (row) {
+			list.appendChild(el("dt", null, row[0]));
+			var value = el("dd", null, row[1]);
+			if (row[2]) {
+				value.setAttribute("dir", "rtl");
+				value.setAttribute("lang", "he");
+			}
+			list.appendChild(value);
+		});
+		return list;
 	}
 
 	// The verse the reader clicked, so they can get straight back to it.
@@ -268,61 +297,173 @@ content.appendChild(renderWordHead(entry));
 		return row;
 	}
 
-	// There is no dictionary behind this page - the Berean tables carry no
-	// definition of a word - so the summary is the translation's own usage,
-	// which is what the page can honestly say.
+	// Strong's Dictionaries give the entry as one run of text - where the word
+	// comes from, then what it means - and the two fields are kept apart in the
+	// file only because the page also uses the derivation on its own, as a list
+	// of links to the words this one is built from. Where a dictionary entry is
+	// mostly derivation (Greek especially, where Strong's derivation often
+	// carries the main sense), quoting the two together reads as one entry
+	// instead of as half of one.
+	function strongsEntryText(entry) {
+		var from = entry.r ? entry.r.replace(/;\s*$/, "") : "";
+		if (!from) return entry.d || "";
+		return entry.d ? from + "; " + entry.d : from;
+	}
+
+	// The definition, then what this translation does with the word: two
+	// different answers, and the reader asked for both.
 	function renderWordDefinition(entry) {
 		var section = el("section", "word-section");
 		section.appendChild(el("h2", null, "Definition"));
 
-		var top = entry.g[0];
-		var text = el("p", "word-definition");
-		if (!top) {
-			text.textContent = "There is nothing recorded for this word.";
+		var text = strongsEntryText(entry);
+		if (text) {
+			var definition = el("p", "word-definition-strong");
+			appendStrongsRefs(definition, text);
+			definition.setAttribute("data-cy", "wordDefinition");
+			section.appendChild(definition);
 		} else {
-			text.appendChild(
-				document.createTextNode("The BSB renders this " + entry.l + " word "),
-			);
-			text.appendChild(el("em", "word-definition-main", top.e));
-			text.appendChild(
-				document.createTextNode(
-					" " +
-						thousands(top.n) +
-						" times (" +
-						percent(top.n, entry.n) +
-						" of its " +
-						thousands(entry.n) +
-						" " +
-						plural(entry.n, "use") +
-						")",
+			section.appendChild(
+				el(
+					"p",
+					"word-note",
+					"Strong's Dictionaries give no definition for this number. What " +
+						"the BSB does with the word is all there is.",
 				),
 			);
-			var others = entry.g.slice(1, 5);
-			if (others.length) {
-				text.appendChild(
-					document.createTextNode(
-						", and also " +
-							others
-								.map(function (g) {
-									return "“" + g.e + "” (" + thousands(g.n) + ")";
-								})
-								.join(", ") +
-							".",
-					),
-				);
-			}
 		}
-		section.appendChild(text);
 
+		section.appendChild(renderWordUsage(entry));
+		section.appendChild(
+			el(
+				"p",
+				"word-credit",
+				"From Strong's Dictionaries of Hebrew and Greek, James Strong (1890 " +
+					"Greek, 1894 Hebrew), as published by Open Scriptures under " +
+					"CC-BY-SA.",
+			),
+		);
+		return section;
+	}
+
+	// How the BSB itself renders the word, which is a count out of its own text
+	// rather than anything a dictionary says.
+	function renderWordUsage(entry) {
+		var top = entry.g[0];
+		var block = el("div", "word-usage");
+		if (!top) {
+			block.appendChild(el("p", null, "The BSB does not translate it."));
+			return block;
+		}
+		var text = el("p", "word-usage-text");
+		text.appendChild(el("span", "word-usage-label", "In the BSB: "));
+		text.appendChild(el("em", "word-definition-main", top.e));
+		text.appendChild(
+			document.createTextNode(
+				" " +
+					thousands(top.n) +
+					" times (" +
+					percent(top.n, entry.n) +
+					" of its " +
+					thousands(entry.n) +
+					" " +
+					plural(entry.n, "use") +
+					")",
+			),
+		);
+		var others = entry.g.slice(1, 5);
+		if (others.length) {
+			text.appendChild(
+				document.createTextNode(
+					", and also " +
+						others
+							.map(function (g) {
+								return "“" + g.e + "” (" + thousands(g.n) + ")";
+							})
+							.join(", ") +
+						".",
+				),
+			);
+		}
+		block.appendChild(text);
+		return block;
+	}
+
+	// Where the word comes from, with every other word Strong's names in the
+	// derivation turned into a link to its own page. The text itself is already
+	// in the definition, so this section only appears when there is something to
+	// follow.
+	function renderWordDerivation(entry) {
+		if (!entry.r || !STRONGS_REF.test(entry.r)) return null;
+		var section = el("section", "word-section");
+		section.appendChild(el("h2", null, "Built from"));
+		var text = el("p", "word-derivation");
+		appendStrongsRefs(text, entry.r);
+		text.setAttribute("data-cy", "wordDerivation");
+		section.appendChild(text);
+		return section;
+	}
+
+	// The words the KJV carried for this number. Its notation is Strong's: an X
+	// is a word counted in the Hebrew or Greek but left out in English, and a +
+	// is an English word with nothing behind it in the original. Both are marked
+	// so the note under it has something to point at.
+	function renderWordKjv(entry) {
+		if (!entry.j) return null;
+		var section = el("section", "word-section");
+		section.appendChild(el("h2", null, "In the King James Version"));
+		var text = el("p", "word-kjv");
+		appendKjvNotation(text, entry.j);
+		text.setAttribute("data-cy", "wordKjv");
+		section.appendChild(text);
 		section.appendChild(
 			el(
 				"p",
 				"word-note",
-				"Every number on this page is counted from the BSB's own use of the " +
-					"word. The Berean tables carry no dictionary entry for it.",
+				"X marks a word counted in the Hebrew or Greek text but left out in " +
+					"English. + marks an English word with nothing behind it in the " +
+					"original. [idiom] marks a phrase.",
 			),
 		);
 		return section;
+	}
+
+	function appendKjvNotation(node, text) {
+		node.setAttribute("dir", "auto");
+		text.split(/(\bX\b|\+)/).forEach(function (part) {
+			if (!part) return;
+			if (part == "X" || part == "+") {
+				node.appendChild(el("span", "word-kjv-mark", part));
+			} else {
+				node.appendChild(document.createTextNode(part));
+			}
+		});
+	}
+
+	// Strong's numbers are the strongest thing in the text: a run of digits
+	// after a letter, always four of them now that the build has normalised
+	// them. Each becomes a link to that word's page.
+	var STRONGS_REF = /([HG]\d{4})/g;
+
+	function appendStrongsRefs(node, text) {
+		// Mixed Hebrew and English run together without this, and the entry is
+		// laid out left to right whichever way it starts.
+		node.setAttribute("dir", "auto");
+		var last = 0;
+		var match;
+		STRONGS_REF.lastIndex = 0;
+		while ((match = STRONGS_REF.exec(text))) {
+			if (match.index > last) {
+				node.appendChild(document.createTextNode(text.slice(last, match.index)));
+			}
+			var link = el("a", "word-ref", match[0]);
+			link.setAttribute("href", "#word/" + match[0]);
+			node.appendChild(link);
+			last = match.index + match[0].length;
+		}
+		if (last < text.length) {
+			node.appendChild(document.createTextNode(text.slice(last)));
+		}
 	}
 
 	// "Different ways it is translated": every rendering the tables give this
@@ -427,13 +568,13 @@ content.appendChild(renderWordHead(entry));
 		if (row) row.classList.add("selected");
 	}
 
-	// Spellings, transliterations and the parsing codes: how the word is
-	// written, how it sounds, and what shape the grammar gives it. Each list
-	// keeps the commonest few; the rest are counted but not shown, so a word
-	// does not open with a wall of rare forms.
+	// Spellings, transliterations and the parsing codes: how this translation
+	// writes the word, as opposed to the headword the dictionary lists. Each
+	// list keeps the commonest few; the rest are counted but not shown, so a
+	// word does not open with a wall of rare forms.
 	function renderWordForms(entry) {
 		var section = el("section", "word-section");
-		section.appendChild(el("h2", null, "Forms"));
+		section.appendChild(el("h2", null, "Forms in the BSB"));
 
 		if (entry.o.length) {
 			section.appendChild(wordFormList("Written", entry.o, entry.oc, true));

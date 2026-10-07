@@ -5,17 +5,17 @@
 //	node tools/buildLexicon.mjs
 //
 // The word study popup needs one entry - the row a click landed on - which is
-// what wordData holds. A page for the word itself needs everything else the
-// tables know about that word, and that is the whole Bible rather than the
-// chapter on screen, so it cannot live in a file fetched per chapter. Hence a
-// directory of small files, one per Strong's number, that the page fetches
-// whole.
+// what wordData holds. A page for the word itself needs everything else that is
+// known about the word, and that is the whole Bible rather than the chapter on
+// screen, so it cannot live in a file fetched per chapter. Hence a directory of
+// small files, one per Strong's number, that the page fetches whole.
 //
-// There is no lexicon entry anywhere in bsb_tables.tsv, so nothing here is a
-// dictionary definition. Every field is counted out of the BSB's own usage -
-// how often each spelling, transliteration, parsing code and English rendering
+// Two things go into a file. The counts are out of the BSB's own usage - how
+// often each spelling, transliteration, parsing code and English rendering
 // occurs, and where - which is what lets the page say what the translation does
-// with the word. AGENTS.md documents the shape of a lexicon file.
+// with the word. The definition is out of Strong's Dictionaries of Hebrew and
+// Greek, because bsb_tables.tsv has no dictionary in it at all.
+// AGENTS.md documents the shape of a lexicon file.
 
 import fs from "fs";
 import vm from "vm";
@@ -50,6 +50,40 @@ const bookIndexBySlug = {};
 sandbox.books.forEach(function (book, index) {
 	bookIndexBySlug[book.slug] = index;
 });
+
+// Strong's own dictionaries, keyed on the same numbers the tables use, so the
+// two join without a lookup table. Each file is a CommonJS module that exports
+// its entries as an object keyed on unpadded numbers ("H430", "G2424"), so the
+// keys are padded here and the module is loaded in a sandbox - the same two
+// moves buildWordData.mjs makes to read books.js. AGENTS.md records where they
+// come from and under what licence.
+function loadStrongs(file) {
+	const box = { module: { exports: null } };
+	vm.createContext(box);
+	vm.runInContext(fs.readFileSync(file, "utf8"), box);
+	const entries = {};
+	for (const [number, entry] of Object.entries(box.module.exports)) {
+		const letter = number[0];
+		entries[letter + String(parseInt(number.slice(1), 10)).padStart(4, "0")] = entry;
+	}
+	return entries;
+}
+
+// The text is Strong's, with the typographic leftovers taken off: the leading
+// and doubled spaces, and the braces he put round an entry that is only a
+// cross-reference to another word. His numbers are written with five digits in
+// places and four in others ("H03091"), so they are brought to the four digits
+// the rest of the app uses - the page turns them into links to those words.
+function cleanStrongsText(text) {
+	if (!text) return "";
+	return text
+		.replace(/[{}]/g, "")
+		.replace(/\b([HG])0*(\d+)\b/g, function (match, letter, digits) {
+			return letter + String(parseInt(digits, 10)).padStart(4, "0");
+		})
+		.replace(/\s+/g, " ")
+		.trim();
+}
 
 // Stable descending order: most used first, then alphabetical, so a rebuild
 // that saw the same counts wrote the same bytes.
@@ -92,6 +126,11 @@ if (!fs.existsSync(wordDataDir)) {
 	console.error("no " + wordDataDir + " - run tools/buildWordData.mjs first");
 	process.exit(1);
 }
+
+const strongs = {
+	...loadStrongs("resources/strongs-hebrew-dictionary.js"),
+	...loadStrongs("resources/strongs-greek-dictionary.js"),
+};
 
 fs.rmSync(outDir, { recursive: true, force: true });
 fs.mkdirSync(outDir, { recursive: true });
@@ -219,6 +258,8 @@ function cap(list, limit) {
 let totalBytes = 0;
 let versesKeptTotal = 0;
 let wordsWritten = 0;
+let dictionaryEntries = 0;
+let missingDefinitions = 0;
 let wordsByLanguage = {};
 
 for (const key of Object.keys(words).sort()) {
@@ -274,14 +315,37 @@ for (const key of Object.keys(words).sort()) {
 		}),
 	};
 
+	// What Strong's dictionaries make of it. Nineteen of the numbers the tables
+	// use have no definition at all, so the fields that came out empty are left
+	// out rather than written as blanks.
+	const entry = strongs[key];
+	if (entry) {
+		const lemma = cleanStrongsText(entry.lemma);
+		const transliteration = cleanStrongsText(entry.xlit || entry.translit);
+		const pronunciation = cleanStrongsText(entry.pron);
+		const definition = cleanStrongsText(entry.strongs_def);
+		const kjv = cleanStrongsText(entry.kjv_def);
+		const derivation = cleanStrongsText(entry.derivation);
+		if (lemma) payload.m = lemma; // the headword the dictionary lists
+		if (transliteration) payload.x = transliteration;
+		if (pronunciation) payload.pr = pronunciation; // Hebrew only; the Greek
+		// dictionaries this comes from give a transliteration but no respelling
+		if (definition) payload.d = definition;
+		if (kjv) payload.j = kjv; // the words the KJV carried for this number
+		if (derivation) payload.r = derivation; // where the word comes from
+	}
+
 	const text = JSON.stringify(payload);
 	fs.writeFileSync(path.join(outDir, key + ".json"), text);
 	totalBytes += text.length;
 	wordsWritten++;
 	wordsByLanguage[word.lang] = (wordsByLanguage[word.lang] || 0) + 1;
+	dictionaryEntries++;
+	if (!payload.d) missingDefinitions++;
 }
 
 console.log("words written:", wordsWritten, wordsByLanguage);
 console.log("total size:", (totalBytes / 1024 / 1024).toFixed(1), "MB");
 console.log("verse references kept:", versesKeptTotal);
 console.log("rows with no Strong's number, popup only:", skippedRows);
+console.log("with a Strong's entry:", dictionaryEntries, "with no definition:", missingDefinitions);

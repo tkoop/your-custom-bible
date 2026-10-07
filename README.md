@@ -60,11 +60,19 @@ All four outputs are committed, so you only need to run these if you change the
 scripts or pick up a newer copy of the tables. They currently regenerate
 byte-for-byte identically from the committed `resources/bsb_tables.tsv`.
 
-The word study popup and the word study page both read the BSB's own tables and
-neither carries a dictionary definition, because the tables hold none: every
-number they show is counted out of the BSB's use of the word.
+`tools/buildLexicon.mjs` also reads two more downloads:
+`resources/strongs-hebrew-dictionary.js` and
+`resources/strongs-greek-dictionary.js`, from
+[openscriptures/strongs](https://github.com/openscriptures/strongs). They are
+Strong's Dictionaries of Hebrew and Greek, which is where the word study pages
+get their definitions, lemmas and pronunciations. The BSB tables hold no
+dictionary, so every other number on those pages is counted out of the BSB's own
+use of the word.
 
 ## License
 
 + The code is licensed under the MIT license (see `LICENSE`).
 + For the content license, see https://berean.bible/licensing.htm
++ The word study pages also quote Strong's Dictionaries of Hebrew and Greek
+  (James Strong, 1890 Greek and 1894 Hebrew) as published by Open Scriptures
+  under CC-BY-SA: https://github.com/openscriptures/strongs

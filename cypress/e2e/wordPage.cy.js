@@ -63,9 +63,39 @@ describe("word study page", () => {
       .and("have.attr", "dir", "rtl");
     cy.get("[data-cy='wordStrong']").should("contain", "Strong's H8064");
     cy.get("#wordContent h2").contains("Definition");
-    cy.get(".word-definition").should("contain", "the heavens");
     cy.get("#wordContent h2").contains("How it is translated");
     cy.get("#wordContent h2").contains("Verses");
+  });
+
+  it("shows Strong's dictionary entry for the word", () => {
+    openStudyFor("heavens");
+
+    cy.get("[data-cy='wordStrongsEntry']").within(() => {
+      cy.get("dt").should("have.length", 3); // headword, transliteration, sound
+      cy.contains("dt", "Headword");
+      cy.contains("dt", "Pronounced").next().should("not.be.empty");
+    });
+    cy.get("[data-cy='wordDefinition']").should("contain", "the sky");
+    cy.get(".word-usage").should("contain", "In the BSB:");
+    cy.get(".word-credit").should("contain", "Strong's Dictionaries");
+    cy.get("[data-cy='wordKjv']").should("contain", "heaven");
+  });
+
+  it("links the words a Strong's entry is built from", () => {
+    // H0430 is a plural of H0433, so its definition names the word it is made of.
+    cy.visit("http://localhost:8000/#word/H0430");
+    cy.get("[data-cy='wordDefinition']").should(
+      "contain",
+      "gods in the ordinary sense",
+    );
+    cy.get("[data-cy='wordDerivation']").should("contain", "plural of");
+    cy.get("[data-cy='wordDefinition'] a.word-ref")
+      .first()
+      .should("have.attr", "href", "#word/H0433")
+      .click();
+
+    cy.location("hash").should("eq", "#word/H0433");
+    cy.get("[data-cy='wordStrong']").should("contain", "Strong's H0433");
   });
 
   it("remembers the verse the reader came from and goes back to it", () => {
@@ -132,7 +162,7 @@ describe("word study page", () => {
     cy.get("[data-cy='wordPage']").should("be.visible");
     cy.get("[data-cy='wordStrong']").should("contain", "Strong's G2424");
     cy.get("[data-cy='wordHeadword']").should("have.attr", "lang", "el");
-    cy.get(".word-definition").should("contain", "Jesus");
+    cy.get(".word-usage").should("contain", "Jesus");
     cy.get("[data-cy='wordRendering']").first().should("contain", "Jesus");
     // A word with no Strong's number has no page to offer.
     cy.get("[data-cy='wordOrigin']").should("not.exist");
