@@ -2555,25 +2555,11 @@ body.rtm-open #chapter.page-turn {
 	color: var(--primary);
 }
 
-.word-derivation,
-.word-kjv {
+.word-derivation {
 	margin: 0;
 	font-size: 1.05rem;
 	line-height: 1.6;
 	color: var(--text-primary);
-}
-
-.word-kjv {
-	font-style: italic;
-	color: var(--text-secondary);
-}
-
-/* Strong's marks in the KJV word list, so the note under it has something to
-   point at. */
-.word-kjv-mark {
-	font-style: normal;
-	font-weight: 700;
-	color: var(--primary);
 }
 
 /* The dictionary is someone else's work under CC-BY-SA, so the page that quotes

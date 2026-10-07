@@ -196,8 +196,6 @@ content.appendChild(renderWordHead(entry));
 		content.appendChild(renderWordDefinition(entry));
 		var derivation = renderWordDerivation(entry);
 		if (derivation) content.appendChild(derivation);
-		var kjv = renderWordKjv(entry);
-		if (kjv) content.appendChild(kjv);
 		content.appendChild(renderWordTranslations(entry));
 		content.appendChild(renderWordForms(entry));
 		content.appendChild(renderWordVerses(entry));
@@ -404,45 +402,9 @@ content.appendChild(renderWordHead(entry));
 		return section;
 	}
 
-	// The words the KJV carried for this number. Its notation is Strong's: an X
-	// is a word counted in the Hebrew or Greek but left out in English, and a +
-	// is an English word with nothing behind it in the original. Both are marked
-	// so the note under it has something to point at.
-	function renderWordKjv(entry) {
-		if (!entry.j) return null;
-		var section = el("section", "word-section");
-		section.appendChild(el("h2", null, "In the King James Version"));
-		var text = el("p", "word-kjv");
-		appendKjvNotation(text, entry.j);
-		text.setAttribute("data-cy", "wordKjv");
-		section.appendChild(text);
-		section.appendChild(
-			el(
-				"p",
-				"word-note",
-				"X marks a word counted in the Hebrew or Greek text but left out in " +
-					"English. + marks an English word with nothing behind it in the " +
-					"original. [idiom] marks a phrase.",
-			),
-		);
-		return section;
-	}
-
-	function appendKjvNotation(node, text) {
-		node.setAttribute("dir", "auto");
-		text.split(/(\bX\b|\+)/).forEach(function (part) {
-			if (!part) return;
-			if (part == "X" || part == "+") {
-				node.appendChild(el("span", "word-kjv-mark", part));
-			} else {
-				node.appendChild(document.createTextNode(part));
-			}
-		});
-	}
-
-	// Strong's numbers are the strongest thing in the text: a run of digits
-	// after a letter, always four of them now that the build has normalised
-	// them. Each becomes a link to that word's page.
+	// Strong's numbers inside a definition or a derivation: a link to that word's
+	// page. They are the strongest thing in the text: a run of digits after a
+	// letter, always four of them now that the build has normalised them.
 	var STRONGS_REF = /([HG]\d{4})/g;
 
 	function appendStrongsRefs(node, text) {

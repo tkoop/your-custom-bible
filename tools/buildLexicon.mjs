@@ -324,14 +324,12 @@ for (const key of Object.keys(words).sort()) {
 		const transliteration = cleanStrongsText(entry.xlit || entry.translit);
 		const pronunciation = cleanStrongsText(entry.pron);
 		const definition = cleanStrongsText(entry.strongs_def);
-		const kjv = cleanStrongsText(entry.kjv_def);
 		const derivation = cleanStrongsText(entry.derivation);
 		if (lemma) payload.m = lemma; // the headword the dictionary lists
 		if (transliteration) payload.x = transliteration;
 		if (pronunciation) payload.pr = pronunciation; // Hebrew only; the Greek
 		// dictionaries this comes from give a transliteration but no respelling
 		if (definition) payload.d = definition;
-		if (kjv) payload.j = kjv; // the words the KJV carried for this number
 		if (derivation) payload.r = derivation; // where the word comes from
 	}
 

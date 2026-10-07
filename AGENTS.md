@@ -113,9 +113,8 @@ translation does with the word.
 - `g` - one record per English rendering: `e` the rendering, `n` its count, `b`
   the books it appears in paired with that book's verse keys.
 - `m` `x` `pr` - Strong's headword, transliteration and pronunciation.
-- `d` `j` `r` - Strong's definition, the words the KJV carried for the number,
-  and where the word comes from. `r` is full of other Strong's numbers and the
-  page turns each into a link to that word's page.
+- `d` `r` - Strong's definition and where the word comes from. `r` is full of
+  other Strong's numbers and the page turns each into a link to that word's page.
 
 Twenty of the numbers the tables use have no definition field at all. Their
 derivation reads as one - "a primary particle, denoting a supposition, wish,
@@ -169,7 +168,7 @@ Browsers cache this app's static assets aggressively:
 file under `public/` whose content changed.** Increment the number each time:
 
 - Start/raise any resource that has no version param yet (add `?version=1`).
-- `style.css` is currently at `?version=46`; leave it unless it changes.
+- `style.css` is currently at `?version=47`; leave it unless it changes.
 
 Files involved (all referenced from `public/index.html`):
 

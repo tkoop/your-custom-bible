@@ -78,7 +78,7 @@ describe("word study page", () => {
     cy.get("[data-cy='wordDefinition']").should("contain", "the sky");
     cy.get(".word-usage").should("contain", "In the BSB:");
     cy.get(".word-credit").should("contain", "Strong's Dictionaries");
-    cy.get("[data-cy='wordKjv']").should("contain", "heaven");
+    cy.get("#wordContent h2").should("not.contain", "King James");
   });
 
   it("links the words a Strong's entry is built from", () => {
