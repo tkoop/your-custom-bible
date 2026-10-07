@@ -9,6 +9,10 @@
 		function (event) {
 			applySettings();
 			applyWordStudyLinks();
+			// The settings rewrite some words in place and swap which spelling
+			// is on screen, so the marks are laid out again against the text as
+			// it now reads.
+			renderHighlights();
 		},
 	);
 
@@ -357,6 +361,13 @@
 		var chapter = document.getElementById("chapter");
 		chapter.innerHTML = "";
 
+		// Whoever asked for these words asked before the fetch started, and only
+		// one chapter is ever in flight, so they are taken here: a chapter that
+		// arrives without them - the next one, or one reached from the address
+		// bar - is unmarked.
+		var pendingHighlight = window.pendingHighlight;
+		window.pendingHighlight = null;
+
 		fetch(url)
 			.then(function (response) {
 				return response.text();
@@ -385,6 +396,7 @@
 				chapter.innerHTML = addArrows(text, title);
 				applySettings();
 				applyWordStudyLinks(book ? book.slug : null, chapterNum);
+				applyChapterHighlight(pendingHighlight);
 				setTimeout(chapterFinishedCheck, 100);
 
 fireEvent({
@@ -484,7 +496,14 @@ fireEvent({
 			"<div id='chapterText'>" +
 			html +
 			"</div><div id='chapterSpacer' style='height:32px'></div>" +
-			arrows.replace("chapter-nav", "chapter-nav bottom")
+			arrows.replace("chapter-nav", "chapter-nav bottom") +
+			// The way back to unmarked text. It is fixed to the viewport rather
+			// than to the chapter, because in page turning mode the chapter does
+			// not scroll at all, and it sits outside #chapterText so the page
+			// turn's transform does not carry it away with the columns.
+			"<button id='clearHighlights' data-cy='clearHighlights' type='button' " +
+			"style='display: none' onclick='clearChapterHighlight()'>" +
+			"Clear highlights</button>"
 		);
 	}
 
@@ -1428,7 +1447,7 @@ fireEvent({
 			g.ranges.sort(function (a, b) {
 				return a[0] - b[0];
 			});
-			wrapNodeRanges(g.node, g.ranges);
+			wrapNodeRanges(g.node, g.ranges, "span", "word-link");
 		});
 	}
 
@@ -1475,7 +1494,10 @@ fireEvent({
 		return 0;
 	}
 
-	function wrapNodeRanges(node, ranges) {
+	// Split one text node at the given ranges and wrap each range in an element.
+	// The word study links and the chapter highlights are the same work on
+	// different markup, so it is done once and the tag and class say which.
+	function wrapNodeRanges(node, ranges, tag, className) {
 		if (!ranges.length || !node.parentNode) return;
 		var text = node.nodeValue;
 		var frag = document.createDocumentFragment();
@@ -1485,8 +1507,8 @@ fireEvent({
 			var e = ranges[i][1];
 			if (s > cursor) frag.appendChild(document.createTextNode(text.slice(cursor, s)));
 			if (e > s) {
-				var span = document.createElement("span");
-				span.className = "word-link";
+				var span = document.createElement(tag);
+				span.className = className;
 				span.textContent = text.slice(s, e);
 				frag.appendChild(span);
 			}
@@ -1783,6 +1805,189 @@ fireEvent({
 			closeWordPopup();
 		},
 	);
+
+	// ---------- Highlights ----------
+	//
+	// A search result, and a verse on a word study page, both send the reader to
+	// a chapter with a set of words in mind. The chapter marks them so the
+	// words can be seen where they are, and the button in the corner takes them
+	// away again. Nothing is kept: the next chapter, or the next page of any
+	// kind, starts unmarked.
+
+	// The words on screen, as { terms, partial, label }, or null when nothing is
+	// marked. A page that arrives with words in hand leaves them in
+	// window.pendingHighlight, which loadURL picks up - the same way
+	// window.scrollVerse carries the verse to scroll to - or calls
+	// applyChapterHighlight() itself when the chapter is already on screen.
+	var chapterHighlight = null;
+
+	function applyChapterHighlight(request) {
+		chapterHighlight =
+			request && request.terms && request.terms.length ? request : null;
+		renderHighlights();
+	}
+
+	function clearChapterHighlight() {
+		window.pendingHighlight = null;
+		applyChapterHighlight(null);
+	}
+
+	// The marks belonged to the words the reader was looking for, so any other
+	// page takes them away. Another chapter does it the same way, by arriving
+	// without any.
+	registerEventListener(
+		(e) => e.name == "showPage" && e.page != "chapter",
+		function () {
+			clearChapterHighlight();
+		},
+	);
+
+	function renderHighlights() {
+		var button = document.getElementById("clearHighlights");
+		unwrapHighlights();
+
+		if (!chapterHighlight) {
+			if (button) button.style.display = "none";
+			return;
+		}
+
+		var count = 0;
+		var text = document.getElementById("chapterText");
+		if (text) {
+			highlightableTextNodes(text).forEach(function (node) {
+				var ranges = highlightRangesIn(
+					node,
+					chapterHighlight.terms,
+					chapterHighlight.partial,
+				);
+				if (!ranges.length) return;
+				count += ranges.length;
+				wrapNodeRanges(node, ranges, "mark", "chapter-hl");
+			});
+		}
+
+		if (!button) return;
+		button.textContent = "Clear highlights (" + count + ")";
+		button.title = chapterHighlight.label
+			? "Clear the highlights for " + chapterHighlight.label
+			: "Clear the highlights";
+		button.style.display = "";
+	}
+
+	function unwrapHighlights() {
+		var text = document.getElementById("chapterText");
+		if (!text) return;
+		Array.prototype.slice
+			.call(text.querySelectorAll(".chapter-hl"))
+			.forEach(function (mark) {
+				var parent = mark.parentNode;
+				while (mark.firstChild) parent.insertBefore(mark.firstChild, mark);
+				parent.removeChild(mark);
+			});
+	}
+
+	// The text the reader can see, and nothing else. applySettings hides the
+	// spelling and case variants that are not on screen - the same words three
+	// times over - so only the one that is left is worth marking, and the
+	// footnote letters are apparatus rather than the words of the chapter.
+	function highlightableTextNodes(root) {
+		var nodes = [];
+		var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+			acceptNode: function (node) {
+				if (!node.nodeValue) return NodeFilter.FILTER_REJECT;
+				for (var el = node.parentNode; el && el !== root; el = el.parentNode) {
+					if (el.style && el.style.display == "none")
+						return NodeFilter.FILTER_REJECT;
+					if (
+						el.classList &&
+						(el.classList.contains("fn") || el.classList.contains("chapter-hl"))
+					)
+						return NodeFilter.FILTER_REJECT;
+				}
+				return NodeFilter.FILTER_ACCEPT;
+			},
+		});
+		var node;
+		while ((node = walker.nextNode())) nodes.push(node);
+		return nodes;
+	}
+
+	// applySettings rewrites God's name in place, so the chapter does not always
+	// contain the word a search was run on: the BSB's text says "the LORD" and
+	// the reader may be reading it as Yahweh, or the other way about. The span
+	// keeps the text it stands for in data-name, so that is what is matched, and
+	// the name on screen is marked whole - there is nothing to match inside it,
+	// and half of it would be worse than none.
+	function highlightRangesIn(node, terms, partial) {
+		for (
+			var el = node.parentNode;
+			el && el.id != "chapterText";
+			el = el.parentNode
+		) {
+			if (!el.dataset || !el.dataset.name) continue;
+			var name = el.dataset.name.toLowerCase();
+			var whole = terms.some(function (term) {
+				return findTerm(name, term.toLowerCase(), partial, 0) >= 0;
+			});
+			return whole ? [[0, node.nodeValue.length]] : [];
+		}
+		return findTermRanges(node.nodeValue, terms, partial);
+	}
+
+	// Words are found the way the search page found them: as a phrase or each
+	// word, and on whole words only when Partial is off. The two share these
+	// rules so a result and the chapter it opens agree about what matched.
+	var WORD_CHAR = /[A-Za-z0-9'’-]/;
+
+	function isWordChar(ch) {
+		return ch !== "" && WORD_CHAR.test(ch);
+	}
+
+	function isWholeWord(text, start, len) {
+		return (
+			!isWordChar(start > 0 ? text.charAt(start - 1) : "") &&
+			!isWordChar(start + len < text.length ? text.charAt(start + len) : "")
+		);
+	}
+
+	function findTerm(text, term, partial, from) {
+		for (
+			var i = text.indexOf(term, from);
+			i >= 0;
+			i = text.indexOf(term, i + 1)
+		) {
+			if (partial || isWholeWord(text, i, term.length)) return i;
+		}
+		return -1;
+	}
+
+	// Every match of any of the terms in one piece of text: earliest first, and
+	// the longest where two start together, so "the heavens" wins over
+	// "heavens". What one term takes, another cannot match inside.
+	function findTermRanges(text, terms, partial) {
+		var lower = text.toLowerCase();
+		var ranges = [];
+		var pos = 0;
+		while (pos <= text.length) {
+			var idx = -1;
+			var len = 0;
+			for (var i = 0; i < terms.length; i++) {
+				var t = terms[i].toLowerCase();
+				var j = findTerm(lower, t, partial, pos);
+				if (
+					j >= 0 &&
+					(idx < 0 || j < idx || (j == idx && t.length > len))
+				) {
+					idx = j;
+					len = t.length;
+				}
+			}
+			if (idx < 0) break;
+			ranges.push([idx, idx + len]);
+			pos = idx + len;
+		}
+		return ranges;
+	}
 
 	window.testLookup = function (slug, chapter, verse, word) {
 		return loadWordData(slug).then(function () {

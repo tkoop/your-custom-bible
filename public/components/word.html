@@ -49,6 +49,10 @@
 	// hands over; a link pasted into the address bar arrives without it.
 	var wordStudyFrom = null;
 
+	// The entry on screen, kept because the verse links need its renderings to
+	// know which words to mark in the chapter they open.
+	var wordStudyEntry = null;
+
 	function wordStudyKey(lang, strong) {
 		// The same rule the popup uses to print a Strong's number, and the one
 		// buildLexicon.mjs keys its files by: Greek is G, Hebrew and Aramaic H.
@@ -185,6 +189,7 @@
 
 	function renderWordPage(entry) {
 		wordStudyStatus("");
+		wordStudyEntry = entry;
 		var content = document.getElementById("wordContent");
 		if (!content) return;
 		content.innerHTML = "";
@@ -736,18 +741,61 @@ content.appendChild(renderWordHead(entry));
 
 	// A verse link opens its chapter and scrolls to the verse, which is the
 	// contract loadURL() already offers the search page through window.scrollVerse.
+	// The chapter also marks the words the reader was looking for, which for this
+	// page means the renderings of the word they are looking up.
 	function goToWordVerse(bookIndex, verseKey) {
 		var book = books[bookIndex];
 		if (!book) return;
 		var parts = verseKey.split(":");
 		var verse = parseInt(parts[1], 10);
+		var highlight = wordVerseHighlight(bookIndex, parts[0]);
 		var hash = "#" + book.abbr + "-" + parts[0] + sharedSettingsQuery();
 		if (location.hash === hash) {
+			applyChapterHighlight(highlight);
 			scrollWordVerseIntoView(verse);
 			return;
 		}
 		window.scrollVerse = verse;
+		window.pendingHighlight = highlight;
 		location.hash = hash;
+	}
+
+	// Which of the word's renderings to mark in this chapter: the one the reader
+	// has picked out of "How it is translated" if they have picked one, otherwise
+	// every rendering this chapter uses - the verses each rendering lists are the
+	// ones it stands in for, so the chapter marks this word wherever it is
+	// rendered there, rather than a rendering that never appears in it.
+	function wordVerseHighlight(bookIndex, chapter) {
+		if (!wordStudyEntry) return null;
+		var terms = [];
+		wordStudyEntry.g.forEach(function (rendering, index) {
+			if (wordStudyRendering !== null && wordStudyRendering !== index) return;
+			if (!renderedInChapter(rendering, bookIndex, chapter)) return;
+			terms.push(rendering.e);
+		});
+		// A word whose verse lists were cut, or one this chapter does not appear
+		// in at all, still opens onto something worth marking.
+		if (!terms.length && wordStudyEntry.g.length) {
+			terms.push(wordStudyEntry.g[0].e);
+		}
+		if (!terms.length) return null;
+		return {
+			terms: terms,
+			partial: false,
+			label: "Strong's " + wordStudyEntry.k,
+		};
+	}
+
+	function renderedInChapter(rendering, bookIndex, chapter) {
+		var prefix = chapter + ":";
+		return rendering.b.some(function (pair) {
+			return (
+				pair[0] === bookIndex &&
+				pair[1].split(" ").some(function (verseKey) {
+					return verseKey.indexOf(prefix) === 0;
+				})
+			);
+		});
 	}
 
 	function scrollWordVerseIntoView(verse) {

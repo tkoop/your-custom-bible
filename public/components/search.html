@@ -191,29 +191,9 @@
 		runSearch(inputEl.value, false);
 	});
 
-	var WORD_CHAR = /[A-Za-z0-9'’-]/;
-
-	function isWordChar(ch) {
-		return ch !== "" && WORD_CHAR.test(ch);
-	}
-
-	function isWholeWord(text, start, len) {
-		return (
-			!isWordChar(start > 0 ? text.charAt(start - 1) : "") &&
-			!isWordChar(start + len < text.length ? text.charAt(start + len) : "")
-		);
-	}
-
-	function findTerm(text, term, partial, from) {
-		for (
-			var i = text.indexOf(term, from);
-			i >= 0;
-			i = text.indexOf(term, i + 1)
-		) {
-			if (partial || isWholeWord(text, i, term.length)) return i;
-		}
-		return -1;
-	}
+	// findTerm() and findTermRanges() live in the chapter component: the chapter
+	// marks the words a result is opened for, and the two have to agree about
+	// what a search matched.
 
 	function runSearch(query, record) {
 		query = (query || "").trim().toLowerCase();
@@ -310,35 +290,19 @@
 	}
 
 	function highlight(text, terms, partial) {
-		var lower = text.toLowerCase();
 		var frag = document.createDocumentFragment();
+		var ranges = findTermRanges(text, terms, partial);
 		var pos = 0;
-		while (true) {
-			var idx = -1;
-			var len = 0;
-			for (var i = 0; i < terms.length; i++) {
-				var t = terms[i];
-				var j = findTerm(lower, t, partial, pos);
-				if (
-					j >= 0 &&
-					(idx < 0 || j < idx || (j == idx && t.length > len))
-				) {
-					idx = j;
-					len = t.length;
-				}
-			}
-			if (idx < 0) break;
-			if (idx > pos)
-				frag.appendChild(
-					document.createTextNode(text.substring(pos, idx))
-				);
+		ranges.forEach(function (range) {
+			if (range[0] > pos)
+				frag.appendChild(document.createTextNode(text.substring(pos, range[0])));
 			var mark = document.createElement("mark");
 			mark.appendChild(
-				document.createTextNode(text.substring(idx, idx + len))
+				document.createTextNode(text.substring(range[0], range[1])),
 			);
 			frag.appendChild(mark);
-			pos = idx + len;
-		}
+			pos = range[1];
+		});
 		if (pos < text.length)
 			frag.appendChild(document.createTextNode(text.substring(pos)));
 		if (frag.childNodes.length == 0)
@@ -453,6 +417,24 @@
 		if (!book) return;
 		if (lastSearch) recordSearch(lastSearch);
 		window.scrollVerse = rec[2];
+		window.pendingHighlight = searchHighlight(lastSearch);
 		loadThisChapter(book.name, book.slug, rec[1]);
+	}
+
+	// The chapter marks the words this result was found by, matched the same way
+	// they were matched here: each word separately or the whole phrase, and on
+	// whole words only when Partial is off.
+	function searchHighlight(search) {
+		if (!search || !search.q) return null;
+		var terms =
+			search.mode === "words"
+				? search.q.split(/\s+/).filter(Boolean)
+				: [search.q];
+		if (!terms.length) return null;
+		return {
+			terms: terms,
+			partial: search.partial !== false,
+			label: "“" + search.q + "”",
+		};
 	}
 </script>

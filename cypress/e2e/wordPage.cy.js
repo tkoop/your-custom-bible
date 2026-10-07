@@ -156,6 +156,69 @@ describe("word study page", () => {
       });
   });
 
+  it("marks the word's renderings in the chapter a verse link opens", () => {
+    openStudyFor("heavens");
+
+    // The renderings the page lists are the words the chapter can be marked
+    // with: this word, wherever the translation renders it, and nothing else.
+    cy.get("[data-cy='wordRendering']")
+      .then(($rows) =>
+        [...$rows].map((row) =>
+          row.getAttribute("data-rendering").toLowerCase(),
+        ),
+      )
+      .as("renderings");
+
+    cy.get("[data-cy='wordBook']").eq(1).click();
+    cy.get("[data-cy='wordBook']")
+      .eq(1)
+      .find("[data-cy='wordVerse']")
+      .first()
+      .then(($verse) => {
+        const [chapter, verse] = $verse.text().split(":");
+        cy.get("[data-cy='wordVerse']").first().click();
+        cy.get("#chapterTitle").should("contain", "Exodus " + chapter);
+
+        cy.get("#chapter .chapter-hl").should("have.length.greaterThan", 0);
+        cy.get("@renderings").then((renderings) => {
+          cy.get("#chapter .chapter-hl").each(($mark) => {
+            expect(renderings).to.include($mark.text().toLowerCase());
+          });
+        });
+        // The verse the link named is one of them.
+        cy.get("#chapter #v" + verse)
+          .closest("p")
+          .find(".chapter-hl")
+          .should("exist");
+        cy.get("[data-cy='clearHighlights']")
+          .should("be.visible")
+          .and("contain", "Clear highlights")
+          .click();
+        cy.get("#chapter .chapter-hl").should("not.exist");
+      });
+  });
+
+  it("marks only the rendering the reader picked", () => {
+    openStudyFor("heavens");
+
+    // "the heavens" is the rendering Genesis 1:1 uses, so the marks on it are
+    // the phrase and not the single word on its own.
+    cy.get("[data-cy='wordRendering']").first().should("contain", "the heavens");
+    cy.get("[data-cy='wordRenderingChoose']").first().click();
+
+    cy.get("[data-cy='wordBook']").first().click();
+    cy.get("[data-cy='wordBook']")
+      .first()
+      .find("[data-cy='wordVerse']")
+      .first()
+      .click();
+
+    cy.get("#chapter .chapter-hl").should("have.length.greaterThan", 0);
+    cy.get("#chapter .chapter-hl").each(($mark) => {
+      expect($mark.text().toLowerCase()).to.equal("the heavens");
+    });
+  });
+
   it("opens from its own URL", () => {
     cy.visit("http://localhost:8000/#word/G2424");
 

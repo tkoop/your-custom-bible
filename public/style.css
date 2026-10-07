@@ -1521,6 +1521,52 @@ div.fn p.calibre2 {
 	display: none;
 }
 
+/* ---------- Highlights ---------- */
+/* The words a search result or a word study sent the reader here for, marked in
+   the chapter they land on. A tint behind the text rather than the browser's
+   yellow, so a marked chapter still reads as scripture. */
+.chapter-hl {
+	background: var(--gold-light);
+	color: inherit;
+	border-radius: 3px;
+	padding: 0 1px;
+	/* a mark that falls over a line break is tinted on both lines, not only the
+	   first */
+	-webkit-box-decoration-break: clone;
+	box-decoration-break: clone;
+}
+
+/* The way back to unmarked text. Fixed to the viewport, because the chapter
+   scrolls under it and in page turning mode does not scroll at all. */
+#clearHighlights {
+	position: fixed;
+	right: 14px;
+	bottom: 14px;
+	z-index: 60;
+	display: inline-block;
+	padding: 8px 14px;
+	border: 1px solid var(--border);
+	border-radius: 999px;
+	background-color: var(--surface);
+	color: var(--text-secondary);
+	font-family: 'sourceSansPro', sans-serif;
+	font-size: 0.82rem;
+	font-weight: 600;
+	box-shadow: var(--shadow);
+	cursor: pointer;
+}
+
+#clearHighlights:hover {
+	border-color: var(--primary);
+	color: var(--primary);
+}
+
+/* The read to me panel is pinned to the bottom of the screen too, so the button
+   sits above it rather than under it. */
+body.rtm-open #clearHighlights {
+	bottom: calc(var(--rtm-panel-h, 0px) + 14px);
+}
+
 /* ---------- Page headings (Home / Search / About / History) ----------
    These are app chrome, not scripture, so they keep the UI font and must
    not follow the reading font the gear menu picks. Scripture headings are
