@@ -53,13 +53,26 @@ To rebuild the derived data:
 node scripts/count-you.mjs resources/bsb_you_counts.tsv   # you/your singular vs plural, per verse
 node scripts/build-plurals.mjs                            # -> pluralYous.mjs, used by compile.mjs
 node tools/buildWordData.mjs                              # -> public/wordData/*.json, the word study popup
+node tools/buildLexicon.mjs                               # -> public/lexicon/*.json, the word study page (run after buildWordData)
 ```
 
-All three outputs are committed, so you only need to run these if you change
-the scripts or pick up a newer copy of the tables. They currently regenerate
+All four outputs are committed, so you only need to run these if you change the
+scripts or pick up a newer copy of the tables. They currently regenerate
 byte-for-byte identically from the committed `resources/bsb_tables.tsv`.
+
+`tools/buildLexicon.mjs` also reads two more downloads:
+`resources/strongs-hebrew-dictionary.js` and
+`resources/strongs-greek-dictionary.js`, from
+[openscriptures/strongs](https://github.com/openscriptures/strongs). They are
+Strong's Dictionaries of Hebrew and Greek, which is where the word study pages
+get their definitions, lemmas and pronunciations. The BSB tables hold no
+dictionary, so every other number on those pages is counted out of the BSB's own
+use of the word.
 
 ## License
 
 + The code is licensed under the MIT license (see `LICENSE`).
 + For the content license, see https://berean.bible/licensing.htm
++ The word study pages also quote Strong's Dictionaries of Hebrew and Greek
+  (James Strong, 1890 Greek and 1894 Hebrew) as published by Open Scriptures
+  under CC-BY-SA: https://github.com/openscriptures/strongs

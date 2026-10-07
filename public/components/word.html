@@ -1,0 +1,779 @@
+<div id="wordPage" class="word-page" data-cy="wordPage">
+	<div class="word-page-bar">
+		<button
+			type="button"
+			class="word-back"
+			data-cy="wordBack"
+			onclick="wordStudyBack()"
+		>
+			<svg
+				width="20"
+				height="20"
+				viewBox="0 0 24 24"
+				fill="none"
+				xmlns="http://www.w3.org/2000/svg"
+				aria-hidden="true"
+			>
+				<path
+					d="M15.41 16.58L10.83 12L15.41 7.41L14 6L8 12L14 18L15.41 16.58Z"
+					fill="currentColor"
+				/>
+			</svg>
+			<span id="wordBackLabel">Back</span>
+		</button>
+	</div>
+
+	<div id="wordStatus" class="word-status"></div>
+
+	<div id="wordContent"></div>
+</div>
+
+<script>
+	// The page for one Hebrew, Aramaic or Greek word. The popup answers "what is
+	// this word here"; this answers "what is this word" - how often it occurs,
+	// how the BSB renders it, what forms it takes and where it turns up - and
+	// links every occurrence back into the reader.
+	//
+	// It is all one fetch: tools/buildLexicon.mjs counts the word out of the same
+	// word data the popup reads and writes one small file per Strong's number
+	// under public/lexicon, so a page is one request whatever the word's size.
+	var wordStudyCache = {};
+	var wordStudyLoaded = null; // the key whose file is on its way
+	var wordStudyRendering = null; // the translation row the verse list is showing
+
+	// How many renderings are shown before the rest are folded away.
+	var FIRST_RENDERINGS = 12;
+
+	// Where the reader came from, so the back button has something to say and
+	// the page can offer the verse they clicked. The popup sets it before it
+	// hands over; a link pasted into the address bar arrives without it.
+	var wordStudyFrom = null;
+
+	function wordStudyKey(lang, strong) {
+		// The same rule the popup uses to print a Strong's number, and the one
+		// buildLexicon.mjs keys its files by: Greek is G, Hebrew and Aramaic H.
+		if (!strong || !/^[0-9]+$/.test(strong)) return null;
+		return (lang == "Greek" ? "G" : "H") + strong.padStart(4, "0");
+	}
+
+	function wordStudyLoad(key) {
+		if (wordStudyCache[key]) return Promise.resolve(wordStudyCache[key]);
+		return fetch("lexicon/" + key + ".json?version=1")
+			.then(function (r) {
+				if (!r.ok) throw new Error(key + " -> HTTP " + r.status);
+				return r.json();
+			})
+			.then(function (data) {
+				wordStudyCache[key] = data;
+				return data;
+			});
+	}
+
+	// ---------- entry points ----------
+
+	// The router calls this for a "#word/G2424" hash, and the popup calls it
+	// straight after moving the address bar there.
+	function showWordPage(key) {
+		key = (key || "").split("?")[0].trim();
+		wordStudyRendering = null;
+		wordStudyStatus(key ? "Loading…" : "");
+		renderWordBack();
+
+		fireEvent({
+			name: "showPage",
+			page: "word",
+			hash: key ? "word/" + key : "",
+			skipHistory: true,
+		});
+
+		var content = document.getElementById("wordContent");
+		if (content) content.innerHTML = "";
+		if (!/^[GH]\d{4}$/.test(key)) {
+			wordStudyStatus("No word study for “" + key + "”.");
+			return;
+		}
+
+		var requested = key;
+		wordStudyLoaded = requested;
+		wordStudyLoad(key)
+			.then(function (entry) {
+				// A stale fetch: the reader has moved on to another word.
+				if (wordStudyLoaded !== requested) return;
+				renderWordPage(entry);
+			})
+			.catch(function (e) {
+				console.error("word study failed", e);
+				if (wordStudyLoaded !== requested) return;
+				wordStudyStatus("There is no study for this word.");
+			});
+	}
+
+	function openWordStudy(entry, from) {
+		var key = wordStudyKey(entry.l, entry.s);
+		if (!key) return false;
+		wordStudyFrom = from || null;
+		var hash = "#word/" + key;
+		if (location.hash === hash) {
+			showWordPage(key);
+			return true;
+		}
+		location.hash = hash;
+		return true;
+	}
+
+	// Either way the way back is the reader's own history: the page was reached
+	// by moving the address bar, so the entry before it is whatever they were
+	// reading. Only a first visit in a fresh tab has nothing to go back to.
+	function wordStudyBack() {
+		if (wordStudyFrom || window.history.length > 1) {
+			window.history.back();
+			return;
+		}
+		fireEvent({ name: "showPage", page: "home" });
+	}
+
+	function wordStudyStatus(message) {
+		var status = document.getElementById("wordStatus");
+		if (status) status.textContent = message;
+	}
+
+	function renderWordBack() {
+		var label = document.getElementById("wordBackLabel");
+		if (!label) return;
+		label.textContent = wordStudyFrom
+			? "Back to " + wordStudyFrom.chapterLabel
+			: "Back";
+	}
+
+	// ---------- rendering ----------
+
+	function el(tag, className, text) {
+		var node = document.createElement(tag);
+		if (className) node.className = className;
+		if (text !== undefined && text !== null) node.textContent = text;
+		return node;
+	}
+
+	function hebrewWord(lang) {
+		return lang != "Greek";
+	}
+
+	// A number the reader can read at a glance: 906 stays 906, 5443 becomes
+	// "5,443".
+	function thousands(number) {
+		return String(number).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+	}
+
+	function plural(number, one, many) {
+		return number == 1 ? one : many || one + "s";
+	}
+
+	function percent(part, whole) {
+		if (!whole) return "0%";
+		var value = (part / whole) * 100;
+		if (value >= 10) return Math.round(value) + "%";
+		if (value >= 1) return Math.round(value * 10) / 10 + "%";
+		return "<1%";
+	}
+
+	// The share of the whole a bar is drawn across. Below a couple of percent a
+	// bar would vanish, so the shortest one still shows.
+	function barWidth(part, whole) {
+		if (!whole) return "0%";
+		return Math.max(1.5, Math.min(100, (part / whole) * 100)) + "%";
+	}
+
+	function renderWordPage(entry) {
+		wordStudyStatus("");
+		var content = document.getElementById("wordContent");
+		if (!content) return;
+		content.innerHTML = "";
+
+content.appendChild(renderWordHead(entry));
+	if (wordStudyFrom && wordStudyFrom.ref) {
+		content.appendChild(renderWordOrigin());
+	}
+		content.appendChild(renderWordDefinition(entry));
+		var derivation = renderWordDerivation(entry);
+		if (derivation) content.appendChild(derivation);
+		content.appendChild(renderWordTranslations(entry));
+		content.appendChild(renderWordForms(entry));
+		content.appendChild(renderWordVerses(entry));
+	}
+
+	function renderWordHead(entry) {
+		var card = el("div", "word-card");
+		var rtl = hebrewWord(entry.l);
+
+		var headword = el("h1", "word-headword", (entry.o[0] || [])[0] || "");
+		if (rtl) headword.setAttribute("dir", "rtl");
+		headword.setAttribute("lang", rtl ? "he" : "el");
+		headword.setAttribute("data-cy", "wordHeadword");
+		card.appendChild(headword);
+
+		if (entry.t.length) {
+			card.appendChild(
+				el("p", "word-transliteration", "“" + entry.t[0][0] + "”"),
+			);
+		}
+
+		var meta = el("p", "word-meta");
+		meta.appendChild(el("span", "word-strong", "Strong's " + entry.k));
+		meta.appendChild(el("span", "word-dot", "·"));
+		meta.appendChild(el("span", null, entry.l));
+		meta.setAttribute("data-cy", "wordStrong");
+		card.appendChild(meta);
+
+		var stats = el("p", "word-stats");
+		stats.appendChild(
+			el(
+				"span",
+				null,
+				thousands(entry.n) +
+					" " +
+					plural(entry.n, "use") +
+					" in the BSB",
+			),
+		);
+		stats.appendChild(el("span", "word-dot", "·"));
+		stats.appendChild(
+			el(
+				"span",
+				null,
+				thousands(entry.vc) +
+					" " +
+					plural(entry.vc, "verse") +
+					" in " +
+					thousands(entry.bc) +
+					" " +
+					plural(entry.bc, "book"),
+			),
+		);
+		card.appendChild(stats);
+
+		card.appendChild(renderWordStrongsEntry(entry));
+
+		return card;
+	}
+
+	// Strong's own entry for the number: the headword as the dictionary lists it,
+	// its transliteration, and - where the dictionary gives one - how it is
+	// pronounced. These are the dictionary's forms, which is not the same thing
+	// as the forms the BSB's text is written in further down the page.
+	function renderWordStrongsEntry(entry) {
+		var rows = [];
+		if (entry.m) rows.push(["Headword", entry.m, hebrewWord(entry.l)]);
+		if (entry.x) rows.push(["Transliterated", entry.x, false]);
+		if (entry.pr) rows.push(["Pronounced", entry.pr, false]);
+		if (!rows.length) return el("div");
+
+		var list = el("dl", "word-dictionary");
+		list.setAttribute("data-cy", "wordStrongsEntry");
+		rows.forEach(function (row) {
+			list.appendChild(el("dt", null, row[0]));
+			var value = el("dd", null, row[1]);
+			if (row[2]) {
+				value.setAttribute("dir", "rtl");
+				value.setAttribute("lang", "he");
+			}
+			list.appendChild(value);
+		});
+		return list;
+	}
+
+	// The verse the reader clicked, so they can get straight back to it.
+	function renderWordOrigin() {
+		var row = el("div", "word-origin");
+		row.appendChild(el("span", "word-origin-label", "Opened from"));
+		var button = el("button", "word-origin-link", wordStudyFrom.ref);
+		button.type = "button";
+		button.setAttribute("data-cy", "wordOrigin");
+		button.addEventListener("click", function () {
+			goToWordVerse(wordStudyFrom.bookIndex, wordStudyFrom.verseKey);
+		});
+		row.appendChild(button);
+		return row;
+	}
+
+	// Strong's Dictionaries give the entry as one run of text - where the word
+	// comes from, then what it means - and the two fields are kept apart in the
+	// file only because the page also uses the derivation on its own, as a list
+	// of links to the words this one is built from. Where a dictionary entry is
+	// mostly derivation (Greek especially, where Strong's derivation often
+	// carries the main sense), quoting the two together reads as one entry
+	// instead of as half of one.
+	function strongsEntryText(entry) {
+		var from = entry.r ? entry.r.replace(/;\s*$/, "") : "";
+		if (!from) return entry.d || "";
+		return entry.d ? from + "; " + entry.d : from;
+	}
+
+	// The definition, then what this translation does with the word: two
+	// different answers, and the reader asked for both.
+	function renderWordDefinition(entry) {
+		var section = el("section", "word-section");
+		section.appendChild(el("h2", null, "Definition"));
+
+		var text = strongsEntryText(entry);
+		if (text) {
+			var definition = el("p", "word-definition-strong");
+			appendStrongsRefs(definition, text);
+			definition.setAttribute("data-cy", "wordDefinition");
+			section.appendChild(definition);
+		} else {
+			section.appendChild(
+				el(
+					"p",
+					"word-note",
+					"Strong's Dictionaries give no definition for this number. What " +
+						"the BSB does with the word is all there is.",
+				),
+			);
+		}
+
+		section.appendChild(renderWordUsage(entry));
+		section.appendChild(
+			el(
+				"p",
+				"word-credit",
+				"From Strong's Dictionaries of Hebrew and Greek, James Strong (1890 " +
+					"Greek, 1894 Hebrew), as published by Open Scriptures under " +
+					"CC-BY-SA.",
+			),
+		);
+		return section;
+	}
+
+	// How the BSB itself renders the word, which is a count out of its own text
+	// rather than anything a dictionary says.
+	function renderWordUsage(entry) {
+		var top = entry.g[0];
+		var block = el("div", "word-usage");
+		if (!top) {
+			block.appendChild(el("p", null, "The BSB does not translate it."));
+			return block;
+		}
+		var text = el("p", "word-usage-text");
+		text.appendChild(el("span", "word-usage-label", "In the BSB: "));
+		text.appendChild(el("em", "word-definition-main", top.e));
+		text.appendChild(
+			document.createTextNode(
+				" " +
+					thousands(top.n) +
+					" times (" +
+					percent(top.n, entry.n) +
+					" of its " +
+					thousands(entry.n) +
+					" " +
+					plural(entry.n, "use") +
+					")",
+			),
+		);
+		var others = entry.g.slice(1, 5);
+		if (others.length) {
+			text.appendChild(
+				document.createTextNode(
+					", and also " +
+						others
+							.map(function (g) {
+								return "“" + g.e + "” (" + thousands(g.n) + ")";
+							})
+							.join(", ") +
+						".",
+				),
+			);
+		}
+		block.appendChild(text);
+		return block;
+	}
+
+	// Where the word comes from, with every other word Strong's names in the
+	// derivation turned into a link to its own page. The text itself is already
+	// in the definition, so this section only appears when there is something to
+	// follow.
+	function renderWordDerivation(entry) {
+		if (!entry.r || !STRONGS_REF.test(entry.r)) return null;
+		var section = el("section", "word-section");
+		section.appendChild(el("h2", null, "Built from"));
+		var text = el("p", "word-derivation");
+		appendStrongsRefs(text, entry.r);
+		text.setAttribute("data-cy", "wordDerivation");
+		section.appendChild(text);
+		return section;
+	}
+
+	// Strong's numbers inside a definition or a derivation: a link to that word's
+	// page. They are the strongest thing in the text: a run of digits after a
+	// letter, always four of them now that the build has normalised them.
+	var STRONGS_REF = /([HG]\d{4})/g;
+
+	function appendStrongsRefs(node, text) {
+		// Mixed Hebrew and English run together without this, and the entry is
+		// laid out left to right whichever way it starts.
+		node.setAttribute("dir", "auto");
+		var last = 0;
+		var match;
+		STRONGS_REF.lastIndex = 0;
+		while ((match = STRONGS_REF.exec(text))) {
+			if (match.index > last) {
+				node.appendChild(document.createTextNode(text.slice(last, match.index)));
+			}
+			var link = el("a", "word-ref", match[0]);
+			link.setAttribute("href", "#word/" + match[0]);
+			node.appendChild(link);
+			last = match.index + match[0].length;
+		}
+		if (last < text.length) {
+			node.appendChild(document.createTextNode(text.slice(last)));
+		}
+	}
+
+	// "Different ways it is translated": every rendering the tables give this
+	// word, most used first. Picking one narrows the verses below to the ones
+	// rendered that way. The tail is folded away, because a common word has
+	// hundreds of renderings and they would bury the verses.
+	function renderWordTranslations(entry) {
+		var section = el("section", "word-section");
+		var head = el("div", "word-section-head");
+		head.appendChild(el("h2", null, "How it is translated"));
+		head.appendChild(
+			el(
+				"span",
+				"word-count",
+				thousands(entry.rc) + " " + plural(entry.rc, "rendering"),
+			),
+		);
+		section.appendChild(head);
+
+		var list = el("div", "word-renderings");
+		var shown = Math.min(FIRST_RENDERINGS, entry.g.length);
+		entry.g.slice(0, shown).forEach(function (rendering, index) {
+			list.appendChild(renderWordRendering(entry, rendering, index));
+		});
+
+		var rest = entry.g.slice(shown);
+		if (rest.length) {
+			var more = el("details", "word-more");
+			var summary = el("summary", "word-more-summary");
+			summary.appendChild(
+				el(
+					"span",
+					null,
+					"Show the other " +
+						thousands(rest.length + entry.rd) +
+						" " +
+						plural(rest.length + entry.rd, "rendering"),
+				),
+			);
+			more.appendChild(summary);
+			rest.forEach(function (rendering, index) {
+				more.appendChild(renderWordRendering(entry, rendering, index + shown));
+			});
+			list.appendChild(more);
+		}
+		section.appendChild(list);
+		return section;
+	}
+
+	function renderWordRendering(entry, rendering, index) {
+		var row = el("div", "word-rendering");
+		row.setAttribute("data-cy", "wordRendering");
+		row.setAttribute("data-index", index);
+		row.setAttribute("data-rendering", rendering.e);
+
+		row.appendChild(el("span", "word-rendering-text", rendering.e));
+
+		var bar = el("span", "word-rendering-bar");
+		var fill = el("span", "word-rendering-fill");
+		fill.style.width = barWidth(rendering.n, entry.n);
+		bar.appendChild(fill);
+		row.appendChild(bar);
+
+		row.appendChild(el("span", "word-rendering-count", thousands(rendering.n)));
+
+		// A rendering with no verses listed cannot be filtered to, so it is a
+		// label rather than a button. Everything else is.
+		if (rendering.b.length === 0) {
+			row.classList.add("plain");
+			return row;
+		}
+		var button = el("button", "word-rendering-choose", "");
+		button.type = "button";
+		button.setAttribute("data-cy", "wordRenderingChoose");
+		button.setAttribute("aria-label", "Show the verses rendered “" + rendering.e + "”");
+		button.addEventListener("click", function () {
+			chooseWordRendering(entry, wordStudyRendering === index ? null : index);
+		});
+		row.appendChild(button);
+		return row;
+	}
+
+	function chooseWordRendering(entry, index) {
+		wordStudyRendering = index;
+		renderWordRenderingRows();
+		var section = document.getElementById("wordVersesSection");
+		if (!section) return;
+		var replaced = renderWordVerses(entry);
+		section.parentNode.replaceChild(replaced, section);
+		replaced.scrollIntoView({ block: "start", behavior: "smooth" });
+	}
+
+	function renderWordRenderingRows() {
+		var rows = document.querySelectorAll("#wordContent .word-rendering");
+		Array.prototype.forEach.call(rows, function (row) {
+			row.classList.remove("selected");
+		});
+		if (wordStudyRendering === null) return;
+		var row = document.querySelector(
+			'#wordContent .word-rendering[data-index="' + wordStudyRendering + '"]',
+		);
+		if (row) row.classList.add("selected");
+	}
+
+	// Spellings, transliterations and the parsing codes: how this translation
+	// writes the word, as opposed to the headword the dictionary lists. Each
+	// list keeps the commonest few; the rest are counted but not shown, so a
+	// word does not open with a wall of rare forms.
+	function renderWordForms(entry) {
+		var section = el("section", "word-section");
+		section.appendChild(el("h2", null, "Forms in the BSB"));
+
+		if (entry.o.length) {
+			section.appendChild(wordFormList("Written", entry.o, entry.oc, true));
+		}
+		if (entry.t.length) {
+			section.appendChild(
+				wordFormList("Transliterated", entry.t, entry.tc, false),
+			);
+		}
+		if (entry.p.length) {
+			section.appendChild(wordFormList("Parsing", entry.p, entry.pc, false, true));
+		}
+		return section;
+	}
+
+	function wordFormList(label, pairs, total, rtl, code) {
+		var block = el("div", "word-forms");
+		block.appendChild(el("h3", null, label));
+		var list = el("ul", "word-form-list");
+		pairs.forEach(function (pair) {
+			var item = el("li", code ? "word-form-code" : "word-form");
+			// The direction belongs on the word, not on the row: a right to left
+			// row would put the count on the wrong side of it.
+			var text = el("span", "word-form-text", pair[0]);
+			if (rtl) {
+				text.setAttribute("dir", "rtl");
+				text.setAttribute("lang", "he");
+			}
+			item.appendChild(text);
+			item.appendChild(el("span", "word-form-count", thousands(pair[1])));
+			list.appendChild(item);
+		});
+		block.appendChild(list);
+		if (total > pairs.length) {
+			block.appendChild(
+				el(
+					"p",
+					"word-note",
+					"and " +
+						thousands(total - pairs.length) +
+						" more, each used " +
+						thousands(pairs[pairs.length - 1][1]) +
+						" times or fewer.",
+				),
+			);
+		}
+		return block;
+	}
+
+	// Where the word is used. Every book is a closed list until it is opened,
+	// because a common word has thousands of references and rendering them all
+	// at once would swamp the page.
+	function renderWordVerses(entry) {
+		var section = el("section", "word-section");
+		section.id = "wordVersesSection";
+
+		var rendering = wordStudyRendering === null ? null : entry.g[wordStudyRendering];
+		var byBook = wordVersesByBook(entry, rendering);
+		var listed = 0;
+		byBook.forEach(function (pair) {
+			listed += pair[1].length;
+		});
+
+		var head = el("div", "word-section-head");
+		head.appendChild(el("h2", null, "Verses"));
+		head.appendChild(
+			el(
+				"span",
+				"word-count",
+				rendering
+					? thousands(listed) + " " + plural(listed, "verse")
+					: thousands(listed) + " listed of " + thousands(entry.vc),
+			),
+		);
+		section.appendChild(head);
+
+		if (rendering) {
+			var filter = el("p", "word-filter");
+			filter.appendChild(
+				el("span", "word-filter-label", "Rendered “" + rendering.e + "”"),
+			);
+			var clear = el("button", "word-filter-clear", "Show all");
+			clear.type = "button";
+			clear.addEventListener("click", function () {
+				chooseWordRendering(entry, null);
+			});
+			filter.appendChild(clear);
+			section.appendChild(filter);
+		}
+
+		if (!byBook.length) {
+			section.appendChild(
+				el("p", "word-note", "No verses are listed for this word."),
+			);
+			return section;
+		}
+
+		byBook.forEach(function (pair) {
+			section.appendChild(wordBookList(pair[0], pair[1]));
+		});
+
+		if (!rendering && entry.vd > 0) {
+			section.appendChild(
+				el(
+					"p",
+					"word-note",
+					"Only the first " +
+						thousands(entry.vs) +
+						" of the " +
+						thousands(entry.vc) +
+						" verses this word appears in are listed. Every occurrence is " +
+						"still reachable from the chapter reader: tap a word there for " +
+						"this page.",
+				),
+			);
+		}
+		return section;
+	}
+
+	// [bookIndex, [verseKey, ...]], in canonical order, de-duplicated when the
+	// list is every verse rather than one rendering's.
+	function wordVersesByBook(entry, rendering) {
+		var seen = {};
+		var books = [];
+		var sources = rendering ? [rendering] : entry.g;
+		sources.forEach(function (source) {
+			source.b.forEach(function (pair) {
+				var bookIndex = pair[0];
+				if (!books[bookIndex]) books[bookIndex] = { bookIndex: bookIndex, seen: {} };
+				pair[1].split(" ").forEach(function (verseKey) {
+					if (!verseKey) return;
+					if (rendering) {
+						books[bookIndex].seen[verseKey] = 1;
+						return;
+					}
+					if (seen[bookIndex + ":" + verseKey]) return;
+					seen[bookIndex + ":" + verseKey] = 1;
+					books[bookIndex].seen[verseKey] = 1;
+				});
+			});
+		});
+		return books
+			.filter(function (book) {
+				return book && Object.keys(book.seen).length;
+			})
+			.map(function (book) {
+				return [book.bookIndex, Object.keys(book.seen).sort(verseSort)];
+			});
+	}
+
+	function verseSort(a, b) {
+		var aParts = a.split(":");
+		var bParts = b.split(":");
+		if (aParts[0] != bParts[0]) return parseInt(aParts[0], 10) - parseInt(bParts[0], 10);
+		return parseInt(aParts[1], 10) - parseInt(bParts[1], 10);
+	}
+
+	function wordBookList(bookIndex, verseKeys) {
+		var book = books[bookIndex];
+		var details = el("details", "word-book");
+		details.setAttribute("data-cy", "wordBook");
+
+		var summary = el("summary", "word-book-name");
+		summary.appendChild(el("span", null, chapterRefName(book.name)));
+		summary.appendChild(
+			el("span", "word-book-count", thousands(verseKeys.length)),
+		);
+		details.appendChild(summary);
+
+		var body = el("div", "word-book-verses");
+		details.appendChild(body);
+
+		// The references are built when the book is opened, so a word used in
+		// two thousand verses costs two thousand buttons only for the books the
+		// reader actually opens.
+		details.addEventListener("toggle", function () {
+			if (!details.open || body.childNodes.length) return;
+			verseKeys.forEach(function (verseKey) {
+				body.appendChild(wordVerseLink(bookIndex, verseKey));
+			});
+		});
+
+		return details;
+	}
+
+	function wordVerseLink(bookIndex, verseKey) {
+		var book = books[bookIndex];
+		var button = el("button", "word-verse", verseKey);
+		button.type = "button";
+		button.setAttribute("data-cy", "wordVerse");
+		button.setAttribute("title", chapterRefName(book.name) + " " + verseKey);
+		button.addEventListener("click", function () {
+			goToWordVerse(bookIndex, verseKey);
+		});
+		return button;
+	}
+
+	// A verse link opens its chapter and scrolls to the verse, which is the
+	// contract loadURL() already offers the search page through window.scrollVerse.
+	function goToWordVerse(bookIndex, verseKey) {
+		var book = books[bookIndex];
+		if (!book) return;
+		var parts = verseKey.split(":");
+		var verse = parseInt(parts[1], 10);
+		var hash = "#" + book.abbr + "-" + parts[0] + sharedSettingsQuery();
+		if (location.hash === hash) {
+			scrollWordVerseIntoView(verse);
+			return;
+		}
+		window.scrollVerse = verse;
+		location.hash = hash;
+	}
+
+	function scrollWordVerseIntoView(verse) {
+		var verseEl = document.getElementById("v" + verse);
+		if (!verseEl) return;
+		var target = verseEl.closest("p") || verseEl;
+		target.scrollIntoView({ block: "center" });
+	}
+
+	registerEventListener(
+		(e) => e.name == "showPage" && e.page == "word",
+		function () {
+			// The page is filled before it is shown, so there is nothing to do
+			// here beyond keeping the back button's label in step with where the
+			// reader came from.
+			renderWordBack();
+		},
+	);
+
+	// Leaving the page retires the chapter it was opened from: another word
+	// study reached through the address bar should not claim to be a step back
+	// from a chapter the reader has already left.
+	registerEventListener(
+		(e) => e.name == "showPage" && e.page != "word",
+		function () {
+			wordStudyFrom = null;
+		},
+	);
+</script>
