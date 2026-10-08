@@ -31,13 +31,30 @@ describe("word lookup popup", () => {
     throw new Error("word " + needle + " not found");
   };
 
-  it("shows popup with Hebrew info for a clicked word", () => {
+  // The popup belongs to the reader who turned the links on, so every spec that
+  // wants one asks for the links first, and puts the menus away again so a panel
+  // cannot be left sitting over the word being clicked.
+  const wordStudyLinksOn = () => {
+    cy.openAdvancedMenu();
+    cy.get("#advancedDropdown").contains("Word study links").click();
+    cy.get("#chapter .word-link", { timeout: 10000 }).should("exist");
+    cy.get("#chapterTitle").click();
+    cy.get("#settingsDropdown").should("not.be.visible");
+    cy.get("#advancedDropdown").should("not.be.visible");
+  };
+
+  const clickInVerse = (needle) => {
     cy.get("#chapter p.reg1")
       .first()
       .then(($p) => {
-        const pos = chapterRelative($p, "heavens");
+        const pos = chapterRelative($p, needle);
         cy.get("#chapter").click(pos.x, pos.y);
       });
+  };
+
+  it("shows popup with Hebrew info for a clicked word", () => {
+    wordStudyLinksOn();
+    clickInVerse("heavens");
 
     cy.get("[data-cy='wordPopup']", { timeout: 5000 }).should("be.visible");
     cy.get(".word-popup-ref").should("contain", "Genesis 1:");
@@ -72,34 +89,28 @@ describe("word lookup popup", () => {
   });
 
   it("closes the popup when the close button is clicked", () => {
-    cy.get("#chapter p.reg1")
-      .first()
-      .then(($p) => {
-        const pos = chapterRelative($p, "earth");
-        cy.get("#chapter").click(pos.x, pos.y);
-      });
+    wordStudyLinksOn();
+    clickInVerse("earth");
 
     cy.get("[data-cy='wordPopup']", { timeout: 5000 }).should("be.visible");
     cy.get("[data-cy='wordPopupClose']").click();
     cy.get("[data-cy='wordPopup']").should("not.be.visible");
   });
 
-  it("is off by default (no underlines) but popup still works", () => {
+  it("is off by default: no underlines, and a word is not tappable", () => {
     cy.get("#chapter .word-link").should("not.exist");
 
-    cy.get("#chapter p.reg1")
-      .first()
-      .then(($p) => {
-        const pos = chapterRelative($p, "heavens");
-        cy.get("#chapter").click(pos.x, pos.y);
-      });
+    clickInVerse("heavens");
 
-    cy.get("[data-cy='wordPopup']", { timeout: 5000 }).should("be.visible");
+    // Nothing opens: the popup is built the first time a word is looked up, so
+    // there is no element for it to have been. The wait is for the lookup that
+    // would otherwise have been in flight.
+    cy.wait(750);
+    cy.get("#wordPopup").should("not.exist");
   });
 
   it("shows dotted underlines with pointer cursor when Word study links is on", () => {
-    cy.openAdvancedMenu();
-    cy.get("#advancedDropdown").contains("Word study links").click();
+    wordStudyLinksOn();
 
     cy.get("#chapter .word-link", { timeout: 10000 }).should("exist");
     cy.get("#chapter .word-link")
@@ -113,11 +124,12 @@ describe("word lookup popup", () => {
     });
   });
 
-  it("removes underlines when Word study links is off but popup still works", () => {
+  it("stops opening the popup when Word study links is turned off again", () => {
     cy.openAdvancedMenu();
     cy.get("#advancedDropdown").contains("Word study links").click();
     cy.get("#chapter .word-link", { timeout: 10000 }).should("exist");
 
+    // The underlines come and go with the setting, word for word.
     cy.get("#advancedDropdown").should("be.visible");
     cy.get("#advancedDropdown").contains("Word study links").click();
     cy.get("#chapter .word-link").should("not.exist");
@@ -130,16 +142,12 @@ describe("word lookup popup", () => {
     cy.get("#advancedDropdown").contains("Word study links").click();
     cy.get("#chapter .word-link").should("not.exist");
 
-    cy.get("#gearIcon").click();
-    cy.get("#settingsDropdown").should("be.visible");
+    cy.get("#chapterTitle").click();
+    cy.get("#settingsDropdown").should("not.be.visible");
 
-    cy.get("#chapter p.reg1")
-      .first()
-      .then(($p) => {
-        const pos = chapterRelative($p, "heavens");
-        cy.get("#chapter").click(pos.x, pos.y);
-      });
-
-    cy.get("[data-cy='wordPopup']", { timeout: 5000 }).should("be.visible");
+    // A word that was tappable a moment ago is not tappable now.
+    clickInVerse("heavens");
+    cy.wait(750);
+    cy.get("#wordPopup").should("not.exist");
   });
 });

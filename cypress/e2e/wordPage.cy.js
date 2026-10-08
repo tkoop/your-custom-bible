@@ -4,11 +4,21 @@ describe("word study page", () => {
   beforeEach(() => {
     cy.clearLocalStorage();
     cy.visit("http://localhost:8000/#Gen-1");
-    cy.get("#chapter").should("contain", "Genesis 1");
+    // "#chapter" holds the component's own markup until a chapter is fetched
+    // into it, and that markup mentions Genesis 1 in a comment, so wait for the
+    // title that only a loaded chapter has.
+    cy.get("#chapterTitle", { timeout: 10000 }).should("contain", "Genesis 1");
     cy.window().then((win) => win.document.fonts.ready);
     // The word page is a component like the chapter, and components load one
     // after another, so the chapter can be on screen before this one is here.
     cy.window().should((win) => expect(win.showWordPage).to.be.a("function"));
+    // A word is only tappable for the reader who turned the links on, and every
+    // spec here starts by tapping one to open the study.
+    cy.openAdvancedMenu();
+    cy.get("#advancedDropdown").contains("Word study links").click();
+    cy.get("#chapter .word-link", { timeout: 10000 }).should("exist");
+    cy.get("#chapterTitle").click();
+    cy.get("#settingsDropdown").should("not.be.visible");
   });
 
   // The click the popup listens for is a caret position, so the spec has to

@@ -1714,6 +1714,11 @@ fireEvent({
 	document
 		.getElementById("chapter")
 		.addEventListener("click", function (ev) {
+			// The links are what tells the reader a word is tappable, so with
+			// them off the text is not tappable and a click is just a click. The
+			// lookup below is the same one they make on a linked word; there is
+			// no word to look up without them.
+			if (!settings.wordStudyLinks) return;
 			if (!window.getSelection().isCollapsed) return;
 			if (ignoreClickElement(ev.target)) return;
 
