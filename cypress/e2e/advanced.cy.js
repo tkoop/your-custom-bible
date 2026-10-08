@@ -109,6 +109,22 @@ describe("advanced menu", () => {
     cy.get("#gearIcon").should("be.visible");
   });
 
+  it("opens the speed reader, which the menu's own click must not dismiss", () => {
+    cy.openAdvancedMenu();
+    cy.get("#speedReadItem").click();
+
+    cy.get("#speedReader").should("be.visible");
+    cy.get("#speedWord .orp", { timeout: 5000 }).should("exist");
+    cy.get("#speedWord").invoke("text").should("match", /\S/);
+
+    // The reader is dismissed by a click on the page, not by the click that
+    // opened it, so it is still up once the advanced menu has gone.
+    advancedMenu().should("not.be.visible");
+
+    clickAway();
+    cy.get("#speedReader").should("not.be.visible");
+  });
+
   it("closes when you navigate away mid-read", () => {
     cy.openAdvancedMenu();
     cy.get("#advancedDropdown").contains("Show advanced menu").click();
