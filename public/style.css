@@ -1244,7 +1244,7 @@ div.index-chapters a:active {
 .plans-form select,
 .plans-form input[type='text'],
 .plans-form input[type='number'],
-.plans-start input {
+.plans-inline-field input {
 	padding: 8px 10px;
 	border: 1px solid var(--border);
 	border-radius: var(--radius-sm);
@@ -1257,13 +1257,13 @@ div.index-chapters a:active {
 .plans-order-select:focus,
 .plans-form select:focus,
 .plans-form input:focus,
-.plans-start input:focus {
+.plans-inline-field input:focus {
 	outline: none;
 	border-color: var(--primary);
 	box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
-.plans-start {
+.plans-inline-field {
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;

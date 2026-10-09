@@ -280,7 +280,7 @@ function planPaceLabel(plan, order, fresh) {
 		label = count == 1 ? "1 chapter a day" : count + " chapters a day";
 	} else if (total < days) {
 		var gap = Math.max(1, Math.round(days / total));
-		label = "1 chapter every " + gap + " days";
+		label = gap == 1 ? "1 chapter a day" : "1 chapter every " + gap + " days";
 	} else {
 		var smallest = Math.floor(total / days);
 		var largest = Math.ceil(total / days);

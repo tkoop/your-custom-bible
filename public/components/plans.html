@@ -305,63 +305,67 @@ if (state.startsIn) {
 			actions.appendChild(read);
 		}
 
-var startLabel = plansEl("label", "plans-start");
-		startLabel.appendChild(plansEl("span", null, "Start"));
-		var start = document.createElement("input");
-		start.type = "date";
-		start.value = subscription.start;
-		start.setAttribute("data-cy", "planStartDate");
-		// A date input reports as its segments are filled in, so a whole date is
-		// the only thing worth storing: anything less is a date mid-typing. Both
-		// events are covered because a browser fires them at different moments -
-		// "input" while the segments change, "change" when the picker closes.
-		start.oninput = start.onchange = function () {
-			if (!/^\d{4}-\d{2}-\d{2}$/.test(this.value)) return;
-			updateSubscription(subscription.id, { start: this.value });
+var drop = plansEl("button", "standardButton", "Unsubscribe");
+		drop.setAttribute("data-cy", "planUnsubscribe");
+		drop.onclick = function () {
+			unsubscribeFromPlan(subscription.id);
 		};
-		startLabel.appendChild(start);
-		actions.appendChild(startLabel);
+		actions.appendChild(drop);
 
-			var drop = plansEl("button", "standardButton", "Unsubscribe");
-			drop.setAttribute("data-cy", "planUnsubscribe");
-			drop.onclick = function () {
-				unsubscribeFromPlan(subscription.id);
-			};
-			actions.appendChild(drop);
+		row.appendChild(actions);
+		container.appendChild(row);
+	});
+}
 
-			row.appendChild(actions);
-			container.appendChild(row);
-		});
-	}
+// A labelled control in a row of controls, as the subscribe flow reads: the
+// choice, the date, then the button that commits them.
+function plansInlineField(label, control) {
+	var el = plansEl("label", "plans-inline-field");
+	el.appendChild(plansEl("span", null, label));
+	el.appendChild(control);
+	return el;
+}
 
-	// ---------- The plans on offer ----------
+// ---------- The plans on offer ----------
 
-	function plansRenderPlanRow(plan, extra) {
-		var row = plansEl("div", "plans-row");
-		row.setAttribute("data-cy", "planRow-" + plan.id);
+function plansRenderPlanRow(plan, extra) {
+	var row = plansEl("div", "plans-row");
+	row.setAttribute("data-cy", "planRow-" + plan.id);
 
-		var head = plansEl("div", "plans-row-head");
-		head.appendChild(plansEl("h3", "plans-row-title", plan.name));
-		row.appendChild(head);
-		row.appendChild(
-			plansEl("p", "plans-plan-line", plansPlanLine(plan, planOrder(plan))),
-		);
+	var head = plansEl("div", "plans-row-head");
+	head.appendChild(plansEl("h3", "plans-row-title", plan.name));
+	row.appendChild(head);
+	row.appendChild(
+		plansEl("p", "plans-plan-line", plansPlanLine(plan, planOrder(plan))),
+	);
 
-		var actions = plansEl("div", "plans-actions");
+	var actions = plansEl("div", "plans-actions");
 
-		// The order belongs to the subscription rather than to the plan: the same
-		// plan read canonically by one reader and chronologically by another stays
-		// right for both, and changing it here does not rewrite a plan under way.
-		// It starts at whatever order the plan itself was built with.
-		var order = plansSelect(plansOrderOptions, planOrder(plan));
-		order.className = "plans-order-select";
-		order.setAttribute("data-cy", "planOrderSelect");
-		actions.appendChild(order);
+	// Subscribing asks three things in a row: which order to read the books in,
+	// which day to begin, and then Subscribe. The order belongs to the
+	// subscription rather than to the plan - the same plan read canonically by
+	// one reader and chronologically by another stays right for both - and it
+	// starts at whatever order the plan itself was built with.
+	var order = plansSelect(plansOrderOptions, planOrder(plan));
+	order.className = "plans-order-select";
+	order.setAttribute("data-cy", "planOrderSelect");
+	actions.appendChild(plansInlineField("Order", order));
+
+	// The start date is picked here, once, and never touched again: a plan's
+	// position is counted from the day the reader began it, so moving it later
+	// would be a second reading of the plan rather than an edit to this one.
+	var start = document.createElement("input");
+	start.type = "date";
+	start.value = todayDateString();
+	start.setAttribute("data-cy", "planStartDate");
+	actions.appendChild(plansInlineField("Start", start));
 
 		var subscribe = plansEl("button", "standardButton plans-primary", "Subscribe");
 		subscribe.setAttribute("data-cy", "planSubscribe");
 		subscribe.onclick = function () {
-			subscribeToPlan(plan, order.value, null);
+			// An empty date means the reader has cleared it rather than chosen
+			// one, and a subscription starts on some day - today being it.
+			subscribeToPlan(plan, order.value, start.value || todayDateString());
 		};
 		actions.appendChild(subscribe);
 

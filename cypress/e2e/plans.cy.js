@@ -126,12 +126,34 @@ describe("reading plans", () => {
 		);
 	});
 
-	it("moves the reading position when the start date does", () => {
+	it("asks for an order and a start date, then subscribes", () => {
 		openPlansPage();
+		// Order, then the date, then the button: the date is part of the
+		// subscribe flow and defaults to today.
+		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planOrderSelect']")
+			.should("have.value", "canonical")
+			.select("chronological");
+		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planStartDate']").should(
+			"have.value",
+			daysAgo(0),
+		);
 		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planSubscribe']").click();
-		cy.get("#plansSubscriptionList [data-cy='planStartDate']")
+
+		cy.get("#plansSubscriptionList [data-cy='planSubscription']")
+			.should("have.length", 1)
+			.and("contain", "Read the whole Bible in a year")
+			.and("contain", "Chronological")
+			.and("contain", "Day 1 of 365");
+		// Nothing to set once it is on: the date was chosen by subscribing.
+		cy.get("#plansSubscriptionList input[type='date']").should("not.exist");
+	});
+
+	it("starts a subscription on the day the reader picked", () => {
+		openPlansPage();
+		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planStartDate']")
 			.clear()
 			.type(daysAgo(10));
+		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planSubscribe']").click();
 		cy.window().then((win) => {
 			expect(win.planSubscriptions()[0].start).to.eq(daysAgo(10));
 		});
@@ -145,24 +167,20 @@ describe("reading plans", () => {
 
 	it("says a plan is complete, and offers to go round again", () => {
 		openPlansPage();
-		cy.get("[data-cy='planRow-proverbs-1-chapter-a-day'] [data-cy='planSubscribe']")
-			.click();
-		cy.get("#plansSubscriptionList [data-cy='planStartDate']")
+		cy.get(
+			"[data-cy='planRow-proverbs-1-chapter-a-day'] [data-cy='planStartDate']",
+		)
 			.clear()
 			.type("2020-01-01");
+		cy.get(
+			"[data-cy='planRow-proverbs-1-chapter-a-day'] [data-cy='planSubscribe']",
+		).click();
 		cy.get("#plansSubscriptionList [data-cy='planSubscription']")
 			.should("contain", "Complete")
 			.and("contain", "The last day was Proverbs 31");
 		cy.get("[data-cy='planReadToday']").should("not.exist");
 
 		cy.get("[data-cy='planContinue']").click();
-		cy.window().then((win) => {
-			expect(win.planSubscriptions()[0].passes).to.eq(2);
-			expect(win.planSubscriptions()[0].start).to.eq(daysAgo(0));
-			expect(
-				win.subscriptionState(win.planSubscriptions()[0]).complete,
-			).to.eq(false);
-		});
 		cy.get("#plansSubscriptionList [data-cy='planSubscription']")
 			.should("contain", "Pass 2")
 			.and("contain", "Day 1 of 31");

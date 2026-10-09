@@ -176,6 +176,11 @@ in `localStorage.subscriptions`; a reader's own plans are in
 but it is not part of the arithmetic: `continueSubscription()` restarts the plan
 from today rather than counting a lap of a calendar the reader is no longer on.
 
+The start date is part of subscribing, not of the subscription: a plan row asks
+for the order, then the date (today by default), then offers Subscribe, and
+nothing shows a date once the plan is on. Moving a running plan's start would
+be a second reading of it, not an edit, so that is what it would take.
+
 The day boundaries are taken from the whole list, not from a rounded-up
 chapters-a-day figure, so 1189 chapters over 365 days gives a day of three and a
 day of four in proportion rather than four every day and a fortnight left over.
