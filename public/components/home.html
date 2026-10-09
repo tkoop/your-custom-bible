@@ -24,6 +24,21 @@
 		</a>
 	</section>
 
+	<section class="home-card" data-cy="homePlans">
+		<div class="home-card-head">
+			<h2>Reading Plans</h2>
+			<a
+				href="#"
+				class="home-history-link plans-card-link"
+				data-cy="homePlansLink"
+				onclick="fireEvent({name:'showPage', page:'plans'}); return false;"
+			>
+				All plans
+			</a>
+		</div>
+		<div id="homePlans" class="home-plans"></div>
+	</section>
+
 	<section class="home-card" data-cy="homeSearch">
 		<h2>Search</h2>
 		<div class="home-search-row">
@@ -102,6 +117,125 @@
 		fireEvent({ name: "showPage", page: "search" });
 	}
 
+	// A subscription is a plan and a start date, so the card works out where the
+	// reader is today rather than keeping a log of what they have read: nothing
+	// to fall out of step with the date, and a day missed needs no catching up.
+	function homePlanCard(subscription) {
+		var plan = planSubscriptionName(subscription);
+		var state = subscriptionState(subscription);
+		var card = document.createElement("div");
+		card.className = "plan-card";
+		card.setAttribute("data-cy", "homePlanCard");
+
+		var head = document.createElement("div");
+		head.className = "plan-card-head";
+		var name = document.createElement("span");
+		name.className = "plan-card-name";
+		name.textContent = plan;
+		head.appendChild(name);
+		if (subscriptionOrder(subscription) == "chronological") {
+			var tag = document.createElement("span");
+			tag.className = "plan-card-tag";
+			tag.textContent = "Chronological";
+			head.appendChild(tag);
+		}
+		if (state.passes > 1) {
+			var pass = document.createElement("span");
+			pass.className = "plan-card-tag";
+			pass.textContent = "Pass " + state.passes;
+			head.appendChild(pass);
+		}
+		card.appendChild(head);
+
+		var progress = document.createElement("div");
+		progress.className = "plan-card-progress";
+		var bar = document.createElement("div");
+		bar.className = "plan-card-bar";
+		var fill = document.createElement("div");
+		fill.className = "plan-card-bar-fill";
+		fill.style.width = (state.complete ? 100 : state.percent) + "%";
+		bar.appendChild(fill);
+		progress.appendChild(bar);
+
+		var progressText = document.createElement("span");
+		progressText.className = "plan-card-progress-text";
+		progressText.textContent = state.complete
+			? "Plan complete"
+			: state.startsIn
+				? "Starts in " +
+					state.startsIn +
+					(state.startsIn == 1 ? " day" : " days")
+				: "Day " + state.day + " of " + state.totalDays + " · " + state.percent + "%";
+		progress.appendChild(progressText);
+		card.appendChild(progress);
+
+		var readings = document.createElement("div");
+		readings.className = "plan-card-readings";
+		if (state.complete) {
+			readings.textContent = "The last day was " + planReadingsLabel(state.chapters);
+		} else if (state.startsIn) {
+			readings.textContent = "Nothing to read until it starts.";
+		} else if (state.chapters.length) {
+			readings.textContent = "Today: " + planReadingsLabel(state.chapters);
+		} else {
+			readings.textContent = "Nothing scheduled today — a rest day.";
+		}
+		card.appendChild(readings);
+
+		var actions = document.createElement("div");
+		actions.className = "plan-card-actions";
+		if (state.complete) {
+			var again = document.createElement("button");
+			again.className = "home-button";
+			again.setAttribute("data-cy", "homePlanContinue");
+			again.textContent = "Continue";
+			again.onclick = function () {
+				continueSubscription(subscription);
+			};
+			actions.appendChild(again);
+		} else if (state.chapters.length) {
+			var read = document.createElement("button");
+			read.className = "home-button";
+			read.setAttribute("data-cy", "homePlanRead");
+			read.textContent = "Read";
+			read.onclick = function () {
+				readPlanDay(subscription);
+			};
+			actions.appendChild(read);
+		}
+		if (actions.childNodes.length) card.appendChild(actions);
+
+		return card;
+	}
+
+	function planSubscriptionName(subscription) {
+		var plan = subscriptionPlan(subscription);
+		return plan ? plan.name : "Plan not found";
+	}
+
+	function renderHomePlans() {
+		var el = document.getElementById("homePlans");
+		if (!el) return;
+		var subscriptions = planSubscriptions();
+		el.innerHTML = "";
+		if (subscriptions.length == 0) {
+			var empty = document.createElement("p");
+			empty.className = "home-empty";
+			empty.textContent =
+				"No plans yet — subscribe to one and today's chapters turn up here.";
+			el.appendChild(empty);
+			return;
+		}
+		// A chronological plan needs the app's copy of the book order, which
+		// arrives on its own, so the cards wait for it rather than quote an
+		// order the reader did not choose.
+		whenPlanDataReady(function () {
+			subscriptions.forEach(function (subscription) {
+				el.appendChild(homePlanCard(subscription));
+			});
+		});
+	}
+
 	function initHome() {
 		var input = document.getElementById("homeSearchInput");
 		if (input) {
@@ -112,6 +246,7 @@
 		mountActivityPicker(document.getElementById("homeActivity"));
 		renderHomeToday();
 		renderHomeContinue();
+		renderHomePlans();
 		var picker = document.getElementById("homePicker");
 		if (picker && !picker._indexBuilt) buildIndex(picker, "home");
 	}
@@ -121,8 +256,16 @@
 		function (event) {
 			renderHomeToday();
 			renderHomeContinue();
+			renderHomePlans();
 			var picker = document.getElementById("homePicker");
 			if (picker && !picker._indexBuilt) buildIndex(picker, "home");
+		}
+	);
+
+	registerEventListener(
+		(e) => e.name == "plansUpdated",
+		function (event) {
+			if (window.currentPage == "home") renderHomePlans();
 		}
 	);
 

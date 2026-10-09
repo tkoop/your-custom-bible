@@ -155,6 +155,43 @@ what the link brought as their own and drops the query from the address bar, or
 accident: nothing else writes to `sharedSettings`, and the four rows are hidden
 while it holds anything.
 
+## Reading plans
+
+A **plan** is a list of books, a name and a pace. The pace is either a duration
+to spread the chapters over, or a number of chapters a day. Seven plans are
+built in - `BUILT_IN_PLANS` in `public/plans.js` - and a reader's own are built
+on the Reading Plans page, which is `#plans`, reached from the three-line menu.
+
+A **subscription** is a plan plus a start date. Everything else about it is
+worked out from those two facts: which day it is on, how far through it is, what
+to read today. Nothing is logged and nothing is ticked off, so there is no record
+to fall out of step with the date and a day missed needs no catching up. A
+subscription is stored as
+
+    { id, planId, order, start, passes }
+
+in `localStorage.subscriptions`; a reader's own plans are in
+`localStorage.readingPlans`, shaped like a built-in one plus `custom: true`.
+`passes` counts how many times the plan has been read and is shown on the card,
+but it is not part of the arithmetic: `continueSubscription()` restarts the plan
+from today rather than counting a lap of a calendar the reader is no longer on.
+
+The day boundaries are taken from the whole list, not from a rounded-up
+chapters-a-day figure, so 1189 chapters over 365 days gives a day of three and a
+day of four in proportion rather than four every day and a fortnight left over.
+A plan with more days than chapters - the Gospels spread over a year - has days
+with nothing in them, and the card has to be able to say so.
+
+`order` is the subscription's, not the plan's: the same plan read canonically by
+one reader and chronologically by another stays right for both. Both orders take
+the chapters of each book from `books.js` and differ only in the order the books
+come in, because `chronoChapters.json` is a reading order for the *index*, not
+for the chapter list: its numbering is four chapters short of Leviticus, nine
+long of 2 Kings, and the Psalms are renumbered into superscription groups, and a
+plan that skipped chapters would be no plan at all. `plans.js` fetches that file
+for the book order and waits for it (`whenPlanDataReady()`) before rendering,
+rather than depending on `chapter.html` having fetched it first.
+
 ## Cache-busting rule (IMPORTANT)
 
 Browsers cache this app's static assets aggressively:
@@ -168,21 +205,22 @@ Browsers cache this app's static assets aggressively:
 file under `public/` whose content changed.** Increment the number each time:
 
 - Start/raise any resource that has no version param yet (add `?version=1`).
-- `style.css` is currently at `?version=48`; leave it unless it changes.
+- `style.css` is currently at `?version=51`; leave it unless it changes.
 
 Files involved (all referenced from `public/index.html`):
 
 - `style.css`
 - `images/logo.png`, `images/banner.png`
 - `manifest.json`
-- `framework.js`, `activity.js`, `settings.js`, `books.js`, `translations.js`
+- `framework.js`, `activity.js`, `settings.js`, `books.js`,
+  `translations.js`, `plans.js`
 - Components fetched via `loadComponent()`: `components/menu.html`,
   `components/chapter.html`, `components/word.html`,
   `components/home.html`, `components/about.html`,
   `components/history.html`, `components/search.html`,
   `components/settings.html`, `components/advanced.html`,
   `components/speedReader.html`, `components/readToMe.html`,
-  `components/share.html`
+  `components/share.html`, `components/plans.html`
 - Fonts referenced from `style.css` via `@font-face`: files under `fonts/`
 - `serviceWorker.js` (bump its `?version=` too when its logic changes)
 

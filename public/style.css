@@ -1095,6 +1095,444 @@ div.index-chapters a:active {
 	margin: 4px 0 14px;
 }
 
+/* ---------- Reading plans ---------- */
+.plans-page {
+	max-width: 46rem;
+	margin: 0 auto;
+	padding: 16px 4px 48px;
+}
+
+.plans-section {
+	margin-bottom: 30px;
+}
+
+.plans-section-head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 12px;
+	margin-bottom: 12px;
+}
+
+.plans-section-head h2 {
+	margin: 0;
+	font-size: 1.2rem;
+}
+
+.plans-intro {
+	margin: 0;
+	max-width: 38rem;
+	color: var(--text-secondary);
+	font-size: 0.98rem;
+	line-height: 1.6;
+}
+
+.plans-list {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.plans-row {
+	background-color: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-lg);
+	box-shadow: var(--shadow-sm);
+	padding: 16px 18px;
+}
+
+/* A plan the reader is on, as opposed to one on offer: a gold rule down the
+   side, which is the same accent the chapter titles use. */
+.plans-row-subscription {
+	border-left: 3px solid var(--gold);
+}
+
+.plans-row-head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.plans-row-title {
+	margin: 0;
+	font-size: 1.05rem;
+}
+
+.plans-row-tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.plans-tag {
+	padding: 2px 9px;
+	border: 1px solid var(--border);
+	border-radius: 999px;
+	font-family: var(--font-ui);
+	font-size: 0.68rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: var(--text-muted);
+}
+
+.plans-tag-done {
+	color: var(--secondary);
+	border-color: var(--gold-light);
+}
+
+.plans-progress {
+	margin: 8px 0 2px;
+	font-family: var(--font-ui);
+	font-size: 0.95rem;
+	font-weight: 600;
+	color: var(--text-secondary);
+}
+
+/* What the plan covers and how fast: the facts a reader weighs before
+   subscribing, and the numbers the schedule is worked out from. */
+.plans-plan-line {
+	margin: 2px 0 0;
+	font-family: var(--font-ui);
+	font-size: 0.88rem;
+	color: var(--text-muted);
+}
+
+/* The chapters themselves are scripture, so they wear the reading font. */
+.plans-readings {
+	margin: 8px 0 0;
+	font-family: var(--font-scripture);
+	font-size: 1.08rem;
+	line-height: 1.5;
+	color: var(--text-primary);
+}
+
+.plans-empty {
+	margin: 6px 0 0;
+	font-family: var(--font-ui);
+	font-size: 0.9rem;
+	font-style: italic;
+	color: var(--text-muted);
+}
+
+.plans-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	margin-top: 14px;
+}
+
+/* On a coloured button the label is the background colour, which is a light
+   parchment in one theme and a near-black in the other - readable on the
+   brand blue either way, where white would not be. */
+.plans-primary {
+	border-color: var(--primary);
+	background-color: var(--primary);
+	color: var(--background);
+}
+
+.plans-primary:hover {
+	border-color: var(--primary-dark);
+	background-color: var(--primary-dark);
+	color: var(--background);
+}
+
+.plans-order-select,
+.plans-form select,
+.plans-form input[type='text'],
+.plans-form input[type='number'],
+.plans-start input {
+	padding: 8px 10px;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	background-color: var(--surface);
+	color: var(--text-primary);
+	font-family: var(--font-ui);
+	font-size: 0.92rem;
+}
+
+.plans-order-select:focus,
+.plans-form select:focus,
+.plans-form input:focus,
+.plans-start input:focus {
+	outline: none;
+	border-color: var(--primary);
+	box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.plans-start {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-family: var(--font-ui);
+	font-size: 0.85rem;
+	color: var(--text-muted);
+}
+
+.plans-note {
+	font-family: var(--font-ui);
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: var(--secondary);
+}
+
+/* ---------- Building a plan ---------- */
+.plans-form {
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+	background-color: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-lg);
+	box-shadow: var(--shadow-sm);
+	padding: 18px 20px;
+}
+
+.plans-field {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.plans-field > label,
+.plans-field-label {
+	font-family: var(--font-ui);
+	font-size: 0.78rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	color: var(--text-muted);
+}
+
+.plans-order-choices {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.plans-choice {
+	padding: 8px 16px;
+	border: 1px solid var(--border);
+	border-radius: 999px;
+	background-color: var(--surface);
+	color: var(--text-secondary);
+	font-family: var(--font-ui);
+	font-size: 0.9rem;
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.plans-choice:hover {
+	border-color: var(--primary);
+	color: var(--primary);
+}
+
+.plans-choice.selected {
+	border-color: var(--primary);
+	background-color: var(--primary);
+	color: var(--background);
+}
+
+.plans-choice.selected:hover {
+	color: var(--background);
+}
+
+.plans-book-groups {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+}
+
+.plans-book-group {
+	border: 1px solid var(--border-light);
+	border-radius: var(--radius);
+	margin: 0;
+	padding: 10px 14px 14px;
+}
+
+.plans-book-group legend {
+	padding: 0 6px;
+	font-family: var(--font-ui);
+	font-size: 0.8rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: var(--text-muted);
+}
+
+.plans-book-group-head {
+	display: flex;
+	gap: 8px;
+	margin-bottom: 8px;
+}
+
+.plans-book-group-head .plans-choice {
+	padding: 4px 12px;
+	font-size: 0.82rem;
+}
+
+.plans-book-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(8.75rem, 1fr));
+	gap: 4px 10px;
+}
+
+.plans-book {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 3px 4px;
+	border-radius: var(--radius-sm);
+	font-family: var(--font-ui);
+	font-size: 0.9rem;
+	color: var(--text-primary);
+	cursor: pointer;
+}
+
+.plans-book:hover {
+	background-color: var(--surface-soft);
+}
+
+.plans-book input {
+	margin: 0;
+}
+
+.plans-pace-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 18px;
+}
+
+.plans-radio {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	font-family: var(--font-ui);
+	font-size: 0.92rem;
+	color: var(--text-primary);
+	cursor: pointer;
+}
+
+.plans-radio input[type='number'] {
+	width: 5.5rem;
+}
+
+.plans-summary {
+	margin: 0;
+	font-family: var(--font-ui);
+	font-size: 0.9rem;
+	color: var(--text-secondary);
+}
+
+.plans-form-buttons {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.plans-form-error {
+	margin: 0;
+	font-family: var(--font-ui);
+	font-size: 0.9rem;
+	color: var(--woc);
+}
+
+/* ---------- Plans on the home page ---------- */
+.plans-card-link {
+	margin-top: 0;
+}
+
+.home-plans {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.plan-card {
+	padding: 12px 14px;
+	border: 1px solid var(--border-light);
+	border-radius: var(--radius);
+	background-color: var(--surface-soft);
+}
+
+.plan-card-head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.plan-card-name {
+	font-family: var(--font-ui);
+	font-size: 0.98rem;
+	font-weight: 700;
+	color: var(--text-primary);
+}
+
+.plan-card-tag {
+	padding: 1px 8px;
+	border: 1px solid var(--border);
+	border-radius: 999px;
+	font-family: var(--font-ui);
+	font-size: 0.66rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: var(--text-muted);
+}
+
+.plan-card-progress {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-top: 8px;
+}
+
+.plan-card-bar {
+	flex: 1;
+	min-width: 40px;
+	height: 6px;
+	border-radius: 999px;
+	background-color: var(--border-light);
+	overflow: hidden;
+}
+
+.plan-card-bar-fill {
+	height: 100%;
+	background-color: var(--primary);
+	border-radius: 999px;
+}
+
+.plan-card-progress-text {
+	font-family: var(--font-ui);
+	font-size: 0.82rem;
+	font-weight: 600;
+	white-space: nowrap;
+	color: var(--text-secondary);
+}
+
+.plan-card-readings {
+	margin-top: 6px;
+	font-family: var(--font-scripture);
+	font-size: 1rem;
+	line-height: 1.45;
+	color: var(--text-primary);
+}
+
+.plan-card-actions {
+	margin-top: 10px;
+}
+
+.plan-card-actions .home-button {
+	padding: 7px 18px;
+	font-size: 0.88rem;
+}
+
 /* ---------- Buttons ---------- */
 .standardButton {
 	display: inline-block;

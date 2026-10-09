@@ -1,0 +1,681 @@
+<div class="plans-page">
+	<section class="plans-section">
+		<h1>Reading Plans</h1>
+		<p class="plans-intro">
+			A plan is a list of books and a pace - either spread over a length of
+			time, or a number of chapters a day. Subscribing to one puts it on your
+			home page, where it works out from its start date what today is.
+		</p>
+	</section>
+
+	<section class="plans-section" id="plansSubscriptionsSection">
+		<div class="plans-section-head">
+			<h2>Your plans</h2>
+		</div>
+		<div id="plansSubscriptionList" class="plans-list"></div>
+	</section>
+
+	<section class="plans-section">
+		<div class="plans-section-head">
+			<h2>Plans</h2>
+		</div>
+		<div id="plansBuiltInList" class="plans-list"></div>
+	</section>
+
+	<section class="plans-section" id="plansOwnSection">
+		<div class="plans-section-head">
+			<h2>Your own plans</h2>
+		</div>
+		<div id="plansOwnList" class="plans-list"></div>
+	</section>
+
+	<section class="plans-section" id="plansCreateSection">
+		<div class="plans-section-head">
+			<h2 id="plansCreateHeading">Create a plan</h2>
+		</div>
+
+		<form id="plansForm" class="plans-form" onsubmit="return false;">
+			<div class="plans-field">
+				<label for="plansNameInput">Name</label>
+				<input
+					id="plansNameInput"
+					type="text"
+					placeholder="My plan"
+					maxlength="80"
+					autocomplete="off"
+				/>
+			</div>
+
+			<div class="plans-field">
+				<span class="plans-field-label">Order</span>
+				<div class="plans-order-choices" id="plansOrderChoices">
+					<button
+						type="button"
+						class="plans-choice selected"
+						data-order="canonical"
+						data-cy="plansOrderCanonical"
+						onclick="plansChooseOrder('canonical')"
+					>
+						Canonical
+					</button>
+					<button
+						type="button"
+						class="plans-choice"
+						data-order="chronological"
+						data-cy="plansOrderChronological"
+						onclick="plansChooseOrder('chronological')"
+					>
+						Chronological
+					</button>
+				</div>
+			</div>
+
+			<div class="plans-field">
+				<span class="plans-field-label">Books</span>
+				<div id="plansBookGroups" class="plans-book-groups"></div>
+			</div>
+
+			<div class="plans-field">
+				<span class="plans-field-label">Pace</span>
+				<div class="plans-pace-row">
+					<label class="plans-radio">
+						<input
+							type="radio"
+							name="plansPace"
+							value="duration"
+							checked
+							onchange="plansUpdateSummary()"
+						/>
+						Over
+						<select
+							id="plansDurationSelect"
+							onchange="plansUpdateSummary()"
+						></select>
+					</label>
+					<label class="plans-radio">
+						<input
+							type="radio"
+							name="plansPace"
+							value="perDay"
+							onchange="plansUpdateSummary()"
+						/>
+						<input
+							id="plansPerDayInput"
+							type="number"
+							min="1"
+							max="99"
+							value="1"
+							oninput="plansUpdateSummary()"
+						/>
+						chapters a day
+					</label>
+				</div>
+			</div>
+
+			<p id="plansSummary" class="plans-summary" data-cy="plansSummary"></p>
+
+			<div class="plans-form-buttons">
+				<button
+					type="button"
+					class="standardButton plans-primary"
+					id="plansSaveButton"
+					data-cy="plansSaveButton"
+					onclick="plansSaveForm()"
+				>
+					Save plan
+				</button>
+				<button
+					type="button"
+					class="standardButton"
+					id="plansCancelButton"
+					data-cy="plansCancelButton"
+					style="display: none"
+					onclick="plansResetForm()"
+				>
+					Cancel
+				</button>
+			</div>
+			<p
+				id="plansFormError"
+				class="plans-form-error"
+				data-cy="plansFormError"
+				style="display: none"
+			></p>
+		</form>
+	</section>
+</div>
+
+<script>
+	// Every name on this page is a label, and every label reaches the page as
+// text rather than markup - the rest of the app does the same with the words
+// a reader types. Component scripts share one global scope, so everything here
+// is prefixed plans: nothing here is meant to be called from outside.
+
+	// The plan being edited, or null when the form is building a new one.
+	var plansEditingId = null;
+
+	function plansEl(tag, className, text) {
+		var el = document.createElement(tag);
+		if (className) el.className = className;
+		if (text != null) el.textContent = text;
+		return el;
+	}
+
+	function plansSelect(options, value) {
+		var select = document.createElement("select");
+		options.forEach(function (option) {
+			var el = document.createElement("option");
+			el.value = option.value;
+			el.textContent = option.label;
+			if (option.value == value) el.selected = true;
+			select.appendChild(el);
+		});
+		return select;
+	}
+
+	var plansOrderOptions = [
+		{ value: "canonical", label: "Canonical order" },
+		{ value: "chronological", label: "Chronological order" },
+	];
+
+// ---------- What a day of a plan looks like ----------
+
+function plansProgressLine(state) {
+		if (state.complete) {
+			return "Finished " + state.totalDays + " days";
+		}
+		if (state.startsIn) {
+			return "Starts in " + state.startsIn + (state.startsIn == 1 ? " day" : " days");
+		}
+		return (
+			"Day " +
+			state.day +
+			" of " +
+			state.totalDays +
+			" \u00b7 " +
+			state.percent +
+			"% \u00b7 " +
+			state.totalChapters +
+			" chapters"
+		);
+	}
+
+	function plansPlanLine(plan, order) {
+		return (
+			planBookLabel(plan) +
+			" \u00b7 " +
+			planTotalChapters(plan, order) +
+			" chapters \u00b7 " +
+			planPaceLabel(plan, order)
+		);
+	}
+
+	// ---------- Subscriptions ----------
+
+	function plansRenderSubscriptions() {
+		var container = document.getElementById("plansSubscriptionList");
+		if (!container) return;
+		container.innerHTML = "";
+		var subscriptions = planSubscriptions();
+
+		if (subscriptions.length == 0) {
+			container.appendChild(
+				plansEl(
+					"p",
+					"plans-empty",
+					"No plans yet \u2014 subscribe to one below and it turns up here and on your home page.",
+				),
+			);
+			return;
+		}
+
+		subscriptions.forEach(function (subscription) {
+			var plan = subscriptionPlan(subscription);
+			var state = subscriptionState(subscription);
+			var row = plansEl(
+				"div",
+				"plans-row plans-row-subscription",
+			);
+			row.setAttribute("data-cy", "planSubscription");
+
+			var head = plansEl("div", "plans-row-head");
+			head.appendChild(
+				plansEl("h3", "plans-row-title", plan ? plan.name : "Plan not found"),
+			);
+			var tags = plansEl("div", "plans-row-tags");
+			tags.appendChild(
+				plansEl(
+					"span",
+					"plans-tag",
+					subscriptionOrder(subscription) == "chronological"
+						? "Chronological"
+						: "Canonical",
+				),
+			);
+			if (state.passes > 1) {
+				tags.appendChild(plansEl("span", "plans-tag", "Pass " + state.passes));
+			}
+			if (state.complete) {
+				tags.appendChild(plansEl("span", "plans-tag plans-tag-done", "Complete"));
+			}
+			head.appendChild(tags);
+			row.appendChild(head);
+
+			row.appendChild(plansEl("p", "plans-progress", plansProgressLine(state)));
+
+if (state.startsIn) {
+			row.appendChild(
+				plansEl("p", "plans-empty", "Nothing to read until it starts."),
+			);
+		} else if (state.complete) {
+			row.appendChild(
+				plansEl(
+					"p",
+					"plans-empty",
+					"The last day was " + planReadingsLabel(state.chapters) + ".",
+				),
+			);
+		} else if (state.chapters.length) {
+			// The same words the home card uses for the day, so the two pages
+			// cannot disagree about what a plan is asking for.
+			row.appendChild(
+				plansEl("p", "plans-readings", planReadingsLabel(state.chapters)),
+			);
+		} else {
+			row.appendChild(
+				plansEl("p", "plans-empty", "Nothing scheduled today — a rest day."),
+			);
+		}
+
+		var actions = plansEl("div", "plans-actions");
+
+		if (state.complete) {
+			var again = plansEl("button", "standardButton plans-primary", "Continue");
+			again.setAttribute("data-cy", "planContinue");
+			again.onclick = function () {
+				continueSubscription(subscription);
+			};
+			actions.appendChild(again);
+		} else if (state.chapters.length) {
+			var read = plansEl("button", "standardButton plans-primary", "Read today");
+			read.setAttribute("data-cy", "planReadToday");
+			read.onclick = function () {
+				readPlanDay(subscription);
+			};
+			actions.appendChild(read);
+		}
+
+var startLabel = plansEl("label", "plans-start");
+		startLabel.appendChild(plansEl("span", null, "Start"));
+		var start = document.createElement("input");
+		start.type = "date";
+		start.value = subscription.start;
+		start.setAttribute("data-cy", "planStartDate");
+		// A date input reports as its segments are filled in, so a whole date is
+		// the only thing worth storing: anything less is a date mid-typing. Both
+		// events are covered because a browser fires them at different moments -
+		// "input" while the segments change, "change" when the picker closes.
+		start.oninput = start.onchange = function () {
+			if (!/^\d{4}-\d{2}-\d{2}$/.test(this.value)) return;
+			updateSubscription(subscription.id, { start: this.value });
+		};
+		startLabel.appendChild(start);
+		actions.appendChild(startLabel);
+
+			var drop = plansEl("button", "standardButton", "Unsubscribe");
+			drop.setAttribute("data-cy", "planUnsubscribe");
+			drop.onclick = function () {
+				unsubscribeFromPlan(subscription.id);
+			};
+			actions.appendChild(drop);
+
+			row.appendChild(actions);
+			container.appendChild(row);
+		});
+	}
+
+	// ---------- The plans on offer ----------
+
+	function plansRenderPlanRow(plan, extra) {
+		var row = plansEl("div", "plans-row");
+		row.setAttribute("data-cy", "planRow-" + plan.id);
+
+		var head = plansEl("div", "plans-row-head");
+		head.appendChild(plansEl("h3", "plans-row-title", plan.name));
+		row.appendChild(head);
+		row.appendChild(
+			plansEl("p", "plans-plan-line", plansPlanLine(plan, planOrder(plan))),
+		);
+
+		var actions = plansEl("div", "plans-actions");
+
+		// The order belongs to the subscription rather than to the plan: the same
+		// plan read canonically by one reader and chronologically by another stays
+		// right for both, and changing it here does not rewrite a plan under way.
+		// It starts at whatever order the plan itself was built with.
+		var order = plansSelect(plansOrderOptions, planOrder(plan));
+		order.className = "plans-order-select";
+		order.setAttribute("data-cy", "planOrderSelect");
+		actions.appendChild(order);
+
+		var subscribe = plansEl("button", "standardButton plans-primary", "Subscribe");
+		subscribe.setAttribute("data-cy", "planSubscribe");
+		subscribe.onclick = function () {
+			subscribeToPlan(plan, order.value, null);
+		};
+		actions.appendChild(subscribe);
+
+		if (extra) extra(actions, plan);
+
+		row.appendChild(actions);
+		return row;
+	}
+
+	function plansRenderBuiltIns() {
+		var container = document.getElementById("plansBuiltInList");
+		if (!container) return;
+		container.innerHTML = "";
+		BUILT_IN_PLANS.forEach(function (plan) {
+			container.appendChild(
+				plansRenderPlanRow(plan, function (actions, current) {
+					var subscribed = planSubscriptions().filter(function (subscription) {
+						return subscription.planId == current.id;
+					});
+					if (subscribed.length) {
+						actions.appendChild(
+							plansEl(
+								"span",
+								"plans-note",
+								subscribed.length == 1
+									? "Subscribed"
+									: "Subscribed " + subscribed.length + "\u00d7",
+							),
+						);
+					}
+				}),
+			);
+		});
+	}
+
+	function plansRenderOwnPlans() {
+		var container = document.getElementById("plansOwnList");
+		var section = document.getElementById("plansOwnSection");
+		if (!container || !section) return;
+		container.innerHTML = "";
+		var plans = customPlans();
+		section.style.display = plans.length ? "" : "none";
+		plans.forEach(function (plan) {
+			container.appendChild(
+				plansRenderPlanRow(plan, function (actions, current) {
+					var edit = plansEl("button", "standardButton", "Edit");
+					edit.setAttribute("data-cy", "planEdit");
+					edit.onclick = function () {
+						plansEditPlan(current.id);
+					};
+					actions.appendChild(edit);
+
+					var remove = plansEl("button", "standardButton", "Delete");
+					remove.setAttribute("data-cy", "planDelete");
+					remove.onclick = function () {
+						if (!confirm('Delete the plan "' + current.name + '"?')) return;
+						deleteCustomPlan(current.id);
+					};
+					actions.appendChild(remove);
+				}),
+			);
+		});
+	}
+
+	function renderPlansLists() {
+		plansRenderBuiltIns();
+		plansRenderOwnPlans();
+	}
+
+	// ---------- Building a plan ----------
+
+	// Matthew is where the Old Testament ends, so the picker offers the two
+	// halves the way a table of contents does rather than as 66 loose books.
+	var plansTestamentSplit = books.findIndex((book) => book.slug == "matthew");
+
+	function plansBuildBookGroups() {
+		var container = document.getElementById("plansBookGroups");
+		if (!container || container.childNodes.length > 0) return;
+		[
+			{ label: "Old Testament", books: books.slice(0, plansTestamentSplit) },
+			{
+				label: "New Testament",
+				books: books.slice(plansTestamentSplit),
+			},
+		].forEach(function (group, index) {
+			var box = plansEl("fieldset", "plans-book-group");
+			box.appendChild(plansEl("legend", null, group.label));
+
+			var head = plansEl("div", "plans-book-group-head");
+			["All", "None"].forEach(function (which) {
+				var button = plansEl("button", "plans-choice", which);
+				button.type = "button";
+				button.onclick = function () {
+					container
+						.querySelectorAll("[data-group='" + index + "'] input")
+						.forEach(function (checkbox) {
+							checkbox.checked = which == "All";
+						});
+					plansUpdateSummary();
+				};
+				head.appendChild(button);
+			});
+			box.appendChild(head);
+
+			var grid = plansEl("div", "plans-book-grid");
+			group.books.forEach(function (book) {
+				var label = plansEl("label", "plans-book");
+				var checkbox = document.createElement("input");
+				checkbox.type = "checkbox";
+				checkbox.value = book.slug;
+				checkbox.setAttribute("data-group", index);
+				checkbox.setAttribute("data-cy", "plansBook-" + book.slug);
+				checkbox.onchange = plansUpdateSummary;
+				label.appendChild(checkbox);
+				label.appendChild(plansEl("span", null, book.name));
+				grid.appendChild(label);
+			});
+			box.appendChild(grid);
+			container.appendChild(box);
+		});
+	}
+
+	function plansBuildDurationOptions() {
+		var select = document.getElementById("plansDurationSelect");
+		if (!select || select.childNodes.length > 0) return;
+		PLAN_DURATIONS.forEach(function (duration) {
+			var option = document.createElement("option");
+			option.value = duration.days;
+			option.textContent = duration.label;
+			select.appendChild(option);
+		});
+		select.value = 365;
+	}
+
+	function plansSelectedBookSlugs() {
+		return Array.prototype.map.call(
+			document.querySelectorAll("#plansBookGroups input:checked"),
+			function (box) {
+				return box.value;
+			},
+		);
+	}
+
+	// What the form currently describes, as a plan - the same shape as a stored
+	// one, so the summary can quote the same words the plan list will.
+	function plansDraftPlan() {
+		var slugs = plansSelectedBookSlugs();
+		var chosen = document.querySelector(
+			"#plansOrderChoices .plans-choice.selected",
+		);
+		var perDay = document.getElementById("plansPerDayInput");
+		var duration = document.getElementById("plansDurationSelect");
+		var draft = {
+			id: plansEditingId || "draft",
+			name: "",
+			books: slugs.length ? slugs : "all",
+			order: chosen ? chosen.dataset.order : "canonical",
+		};
+		if (plansPerDayChosen()) {
+			draft.pace = "perDay";
+			draft.perDay = Math.max(1, parseInt(perDay.value, 10) || 1);
+		} else {
+			draft.pace = "duration";
+			draft.days = parseInt(duration.value, 10) || 365;
+		}
+		return draft;
+	}
+
+	function plansPerDayChosen() {
+		var chosen = document.querySelector("input[name=plansPace]:checked");
+		return !!chosen && chosen.value == "perDay";
+	}
+
+	function plansUpdateSummary() {
+		var summary = document.getElementById("plansSummary");
+		if (!summary) return;
+		var slugs = plansSelectedBookSlugs();
+		if (slugs.length == 0) {
+			// A form nobody has filled in is not a mistake, so nothing here
+			// complains: plansSaveForm is where an unfinished plan is refused.
+			summary.textContent = "";
+			plansFormError("");
+			return;
+		}
+		// Asked for fresh: the draft's book list changes as the boxes are ticked,
+		// so it cannot be the cached list of a stored plan.
+		var draft = plansDraftPlan();
+		summary.textContent =
+			slugs.length +
+			(slugs.length == 1 ? " book \u00b7 " : " books \u00b7 ") +
+			planPaceLabel(draft, draft.order, true);
+	}
+
+	function plansFormError(message) {
+		var error = document.getElementById("plansFormError");
+		if (!error) return;
+		error.textContent = message;
+		error.style.display = message ? "" : "none";
+	}
+
+	function plansChooseOrder(order) {
+		document
+			.querySelectorAll("#plansOrderChoices .plans-choice")
+			.forEach(function (button) {
+				button.classList.toggle("selected", button.dataset.order == order);
+			});
+		plansUpdateSummary();
+	}
+
+function plansResetForm() {
+		plansEditingId = null;
+		document.getElementById("plansNameInput").value = "";
+		document
+			.querySelectorAll("#plansBookGroups input")
+			.forEach(function (box) {
+				box.checked = false;
+			});
+		document.getElementById("plansDurationSelect").value = 365;
+		document.getElementById("plansPerDayInput").value = 1;
+		document.querySelector("input[name=plansPace][value=duration]").checked = true;
+		plansChooseOrder("canonical");
+		document.getElementById("plansCreateHeading").textContent = "Create a plan";
+		document.getElementById("plansSaveButton").textContent = "Save plan";
+		document.getElementById("plansCancelButton").style.display = "none";
+		plansFormError("");
+		plansUpdateSummary();
+	}
+
+	function plansEditPlan(id) {
+		var plan = planById(id);
+		if (!plan) return;
+		plansEditingId = id;
+		document.getElementById("plansNameInput").value = plan.name;
+		var slugs = {};
+		planBookSlugs(plan).forEach(function (slug) {
+			slugs[slug] = true;
+		});
+		document
+			.querySelectorAll("#plansBookGroups input")
+			.forEach(function (box) {
+				box.checked = !!slugs[box.value];
+			});
+		if (plan.pace == "perDay") {
+			document.querySelector("input[name=plansPace][value=perDay]").checked = true;
+			document.getElementById("plansPerDayInput").value = plan.perDay;
+		} else {
+			document
+				.querySelector("input[name=plansPace][value=duration]")
+				.checked = true;
+			document.getElementById("plansDurationSelect").value = plan.days;
+		}
+		plansChooseOrder(planOrder(plan));
+		document.getElementById("plansCreateHeading").textContent = "Edit plan";
+		document.getElementById("plansSaveButton").textContent = "Update plan";
+		document.getElementById("plansCancelButton").style.display = "";
+		plansUpdateSummary();
+		document
+			.getElementById("plansCreateSection")
+			.scrollIntoView({ behavior: "smooth", block: "start" });
+	}
+
+	function plansSaveForm() {
+		var name = document.getElementById("plansNameInput").value.trim();
+		if (name == "") {
+			plansFormError("Give the plan a name.");
+			return;
+		}
+		var slugs = plansSelectedBookSlugs();
+		if (slugs.length == 0) {
+			plansFormError("Choose at least one book.");
+			return;
+		}
+		var draft = plansDraftPlan();
+		saveCustomPlan({
+			id: plansEditingId || nextCustomPlanId(),
+			name: name,
+			books: slugs,
+			order: draft.order,
+			pace: draft.pace,
+			days: draft.days,
+			perDay: draft.perDay,
+		});
+		plansResetForm();
+	}
+
+	// ---------- Rendering ----------
+
+	function renderPlansPage() {
+		// A chronological plan needs the app's copy of the book order, which
+		// arrives on its own; until it does the rows would quote a canonical
+		// order that the plan is not in.
+		whenPlanDataReady(function () {
+			plansRenderSubscriptions();
+			renderPlansLists();
+		});
+	}
+
+	registerEventListener(
+		(e) => e.name == "showPage" && e.page == "plans",
+		function () {
+			renderPlansPage();
+		},
+	);
+
+	registerEventListener(
+		(e) => e.name == "plansUpdated",
+		function () {
+			// Both pages keep their own copy of the list up to date; the home
+			// card has a listener of its own for this.
+			if (window.currentPage == "plans") renderPlansPage();
+		},
+	);
+
+	plansBuildBookGroups();
+	plansBuildDurationOptions();
+	plansResetForm();
+</script>
