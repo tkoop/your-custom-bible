@@ -757,8 +757,13 @@ fireEvent({
 		var textWrap = document.getElementById("chapterText");
 		var viewport = document.getElementById("pageTurnViewport");
 		if (!el || !textWrap || !viewport) return;
+		// The verse number is a setting, and when it is off the marker is hidden -
+		// a hidden box has no position - so the paragraph it opens is measured
+		// instead, the same one the scrolling route centres.
+		var target = el.closest("p") || el;
 		var step = viewport.clientWidth + pageTurning.pageGap;
-		var relLeft = el.getBoundingClientRect().left - textWrap.getBoundingClientRect().left;
+		var relLeft =
+			target.getBoundingClientRect().left - textWrap.getBoundingClientRect().left;
 		var page = Math.max(0, Math.floor(relLeft / step));
 		goToPage(page);
 	}
@@ -1153,9 +1158,138 @@ fireEvent({
 		container.appendChild(section);
 	}
 
+	// ---------- Reference jump ----------
+	//
+	// Both lists of chapters to go to - the index page and the home page's
+	// chapter picker - open with a field to type a reference into, so the books
+	// below are the second way in rather than the only one. books.js works out
+	// what has been typed; this is the field, the answers under it, and the
+	// journey from one to the chapter.
+
+	function buildRefJump(container, cyPrefix) {
+		var wrap = document.createElement("div");
+		wrap.className = "ref-jump";
+
+		var input = document.createElement("input");
+		input.className = "ref-jump-input";
+		input.type = "search";
+		input.placeholder = "Go to a reference, like John 3:16";
+		input.autocomplete = "off";
+		input.spellcheck = false;
+		input.setAttribute("data-cy", cyPrefix + "refJumpInput");
+		input.setAttribute("aria-label", "Go to a reference");
+		input.setAttribute("aria-expanded", "false");
+		input.setAttribute("role", "combobox");
+		input.setAttribute("aria-autocomplete", "list");
+
+		var list = document.createElement("div");
+		list.className = "ref-jump-list";
+		list.setAttribute("data-cy", cyPrefix + "refJumpList");
+		list.setAttribute("role", "listbox");
+		list.style.display = "none";
+
+		wrap.appendChild(input);
+		wrap.appendChild(list);
+		container.appendChild(wrap);
+
+		var options = [];
+		var selected = -1;
+
+		function closeRefList() {
+			list.style.display = "none";
+			list.innerHTML = "";
+			options = [];
+			selected = -1;
+			input.setAttribute("aria-expanded", "false");
+		}
+
+		// The first answer is offered ready to take, which is what Enter picks,
+		// so the arrow keys move from it rather than onto it.
+		function selectRefOption(index) {
+			if (!list.children.length) return;
+			selected = (index + list.children.length) % list.children.length;
+			for (var i = 0; i < list.children.length; i++) {
+				var on = i === selected;
+				list.children[i].classList.toggle("selected", on);
+				list.children[i].setAttribute("aria-selected", on ? "true" : "false");
+			}
+		}
+
+		function showRefList() {
+			var suggestions = refSuggestions(input.value, 8);
+			list.innerHTML = "";
+			options = suggestions;
+			if (!suggestions.length) {
+				closeRefList();
+				return;
+			}
+			suggestions.forEach(function (ref) {
+				var option = document.createElement("button");
+				option.type = "button";
+				option.className = "ref-jump-option";
+				option.textContent = ref.label;
+				option.setAttribute("data-cy", cyPrefix + "refJumpOption");
+				option.setAttribute("role", "option");
+				// The tap has to land on the answer rather than on the blur that
+				// closes the list under it.
+				option.addEventListener("mousedown", function (event) {
+					event.preventDefault();
+				});
+				option.addEventListener("click", function () {
+					pickRef(ref);
+				});
+				list.appendChild(option);
+			});
+			list.style.display = "block";
+			input.setAttribute("aria-expanded", "true");
+			selectRefOption(0);
+		}
+
+		function pickRef(ref) {
+			closeRefList();
+			input.value = "";
+			goToRef(ref);
+		}
+
+		input.addEventListener("input", showRefList);
+		input.addEventListener("blur", closeRefList);
+		input.addEventListener("keydown", function (event) {
+			if (event.key === "Enter") {
+				var ref = options[selected < 0 ? 0 : selected];
+				if (!ref) return;
+				event.preventDefault();
+				pickRef(ref);
+			} else if (event.key === "ArrowDown") {
+				if (!options.length) return;
+				event.preventDefault();
+				selectRefOption(selected < 0 ? 0 : selected + 1);
+			} else if (event.key === "ArrowUp") {
+				if (!options.length) return;
+				event.preventDefault();
+				selectRefOption(selected <= 0 ? options.length - 1 : selected - 1);
+			} else if (event.key === "Escape") {
+				closeRefList();
+			}
+		});
+	}
+
+	// A verse in the reference asks the chapter for two things, and both are
+	// contracts it already keeps with the rest of the app: window.scrollVerse
+	// carries the verse to scroll to, and page turning mode works out which page
+	// that is on, while window.pendingHighlight asks for the verse to be marked
+	// where it lies.
+	function goToRef(ref) {
+		if (ref.verse) {
+			window.scrollVerse = ref.verse;
+			window.pendingHighlight = { verse: ref.verse, label: ref.label };
+		}
+		loadThisChapter(ref.book.name, ref.book.slug, ref.chapter);
+	}
+
 	function buildIndex(container, cyPrefix) {
 		if (!container._indexBuilt) {
 			container.innerHTML = "";
+			buildRefJump(container, cyPrefix);
 			if (!cyPrefix) {
 				var activityHolder = document.createElement("div");
 				activityHolder.className = "activity-picker-holder activity-quiet";
@@ -1813,22 +1947,25 @@ fireEvent({
 
 	// ---------- Highlights ----------
 	//
-	// A search result, and a verse on a word study page, both send the reader to
-	// a chapter with a set of words in mind. The chapter marks them so the
-	// words can be seen where they are, and the button in the corner takes them
-	// away again. Nothing is kept: the next chapter, or the next page of any
-	// kind, starts unmarked.
+	// A search result, a verse on a word study page, and a reference typed into a
+	// jump field all send the reader to a chapter with something in mind. The
+	// chapter marks it - words to look at, or the whole of a verse - so it can
+	// be seen where it is, and the button in the corner takes it away again.
+	// Nothing is kept: the next chapter, or the next page of any kind, starts
+	// unmarked.
 
-	// The words on screen, as { terms, partial, label }, or null when nothing is
-	// marked. A page that arrives with words in hand leaves them in
-	// window.pendingHighlight, which loadURL picks up - the same way
-	// window.scrollVerse carries the verse to scroll to - or calls
-	// applyChapterHighlight() itself when the chapter is already on screen.
+	// What is on screen, as { terms, partial, label } for words or
+	// { verse, label } for a verse, or null when nothing is marked. A page that
+	// arrives with something in hand leaves it in window.pendingHighlight, which
+	// loadURL picks up - the same way window.scrollVerse carries the verse to
+	// scroll to - or calls applyChapterHighlight() itself when the chapter is
+	// already on screen.
 	var chapterHighlight = null;
 
 	function applyChapterHighlight(request) {
-		chapterHighlight =
-			request && request.terms && request.terms.length ? request : null;
+		var wanted =
+			request && ((request.terms && request.terms.length) || request.verse);
+		chapterHighlight = wanted ? request : null;
 		renderHighlights();
 	}
 
@@ -1856,27 +1993,76 @@ fireEvent({
 			return;
 		}
 
+		var count = chapterHighlight.verse
+			? markVerse(chapterHighlight.verse)
+			: markWords(chapterHighlight.terms, chapterHighlight.partial);
+
+		if (!button) return;
+
+		if (chapterHighlight.verse) {
+			// A verse the chapter does not have - the reader typed a number out of
+			// range - leaves nothing to take away, so no button either.
+			if (!count) {
+				button.style.display = "none";
+				return;
+			}
+			button.textContent = "Hide highlight";
+			button.title = "Hide the highlight on " + (chapterHighlight.label || "this verse");
+		} else {
+			button.textContent = "Clear highlights (" + count + ")";
+			button.title = chapterHighlight.label
+				? "Clear the highlights for " + chapterHighlight.label
+				: "Clear the highlights";
+		}
+		button.style.display = "";
+	}
+
+	function markWords(terms, partial) {
 		var count = 0;
 		var text = document.getElementById("chapterText");
 		if (text) {
 			highlightableTextNodes(text).forEach(function (node) {
-				var ranges = highlightRangesIn(
-					node,
-					chapterHighlight.terms,
-					chapterHighlight.partial,
-				);
+				var ranges = highlightRangesIn(node, terms, partial);
 				if (!ranges.length) return;
 				count += ranges.length;
 				wrapNodeRanges(node, ranges, "mark", "chapter-hl");
 			});
 		}
+		return count;
+	}
 
-		if (!button) return;
-		button.textContent = "Clear highlights (" + count + ")";
-		button.title = chapterHighlight.label
-			? "Clear the highlights for " + chapterHighlight.label
-			: "Clear the highlights";
-		button.style.display = "";
+	// A reference that names a verse is asking for that verse, so the whole of it
+	// is marked rather than words in it. A verse runs from its own marker to the
+	// next one, which can be in the next paragraph, so it is the text between the
+	// two markers.
+	function markVerse(verseNum) {
+		var text = document.getElementById("chapterText");
+		var marker = document.getElementById("v" + verseNum);
+		if (!text || !marker) return 0;
+		var markers = [].slice.call(text.querySelectorAll(".reftext"));
+		var next = markers[markers.indexOf(marker) + 1] || null;
+
+		var count = 0;
+		highlightableTextNodes(text).forEach(function (node) {
+			// Where the piece sits in the chapter, by the two markers it belongs
+			// between rather than by an offset into the text: a range's ends are
+			// inside it as far as it is concerned, and the first word of the next
+			// verse would come with them.
+			if (!(marker.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING)) return;
+			if (next && !(next.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_PRECEDING)) return;
+			// A heading stands between two verses and belongs to neither.
+			for (var el = node.parentNode; el && el !== text; el = el.parentNode) {
+				if (
+					el.classList &&
+					(el.classList.contains("hdg") || el.classList.contains("subhdg"))
+				)
+					return;
+			}
+			if (!node.nodeValue.length) return;
+			wrapNodeRanges(node, [[0, node.nodeValue.length]], "mark", "chapter-hl");
+			count++;
+		});
+		return count;
 	}
 
 	function unwrapHighlights() {

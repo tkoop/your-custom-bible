@@ -1567,6 +1567,69 @@ body.rtm-open #clearHighlights {
 	bottom: calc(var(--rtm-panel-h, 0px) + 14px);
 }
 
+/* ---------- Reference jump ----------
+   A field to type a reference into, at the top of both lists of chapters to go
+   to: the index page and the home page's chapter picker. The answers sit under
+   it rather than over the books, so the field never covers the list it is
+   meant to serve. */
+.ref-jump {
+	flex-basis: 100%;
+	position: relative;
+	margin: 0 0 14px;
+}
+
+#homePicker .ref-jump {
+	flex-basis: auto;
+	margin: 0 0 14px;
+}
+
+input.ref-jump-input {
+	width: 100%;
+	max-width: 420px;
+	padding: 11px 18px;
+	font-size: 1rem;
+	font-family: var(--font-ui);
+	border: 1px solid var(--border);
+	border-radius: 999px;
+	background: var(--surface);
+	color: var(--text-primary);
+	box-shadow: var(--shadow-sm);
+}
+
+input.ref-jump-input:focus {
+	outline: none;
+	border-color: var(--primary);
+	box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.ref-jump-list {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 2px;
+	margin-top: 8px;
+	max-height: 320px;
+	overflow-y: auto;
+}
+
+.ref-jump-option {
+	font-family: var(--font-scripture);
+	font-size: 1rem;
+	padding: 7px 14px;
+	border: 0;
+	border-radius: var(--radius);
+	background: none;
+	color: var(--text-primary);
+	cursor: pointer;
+	text-align: left;
+}
+
+.ref-jump-option:hover,
+.ref-jump-option.selected {
+	background: var(--surface-soft);
+	color: var(--primary);
+}
+
 /* ---------- Page headings (Home / Search / About / History) ----------
    These are app chrome, not scripture, so they keep the UI font and must
    not follow the reading font the gear menu picks. Scripture headings are
