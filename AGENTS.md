@@ -190,6 +190,23 @@ subscription, which is the reading under way - and one they are not on is laid
 out from today, since a list of dates has to start somewhere. Each day is
 `planSchedule()`: the number, the date, and the chapters, each one a link.
 
+A chapter opened from a plan carries the day with it, so the arrows either side
+walk that day's reading rather than round the Bible - which matters on a
+chronological plan, where the next chapter is not the next one in the Bible.
+`armPlanReading()` is called *before* the chapter is asked for, because the
+chapter is fetched and rendered afterwards and the note about the plan is written
+as it renders; `loadPlanChapter()` marks the load as the plan's own so the clear
+in `loadThisChapter()` does not throw it away. Any other way into a chapter is
+the reader choosing one, so it drops the plan: the note is what tells them why
+the arrows are behaving, and its absence is what tells them they have left.
+
+**Non-ASCII in a `public/*.js` file reaches the browser mangled.** Those are
+`<script src>` tags, and `index.html` declares `<meta name="encoding">`, which is
+not the `charset` the spec wants, so the file is decoded with whatever the
+browser's fallback is. The components are fetched by `loadComponent()` and read
+as UTF-8, so they can hold literal characters. `plans.js` writes its one
+middot as `\u00b7` for that reason - the other script files are ASCII only.
+
 The day boundaries are taken from the whole list, not from a rounded-up
 chapters-a-day figure, so 1189 chapters over 365 days gives a day of three and a
 day of four in proportion rather than four every day and a fortnight left over.
@@ -219,7 +236,7 @@ Browsers cache this app's static assets aggressively:
 file under `public/` whose content changed.** Increment the number each time:
 
 - Start/raise any resource that has no version param yet (add `?version=1`).
-- `style.css` is currently at `?version=54`; leave it unless it changes.
+- `style.css` is currently at `?version=55`; leave it unless it changes.
 
 Files involved (all referenced from `public/index.html`):
 

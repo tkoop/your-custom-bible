@@ -233,6 +233,80 @@ describe("reading plans", () => {
 		cy.get("#planDays [data-cy='planDay']").last().should("contain", "John 21");
 	});
 
+	it("follows the arrows through a plan's day", () => {
+		openPlansPage();
+		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planStartDate']")
+			.clear()
+			.type(daysAgo(10));
+		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planSubscribe']").click();
+		cy.get("#brand").click();
+		cy.get("#homePlans [data-cy='homePlanRead']").click();
+
+		// Day 11 is three chapters, and the arrows walk them rather than the
+		// Bible's own order - which here happens to be the same, so the note is
+		// what says the plan is in charge.
+		cy.get("#chapter").should("contain", "Genesis 33");
+		cy.get("[data-cy='planReadingNote']").should(
+			"contain",
+			"Read the whole Bible in a year · Day 11, chapter 1 of 3",
+		);
+		cy.get("[data-cy='chapterRight']:first").click();
+		cy.get("#chapter").should("contain", "Genesis 34");
+		cy.get("[data-cy='planReadingNote']").should("contain", "chapter 2 of 3");
+		cy.get("[data-cy='chapterRight']:first").click();
+		cy.get("#chapter").should("contain", "Genesis 35");
+		cy.get("[data-cy='planReadingNote']").should("contain", "chapter 3 of 3");
+		// Off the end of the day the arrows are the Bible's own again, and the
+		// plan stops claiming the chapter.
+		cy.get("[data-cy='chapterRight']:first").click();
+		cy.get("#chapter").should("contain", "Genesis 36");
+		cy.get("[data-cy='planReadingNote']").should("not.exist");
+	});
+
+	it("walks a chronological plan in the plan's order, not the Bible's", () => {
+		openPlansPage();
+		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planOrderSelect']").select(
+			"chronological",
+		);
+		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planStartDate']")
+			.clear()
+			.type(daysAgo(15));
+		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planSubscribe']").click();
+		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planSeeEveryDay']").click();
+
+		// Job is dated early in the Bible, so the chronological plan has read all
+		// of Genesis by day 16. Canonical order would have reached Exodus by now.
+		cy.get("#planDays [data-cy='planDay']")
+			.eq(15)
+			.should("contain", "Genesis 49, 50")
+			.and("contain", "Job 1, 2");
+		cy.get("#planDays [data-cy='planDay']")
+			.eq(15)
+			.contains("Genesis 49")
+			.click();
+		cy.get("#chapter").should("contain", "Genesis 49");
+		cy.get("[data-cy='chapterRight']:first").click();
+		cy.get("#chapter").should("contain", "Genesis 50");
+		cy.get("[data-cy='chapterRight']:first").click();
+		cy.get("#chapter").should("contain", "Job 1");
+		cy.get("[data-cy='planReadingNote']").should("contain", "chapter 3 of 4");
+	});
+
+	it("leaves the plan behind when a chapter is chosen some other way", () => {
+		openPlansPage();
+		cy.get("[data-cy='planRow-gospels-2-months'] [data-cy='planSubscribe']").click();
+		cy.get("[data-cy='planRow-gospels-2-months'] [data-cy='planSeeEveryDay']").click();
+		cy.get("#planDays [data-cy='planDay']").first().contains("Matthew 1").click();
+		cy.get("[data-cy='planReadingNote']").should("be.visible");
+		// The chapter picker is the reader choosing a chapter, not the plan.
+		cy.get("#brand").click();
+		cy.openChapter("Genesis", "5");
+		cy.get("#chapter").should("contain", "Genesis 5");
+		cy.get("[data-cy='planReadingNote']").should("not.exist");
+		cy.get("[data-cy='chapterRight']:first").click();
+		cy.get("#chapter").should("contain", "Genesis 6");
+	});
+
 	it("says so when the hash names no plan", () => {
 		cy.visit(base + "/#plan/no-such-plan");
 		waitForComponents();

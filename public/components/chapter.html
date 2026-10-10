@@ -226,6 +226,10 @@
 	}
 
 	function loadThisChapter(book, slug, chapter) {
+		// Any other way into a chapter is the reader choosing one, which leaves
+		// the reading plan they arrived through behind.
+		if (typeof clearPlanReadingContext == "function")
+			clearPlanReadingContext();
 		window.__userNavigated = true;
 		var url = chapterUrl(slug, chapter);
 		var bookObj = books.find((b) => b.slug === slug);
@@ -254,6 +258,12 @@
 	}
 
 	function moveChapter(delta) {
+		// A chapter opened from a reading plan is followed through that day's
+		// reading, which is three or four chapters in the order the plan chose -
+		// not the order of the Bible, and not the reader's chronological setting.
+		if (typeof followPlanChapter == "function" && followPlanChapter(delta))
+			return;
+
 		if (settings.order == "chronological" && chronoSequence.length > 0) {
 			var pos = -1;
 			for (var i = 0; i < chronoSequence.length; i++) {
@@ -394,6 +404,15 @@
 			title +
 			" (<span class='version'></span>)<span class='version-shared' title='These settings came from a shared link' style='display: none'> shared</span>";
 				chapter.innerHTML = addArrows(text, title);
+				// A chapter reached through a plan says which plan and which day
+				// of it, because the arrows either side are following the plan
+				// rather than the Bible.
+				if (typeof planReadingNote == "function") {
+					var planNote = planReadingNote();
+					var chapterText = document.getElementById("chapterText");
+					if (planNote && chapterText)
+						chapterText.parentNode.insertBefore(planNote, chapterText);
+				}
 				applySettings();
 				applyWordStudyLinks(book ? book.slug : null, chapterNum);
 				applyChapterHighlight(pendingHighlight);

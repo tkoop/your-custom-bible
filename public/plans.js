@@ -436,6 +436,119 @@ function planIsSubscribed(plan) {
 	});
 }
 
+// ---------- Reading a plan ----------
+
+// The day a chapter was opened from, so the arrows either side of it carry on
+// through that day's reading rather than round the Bible. Only the day is
+// remembered: the reader opened a chapter, not a plan.
+var planReadingContext = null;
+
+// Set while a plan itself is doing the loading, so the clear below knows not to
+// throw away what the plan is holding on to.
+var planLoadingFromPlan = false;
+
+// Every way into a chapter is the reader choosing one, and leaves any plan
+// behind - except the plan's own loads, which say so first.
+function clearPlanReadingContext() {
+	if (planLoadingFromPlan) return;
+	planReadingContext = null;
+}
+
+function armPlanReading(plan, order, chapters, day) {
+	planReadingContext = {
+		plan: plan,
+		order: order,
+		day: day,
+		chapters: chapters,
+	};
+}
+
+function loadPlanChapter(chapter) {
+	planLoadingFromPlan = true;
+	try {
+		loadThisChapter(chapter.name, chapter.slug, chapter.chapter);
+	} finally {
+		planLoadingFromPlan = false;
+	}
+}
+
+// Opens a day's reading at its first chapter. false when the day has nothing in
+// it, which only a plan with more days than chapters can produce. The day is
+// armed before the chapter is asked for, because the chapter is fetched and
+// rendered afterwards and the note about the plan is written as it renders.
+function openPlanChapters(plan, order, chapters, day) {
+	if (!plan || !chapters || chapters.length == 0) return false;
+	armPlanReading(plan, order, chapters, day);
+	loadPlanChapter(chapters[0]);
+	return true;
+}
+
+function readPlanDay(subscription) {
+	var plan = subscriptionPlan(subscription);
+	var state = subscriptionState(subscription);
+	return openPlanChapters(plan, subscription.order, state.chapters, state.day);
+}
+
+// Where in the day's reading the chapter on screen sits, or -1 when it is not
+// part of one.
+function planReadingPosition(context) {
+	if (!context || !context.chapters.length) return -1;
+	var book = books[currentBookIndex];
+	if (!book) return -1;
+	for (var i = 0; i < context.chapters.length; i++) {
+		if (
+			context.chapters[i].slug == book.slug &&
+			context.chapters[i].chapter == currentChapter
+		) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+// Steps the arrows along a plan's day. False when there is no plan reading to
+// step along, and the arrows are the Bible's own again: the reader has reached
+// the end of the day, or moved to a chapter the day does not list.
+function followPlanChapter(delta) {
+	var at = planReadingPosition(planReadingContext);
+	if (at == -1) {
+		planReadingContext = null;
+		return false;
+	}
+	var next = at + delta;
+	if (next < 0 || next >= planReadingContext.chapters.length) return false;
+	var context = planReadingContext;
+	armPlanReading(context.plan, context.order, context.chapters, context.day);
+	loadPlanChapter(context.chapters[next]);
+	return true;
+}
+
+// What the chapter on screen is to the plan it was opened from. Without it the
+// arrows following the plan would look like a fault: on a chronological plan
+// the next chapter is not the next one in the Bible.
+function planReadingNote() {
+	var context = planReadingContext;
+	var at = planReadingPosition(context);
+	if (at == -1) return null;
+	var note = document.createElement("div");
+	note.className = "plan-reading-note";
+	note.setAttribute("data-cy", "planReadingNote");
+	// The middot is written as an escape because this file is loaded as a
+	// script, not fetched: the app's <meta> says name="encoding" rather than
+	// charset, so a literal non-ASCII character here reaches the browser as
+	// whatever the browser's default happens to be. The component files are
+	// fetched and read as UTF-8, which is why they can be literal.
+	note.appendChild(
+		document.createTextNode(
+			context.plan.name + " \u00b7 Day " + context.day + ", chapter ",
+		),
+	);
+	var count = document.createElement("span");
+	count.textContent = at + 1 + " of " + context.chapters.length;
+	note.appendChild(count);
+	return note;
+}
+
 // ---------- Subscriptions ----------
 
 function planSubscriptions() {
@@ -623,14 +736,4 @@ function saveCustomPlan(plan) {
 	clearPlanChapterLists();
 	fireEvent({ name: "plansUpdated" });
 	return stored;
-}
-
-// Opens the first chapter of a plan's day. A day with no chapters in it is a
-// rest day, which only a plan with more days than chapters produces.
-function readPlanDay(subscription) {
-	var state = subscriptionState(subscription);
-	if (state.chapters.length == 0) return false;
-	var first = state.chapters[0];
-	loadThisChapter(first.name, first.slug, first.chapter);
-	return true;
 }

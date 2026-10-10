@@ -27,31 +27,34 @@
 		return found ? { plan: found, id: id } : null;
 	}
 
-	function planPageReadings(chapters) {
-		// Each chapter links to itself, with the book named once on the first,
-		// which is how the index shows a book's chapters.
+	function planPageReadings(plan, order, entry) {
+		// Each chapter links to itself. The book is named on the first chapter
+		// and again whenever the day moves into another book - a day that runs
+		// from Genesis into Job would otherwise read "Genesis 10, 1, 2, 3".
+		// Following one carries the day with it, so the arrows carry on through
+		// the day's reading rather than round the Bible.
 		var el = planPageEl("div", "plan-day-readings");
-		chapters.forEach(function (chapter, index) {
+		var previous = null;
+		entry.chapters.forEach(function (chapter, index) {
 			if (index > 0) el.appendChild(planPageEl("span", "plan-day-sep", ", "));
 			var link = document.createElement("a");
 			link.href = "#";
-			link.dataset.slug = chapter.slug;
-			link.dataset.book = chapter.name;
-			link.dataset.chapter = chapter.chapter;
 			link.textContent =
-				index == 0
+				chapter.name != previous
 					? chapterRefName(chapter.name) + " " + chapter.chapter
 					: String(chapter.chapter);
 			link.onclick = function () {
-				loadChapter(this);
+				armPlanReading(plan, order, entry.chapters, entry.day);
+				loadPlanChapter(chapter);
 				return false;
 			};
 			el.appendChild(link);
+			previous = chapter.name;
 		});
 		return el;
 	}
 
-	function planPageDay(entry, today) {
+	function planPageDay(plan, order, entry, today) {
 		var row = planPageEl(
 			"div",
 			entry.dateString == today ? "plan-day plan-day-today" : "plan-day",
@@ -64,7 +67,7 @@
 		row.appendChild(head);
 
 		if (entry.chapters.length) {
-			row.appendChild(planPageReadings(entry.chapters));
+			row.appendChild(planPageReadings(plan, order, entry));
 		} else {
 			row.appendChild(planPageEl("p", "plan-day-rest", "Rest day"));
 		}
@@ -156,7 +159,7 @@
 			var today = todayDateString();
 			var fragment = document.createDocumentFragment();
 			schedule.forEach(function (entry) {
-				fragment.appendChild(planPageDay(entry, today));
+				fragment.appendChild(planPageDay(plan, order, entry, today));
 			});
 			list.appendChild(fragment);
 		});

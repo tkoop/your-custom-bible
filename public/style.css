@@ -1427,6 +1427,21 @@ div.index-chapters a:active {
 	color: var(--primary);
 }
 
+/* Says which plan a chapter was opened from, because the arrows either side of
+   it are following that plan rather than the order of the Bible. */
+.plan-reading-note {
+	margin: 0 0 4px;
+	padding: 7px 12px;
+	border: 1px solid var(--border-light);
+	border-left: 3px solid var(--gold);
+	border-radius: var(--radius-sm);
+	background-color: var(--surface-soft);
+	font-family: var(--font-ui);
+	font-size: 0.82rem;
+	color: var(--text-secondary);
+	text-align: center;
+}
+
 /* ---------- Building a plan ---------- */
 .plans-form {
 	display: flex;
