@@ -267,6 +267,36 @@ function planDayChapters(plan, order, day) {
 	return planChapterList(plan, order).slice(range.start, range.end);
 }
 
+// A plan of "X chapters a day" says nothing about how long it lasts: one
+// chapter a day through the whole Bible is 1189 days of reading, which is
+// three years rather than anything a reader would recognise as a plan. So the
+// length is stated alongside the pace, in days first because that is the
+// number the schedule is built from, and then in the words people count in.
+function planRoughSpan(days) {
+	if (days >= 365) {
+		var years = Math.floor(days / 365);
+		var months = Math.round((days - years * 365) / 30);
+		return (
+			"about " +
+			years +
+			(years == 1 ? " year" : " years") +
+			(months
+				? " " + months + (months == 1 ? " month" : " months")
+				: "")
+		);
+	}
+	if (days >= 60) return "about " + Math.round(days / 30) + " months";
+	return "";
+}
+
+function planLengthLabel(plan, order, fresh) {
+	var total = planTotalChapters(plan, order, fresh);
+	var days = planTotalDays(plan, total);
+	var label = days + (days == 1 ? " day" : " days");
+	var rough = planRoughSpan(days);
+	return rough ? label + ", " + rough : label;
+}
+
 // The pace as the reader would say it: "3-4 chapters a day", and for a duration
 // the length of it in days, because that is the other half of the promise. A
 // plan with more days than chapters - the Gospels spread over a year - has days
@@ -341,6 +371,71 @@ function planReadingsLabel(chapters) {
 	return parts.join(", ");
 }
 
+// ---------- The whole plan, day by day ----------
+
+// Which of a plan's subscriptions the schedule is the one for: the most recent
+// start date, since that is the reading under way. None, and the schedule is
+// counted from today - a list of dates has to start somewhere, and there is
+// nothing truer than now for a plan the reader has not begun.
+function planCurrentSubscription(plan) {
+	var subscribed = planSubscriptions().filter(function (subscription) {
+		return subscription.planId == plan.id;
+	});
+	if (subscribed.length == 0) return null;
+	return subscribed.reduce(function (later, subscription) {
+		return subscription.start > later.start ? subscription : later;
+	});
+}
+
+function planScheduleStart(plan) {
+	var subscription = planCurrentSubscription(plan);
+	return subscription ? subscription.start : todayDateString();
+}
+
+function planScheduleOrder(plan) {
+	var subscription = planCurrentSubscription(plan);
+	return subscription
+		? subscriptionOrder(subscription)
+		: planOrder(plan);
+}
+
+// Every day of a plan with the date it falls on, so a reader can see the whole
+// shape of it rather than only today: the Gospels over a year is a chapter every
+// four days with long stretches in between, and that is only visible in a list.
+function planSchedule(plan, order, start) {
+	var days = planTotalDays(plan, planTotalChapters(plan, order));
+	var from = planDateFromString(start || planScheduleStart(plan));
+	var schedule = [];
+	for (var day = 0; day < days; day++) {
+		var date = new Date(from.getTime());
+		date.setDate(date.getDate() + day);
+		schedule.push({
+			day: day + 1,
+			date: date,
+			dateString: planDateString(date),
+			chapters: planDayChapters(plan, order, day),
+		});
+	}
+	return schedule;
+}
+
+// "Tue 13 Oct 2026", in the words a reader would say the day out loud. en-GB
+// puts the day before the month, which is what the history page already uses.
+function planDayLabel(date) {
+	return date.toLocaleDateString("en-GB", {
+		weekday: "short",
+		day: "numeric",
+		month: "short",
+		year: "numeric",
+	});
+}
+
+function planIsSubscribed(plan) {
+	return planSubscriptions().some(function (subscription) {
+		return subscription.planId == plan.id;
+	});
+}
+
 // ---------- Subscriptions ----------
 
 function planSubscriptions() {
@@ -365,13 +460,29 @@ function subscriptionTotalChapters(subscription) {
 	return plan ? planTotalChapters(plan, subscription.order) : 0;
 }
 
-// Days between a "YYYY-MM-DD" start and today, read as local dates: a
-// subscription starts on the day it was made whatever timezone that was in.
-function planDaysSince(start) {
+// A "YYYY-MM-DD" day read as a local date: a subscription starts on the day it
+// was made whatever timezone that was in, and a schedule walks whole days from
+// there rather than adding 86400000 milliseconds to a timestamp.
+function planDateFromString(start) {
 	var parts = String(start || "").split("-");
-	if (parts.length != 3) return 0;
-	var then = new Date(+parts[0], +parts[1] - 1, +parts[2]);
-	if (isNaN(then.getTime())) return 0;
+	if (parts.length != 3) return null;
+	var date = new Date(+parts[0], +parts[1] - 1, +parts[2]);
+	return isNaN(date.getTime()) ? null : date;
+}
+
+function planDateString(date) {
+	return (
+		date.getFullYear() +
+		"-" +
+		String(date.getMonth() + 1).padStart(2, "0") +
+		"-" +
+		String(date.getDate()).padStart(2, "0")
+	);
+}
+
+function planDaysSince(start) {
+	var then = planDateFromString(start);
+	if (!then) return 0;
 	var today = new Date();
 	today.setHours(0, 0, 0, 0);
 	return Math.round((today - then) / 86400000);

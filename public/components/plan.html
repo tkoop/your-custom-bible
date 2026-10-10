@@ -1,0 +1,192 @@
+<div id="planPage" class="plan-page">
+	<div id="planPageHead"></div>
+	<div id="planDays" class="plan-days"></div>
+</div>
+
+<script>
+	// One plan, every day of it. A reader who wants to know what a plan asks of
+	// them - or who is looking ahead, or back - needs the whole list rather than
+	// today's card, so this is the plan laid out from its first day.
+	//
+	// Component scripts share one global scope, so the page's own names are
+	// prefixed with "plan" - the bare word is a function in plans.js.
+
+	function planPageEl(tag, className, text) {
+		var el = document.createElement(tag);
+		if (className) el.className = className;
+		if (text != null) el.textContent = text;
+		return el;
+	}
+
+	// The plan a hash names, or null when it names nothing the app knows.
+	function planFromHash() {
+		var hash = location.hash || "";
+		if (!hash.startsWith("#plan/")) return null;
+		var id = decodeURIComponent(hash.slice("#plan/".length).split("?")[0]);
+		var found = planById(id);
+		return found ? { plan: found, id: id } : null;
+	}
+
+	function planPageReadings(chapters) {
+		// Each chapter links to itself, with the book named once on the first,
+		// which is how the index shows a book's chapters.
+		var el = planPageEl("div", "plan-day-readings");
+		chapters.forEach(function (chapter, index) {
+			if (index > 0) el.appendChild(planPageEl("span", "plan-day-sep", ", "));
+			var link = document.createElement("a");
+			link.href = "#";
+			link.dataset.slug = chapter.slug;
+			link.dataset.book = chapter.name;
+			link.dataset.chapter = chapter.chapter;
+			link.textContent =
+				index == 0
+					? chapterRefName(chapter.name) + " " + chapter.chapter
+					: String(chapter.chapter);
+			link.onclick = function () {
+				loadChapter(this);
+				return false;
+			};
+			el.appendChild(link);
+		});
+		return el;
+	}
+
+	function planPageDay(entry, today) {
+		var row = planPageEl(
+			"div",
+			entry.dateString == today ? "plan-day plan-day-today" : "plan-day",
+		);
+		row.setAttribute("data-cy", "planDay");
+
+		var head = planPageEl("div", "plan-day-head");
+		head.appendChild(planPageEl("span", "plan-day-number", "Day " + entry.day));
+		head.appendChild(planPageEl("span", "plan-day-date", planDayLabel(entry.date)));
+		row.appendChild(head);
+
+		if (entry.chapters.length) {
+			row.appendChild(planPageReadings(entry.chapters));
+		} else {
+			row.appendChild(planPageEl("p", "plan-day-rest", "Rest day"));
+		}
+		return row;
+	}
+
+	// The way back to the list, on any version of the page: a hash can name a
+	// plan that has been deleted, and the reader still has to be able to leave.
+	function planPageBackLink() {
+		var back = planPageEl("a", "plan-page-back", "All plans");
+		back.href = "#";
+		back.setAttribute("data-cy", "planPageBack");
+		back.onclick = function () {
+			fireEvent({ name: "showPage", page: "plans" });
+			return false;
+		};
+		return back;
+	}
+
+	function renderPlanPage() {
+		var head = document.getElementById("planPageHead");
+		var list = document.getElementById("planDays");
+		if (!head || !list) return;
+		head.innerHTML = "";
+		list.innerHTML = "";
+
+		var found = planFromHash();
+		if (!found) {
+			var missing = planPageEl("div", "plan-page-title");
+			missing.appendChild(planPageEl("h1", null, "Plan"));
+			missing.appendChild(planPageBackLink());
+			head.appendChild(missing);
+			list.appendChild(
+				planPageEl("p", "plans-empty", "No such plan. It may have been deleted."),
+			);
+			return;
+		}
+
+		var plan = found.plan;
+		// The order a plan is read in is the reader's, so the schedule is laid
+		// out the way they would meet it - and a chronological one cannot be laid
+		// out at all until the app's copy of that order has arrived.
+		whenPlanDataReady(function () {
+			var order = planScheduleOrder(plan);
+			var start = planScheduleStart(plan);
+			var schedule = planSchedule(plan, order, start);
+
+			var title = planPageEl("div", "plan-page-title");
+			title.appendChild(planPageEl("h1", null, plan.name));
+			var tags = planPageEl("div", "plans-row-tags");
+			tags.appendChild(
+				planPageEl(
+					"span",
+					"plans-tag",
+					order == "chronological" ? "Chronological" : "Canonical",
+				),
+			);
+			tags.appendChild(
+				planPageEl(
+					"span",
+					"plans-tag",
+					schedule.length + (schedule.length == 1 ? " day" : " days"),
+				),
+			);
+			if (planIsSubscribed(plan)) {
+				tags.appendChild(planPageEl("span", "plans-tag plans-tag-done", "Subscribed"));
+			}
+			title.appendChild(tags);
+
+			var back = planPageBackLink();
+			title.appendChild(back);
+
+			head.appendChild(title);
+			head.appendChild(
+				planPageEl("p", "plans-plan-line", plansPlanLine(plan, order)),
+			);
+			head.appendChild(
+				planPageEl(
+					"p",
+					"plans-plan-length",
+					"Begins " +
+						planDayLabel(planDateFromString(start) || new Date()) +
+						(planIsSubscribed(plan)
+							? " \u00b7 the day it was subscribed"
+							: " \u00b7 today, since you are not on this plan yet"),
+				),
+			);
+
+			var today = todayDateString();
+			var fragment = document.createDocumentFragment();
+			schedule.forEach(function (entry) {
+				fragment.appendChild(planPageDay(entry, today));
+			});
+			list.appendChild(fragment);
+		});
+	}
+
+	// The hash names the plan, so it is read from there rather than carried in
+	// the event: a page reached by moving the address bar or going back arrives
+	// the same way as one reached from a link.
+function showPlanPage(id) {
+	fireEvent({
+		name: "showPage",
+		page: "plan",
+		hash: id ? "plan/" + id : "",
+		skipHistory: true,
+	});
+}
+
+	registerEventListener(
+		(e) => e.name == "showPage" && e.page == "plan",
+		function () {
+			renderPlanPage();
+		},
+	);
+
+	// Following a day link is an ordinary page change, so the page that was
+	// left needs rebuilding when the reader comes back to it.
+	registerEventListener(
+		(e) => e.name == "plansUpdated",
+		function () {
+			if (window.currentPage == "plan") renderPlanPage();
+		},
+	);
+</script>

@@ -27,6 +27,19 @@ function daysAgo(n) {
 	);
 }
 
+// The same day as the plan page writes it out, so a spec can say which day a
+// row is showing rather than only counting rows.
+function dayLabel(n) {
+	const d = new Date();
+	d.setDate(d.getDate() - n);
+	return d.toLocaleDateString("en-GB", {
+		weekday: "short",
+		day: "numeric",
+		month: "short",
+		year: "numeric",
+	});
+}
+
 describe("reading plans", () => {
 	beforeEach(() => {
 		cy.clearLocalStorage();
@@ -81,6 +94,33 @@ describe("reading plans", () => {
 		cy.get("#plansSubscriptionList").should("contain", "No plans yet");
 	});
 
+	it("says how long a chapters-a-day plan takes, in small print", () => {
+		openPlansPage();
+		// A plan of so many chapters a day has no end date of its own, so what it
+		// adds up to is stated under the pace.
+		cy.get("[data-cy='planRow-bible-1-chapter-a-day'] .plans-plan-length").should(
+			"have.text",
+			"Takes 1189 days, about 3 years 3 months",
+		);
+		cy.get("[data-cy='planRow-psalms-1-chapter-a-day'] .plans-plan-length").should(
+			"have.text",
+			"Takes 150 days, about 5 months",
+		);
+		// Short enough to count in days, so it says so and leaves it there.
+		cy.get("[data-cy='planRow-proverbs-1-chapter-a-day'] .plans-plan-length").should(
+			"have.text",
+			"Takes 31 days",
+		);
+		// A plan with a duration already said so in the line above it.
+		cy.get("[data-cy='planRow-bible-1-year']").should(
+			"contain",
+			"3-4 chapters a day over 365 days",
+		);
+		cy.get("[data-cy='planRow-bible-1-year'] .plans-plan-length").should(
+			"not.exist",
+		);
+	});
+
 	it("subscribes to a plan and shows it on the home page", () => {
 		openPlansPage();
 		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planSubscribe']").click();
@@ -124,6 +164,82 @@ describe("reading plans", () => {
 			"contain",
 			"Subscribed",
 		);
+	});
+
+	it("opens a plan on its own page, with every day and its date", () => {
+		openPlansPage();
+		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planStartDate']")
+			.clear()
+			.type(daysAgo(10));
+		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planSubscribe']").click();
+		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planSeeEveryDay']").click();
+
+		cy.location("hash").should("eq", "#plan/bible-1-year");
+		cy.get("#plan").should("be.visible");
+		cy.get("#plan").contains("Read the whole Bible in a year");
+		cy.get("#plan").should("contain", "the day it was subscribed");
+		// A plan the reader is on is laid out from the day they began it, so the
+		// days run from ten days ago and today is the eleventh.
+		cy.get("#planDays [data-cy='planDay']").should("have.length", 365);
+		cy.get("#planDays").should("contain", "Day 1");
+		cy.get("#planDays [data-cy='planDay']")
+			.first()
+			.should("contain", dayLabel(10));
+		cy.get("#planDays .plan-day-today").should("contain", dayLabel(0));
+		cy.get("#planDays .plan-day-today").should("contain", "Day 11");
+		cy.get("#planDays .plan-day-today").should("contain", "Genesis 33");
+		cy.get("#planDays [data-cy='planDay']").last().should("contain", "Day 365");
+		cy.get("#planDays [data-cy='planDay']").last().should(
+			"contain",
+			"Revelation 19, 20, 21, 22",
+		);
+	});
+
+	it("lays out a plan nobody is on from today, rest days and all", () => {
+		openPlansPage();
+		cy.get("[data-cy='planRow-gospels-1-year'] [data-cy='planSeeEveryDay']").click();
+		cy.location("hash").should("eq", "#plan/gospels-1-year");
+		cy.get("#plan").should("contain", "since you are not on this plan yet");
+		cy.get("#planDays [data-cy='planDay']").should("have.length", 365);
+		// 89 chapters over 365 days is a chapter every fourth day or so, so most
+		// of the plan is days with nothing in them.
+		cy.get("#planDays .plan-day-rest").should("have.length", 276);
+		cy.get("#planDays .plan-day-today").should("contain", "Day 1");
+		cy.get("#planDays").should("contain", "Matthew 1");
+		cy.get("#planDays").should("contain", "John 21");
+	});
+
+	it("opens a day of the plan from the plan page", () => {
+		openPlansPage();
+		cy.get("[data-cy='planRow-gospels-2-months'] [data-cy='planSeeEveryDay']").click();
+		cy.get("#planDays [data-cy='planDay']").first().contains("Matthew 1").click();
+		cy.get("#chapter").should("be.visible");
+		cy.get("#chapter").should("contain", "Matthew 1");
+		cy.location("hash").should("eq", "#Mat-1");
+	});
+
+	it("shows a custom plan's own days", () => {
+		openPlansPage();
+		cy.get("#plansNameInput").type("Gospels a day");
+		["matthew", "mark", "luke", "john"].forEach((slug) =>
+			cy.get(`[data-cy='plansBook-${slug}']`).check(),
+		);
+		cy.get("input[name=plansPace][value=perDay]").check();
+		cy.get("[data-cy='plansSaveButton']").click();
+		cy.get("#plansOwnList [data-cy='planSeeEveryDay']").click();
+		cy.get("#plan").should("contain", "Gospels a day");
+		cy.get("#planDays [data-cy='planDay']").should("have.length", 89);
+		cy.get("#planDays [data-cy='planDay']").first().should("contain", "Matthew 1");
+		cy.get("#planDays [data-cy='planDay']").last().should("contain", "John 21");
+	});
+
+	it("says so when the hash names no plan", () => {
+		cy.visit(base + "/#plan/no-such-plan");
+		waitForComponents();
+		cy.get("#plan").should("be.visible");
+		cy.get("#plan").should("contain", "No such plan");
+		cy.get("[data-cy='planPageBack']").click();
+		cy.get("#plans").should("be.visible");
 	});
 
 	it("asks for an order and a start date, then subscribes", () => {

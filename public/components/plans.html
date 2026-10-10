@@ -338,6 +338,18 @@ function plansRenderPlanRow(plan, extra) {
 	row.appendChild(
 		plansEl("p", "plans-plan-line", plansPlanLine(plan, planOrder(plan))),
 	);
+	// A plan read at so many chapters a day has no end date of its own, so what
+	// it adds up to is said under it. A plan with a duration already says so in
+	// the line above and does not repeat itself.
+	if (plan.pace == "perDay") {
+		row.appendChild(
+			plansEl(
+				"p",
+				"plans-plan-length",
+				"Takes " + planLengthLabel(plan, planOrder(plan)),
+			),
+		);
+	}
 
 	var actions = plansEl("div", "plans-actions");
 
@@ -368,6 +380,16 @@ function plansRenderPlanRow(plan, extra) {
 			subscribeToPlan(plan, order.value, start.value || todayDateString());
 		};
 		actions.appendChild(subscribe);
+
+		// The plan on its own page: every day of it with the date it falls on,
+		// which is the only way to see the shape of a plan before committing to it.
+		var see = plansEl("a", "plans-row-link", "See every day");
+		see.href = "#plan/" + plan.id;
+		see.setAttribute("data-cy", "planSeeEveryDay");
+		see.onclick = function () {
+			return true;
+		};
+		actions.appendChild(see);
 
 		if (extra) extra(actions, plan);
 
@@ -556,7 +578,10 @@ function plansRenderPlanRow(plan, extra) {
 		summary.textContent =
 			slugs.length +
 			(slugs.length == 1 ? " book \u00b7 " : " books \u00b7 ") +
-			planPaceLabel(draft, draft.order, true);
+			planPaceLabel(draft, draft.order, true) +
+			(draft.pace == "perDay"
+				? " \u00b7 takes " + planLengthLabel(draft, draft.order, true)
+				: "");
 	}
 
 	function plansFormError(message) {

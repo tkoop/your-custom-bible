@@ -181,6 +181,15 @@ for the order, then the date (today by default), then offers Subscribe, and
 nothing shows a date once the plan is on. Moving a running plan's start would
 be a second reading of it, not an edit, so that is what it would take.
 
+A plan is also a page of its own, `#plan/<id>`, reached by "See every day" on a
+plan row. It lays out **every** day with the date it falls on, because the shape
+of a plan is the thing a reader cannot see from today's card: the Gospels over a
+year is a chapter every fourth day with long stretches of rest days between. A
+plan the reader is on is laid out from the day they began it - the most recent
+subscription, which is the reading under way - and one they are not on is laid
+out from today, since a list of dates has to start somewhere. Each day is
+`planSchedule()`: the number, the date, and the chapters, each one a link.
+
 The day boundaries are taken from the whole list, not from a rounded-up
 chapters-a-day figure, so 1189 chapters over 365 days gives a day of three and a
 day of four in proportion rather than four every day and a fortnight left over.
@@ -210,7 +219,7 @@ Browsers cache this app's static assets aggressively:
 file under `public/` whose content changed.** Increment the number each time:
 
 - Start/raise any resource that has no version param yet (add `?version=1`).
-- `style.css` is currently at `?version=51`; leave it unless it changes.
+- `style.css` is currently at `?version=54`; leave it unless it changes.
 
 Files involved (all referenced from `public/index.html`):
 
@@ -225,7 +234,8 @@ Files involved (all referenced from `public/index.html`):
   `components/history.html`, `components/search.html`,
   `components/settings.html`, `components/advanced.html`,
   `components/speedReader.html`, `components/readToMe.html`,
-  `components/share.html`, `components/plans.html`
+  `components/share.html`, `components/plans.html`,
+  `components/plan.html`
 - Fonts referenced from `style.css` via `@font-face`: files under `fonts/`
 - `serviceWorker.js` (bump its `?version=` too when its logic changes)
 

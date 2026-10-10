@@ -5,7 +5,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="theme-color" content="#34507a" />
 		<title>Your Custom Bible</title>
-<link rel="stylesheet" href="style.css?version=52" />
+<link rel="stylesheet" href="style.css?version=54" />
 		<link rel="icon" type="image/png" href="images/logo.png?version=4" />
 		<link rel="manifest" href="manifest.json?version=2" />
 	</head>
@@ -94,6 +94,7 @@
 		<div id="home" class="page"></div>
 		<div id="index" class="page"></div>
 		<div id="plans" class="page"></div>
+		<div id="plan" class="page"></div>
 		<div id="history" class="page">History page</div>
 		<div id="search" class="page"></div>
 		<div id="about" class="page"></div>
@@ -113,7 +114,7 @@
 		<script src="settings.js?version=16"></script>
 	<script src="books.js?version=2"></script>
 	<script src="translations.js?version=1"></script>
-	<script src="plans.js?version=2"></script>
+	<script src="plans.js?version=4"></script>
 
 	<script>
 		async function loadComponents() {
@@ -121,7 +122,8 @@
 			await loadComponent("chapter", "components/chapter.html?version=46");
 			await loadComponent("word", "components/word.html?version=5");
 			await loadComponent("home", "components/home.html?version=6");
-			await loadComponent("plans", "components/plans.html?version=3");
+			await loadComponent("plans", "components/plans.html?version=5");
+			await loadComponent("plan", "components/plan.html?version=3");
 			await loadComponent("about", "components/about.html?version=3");
 			await loadComponent("history", "components/history.html?version=5");
 			await loadComponent("search", "components/search.html?version=6");
@@ -187,6 +189,12 @@ await loadComponent("speedReader", "components/speedReader.html?version=9");
 				fireEvent({ name: "showPage", page: "search", skipHistory: true });
 			} else if (state === "#about") {
 				fireEvent({ name: "showPage", page: "about", skipHistory: true });
+			} else if (state.startsWith("#plan/")) {
+				// One plan laid out day by day. Like a word study, the hash names
+				// what the page is about and the page reads it back from there, so
+				// it comes before the chapter branch below - that one takes any hash
+				// starting with a "#".
+				showPlanPage(state.slice("#plan/".length));
 			} else if (state.startsWith("#word/")) {
 				// A word study, "#word/G2424". It comes before the chapter branch
 				// below because that one reads anything that starts with a "#",
@@ -257,6 +265,7 @@ await loadComponent("speedReader", "components/speedReader.html?version=9");
 					else if (event.page === "history") hash = "#history";
 					else if (event.page === "search") hash = "#search";
 					else if (event.page === "about") hash = "#about";
+					else if (event.page === "plan") hash = "#" + event.hash;
 					else if (event.page === "word") hash = "#" + event.hash;
 					else if (event.page === "chapter") hash = "#" + event.hash;
 					history.pushState(hash, "", hash);
