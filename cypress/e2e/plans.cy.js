@@ -174,10 +174,13 @@ describe("reading plans", () => {
 		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planSubscribe']").click();
 		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planSeeEveryDay']").click();
 
-		cy.location("hash").should("eq", "#plan/bible-1-year");
+		cy.location("hash").should(
+			"eq",
+			"#plan/bible-1-year?order=canonical&start=" + daysAgo(10),
+		);
 		cy.get("#plan").should("be.visible");
 		cy.get("#plan").contains("Read the whole Bible in a year");
-		cy.get("#plan").should("contain", "the day it was subscribed");
+		cy.get("#plan").should("contain", "as chosen on the plans page");
 		// A plan the reader is on is laid out from the day they began it, so the
 		// days run from ten days ago and today is the eleventh.
 		cy.get("#planDays [data-cy='planDay']").should("have.length", 365);
@@ -198,8 +201,11 @@ describe("reading plans", () => {
 	it("lays out a plan nobody is on from today, rest days and all", () => {
 		openPlansPage();
 		cy.get("[data-cy='planRow-gospels-1-year'] [data-cy='planSeeEveryDay']").click();
-		cy.location("hash").should("eq", "#plan/gospels-1-year");
-		cy.get("#plan").should("contain", "since you are not on this plan yet");
+		cy.location("hash").should(
+			"eq",
+			"#plan/gospels-1-year?order=canonical&start=" + daysAgo(0),
+		);
+		cy.get("#plan").should("contain", "as chosen on the plans page");
 		cy.get("#planDays [data-cy='planDay']").should("have.length", 365);
 		// 89 chapters over 365 days is a chapter every fourth day or so, so most
 		// of the plan is days with nothing in them.
@@ -273,6 +279,10 @@ describe("reading plans", () => {
 			.type(daysAgo(15));
 		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planSubscribe']").click();
 		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planSeeEveryDay']").click();
+		cy.location("hash").should(
+			"eq",
+			"#plan/bible-1-year?order=chronological&start=" + daysAgo(15),
+		);
 
 		// Job is dated early in the Bible, so the chronological plan has read all
 		// of Genesis by day 16. Canonical order would have reached Exodus by now.
@@ -305,6 +315,64 @@ describe("reading plans", () => {
 		cy.get("[data-cy='planReadingNote']").should("not.exist");
 		cy.get("[data-cy='chapterRight']:first").click();
 		cy.get("#chapter").should("contain", "Genesis 6");
+	});
+
+	it("lays the plan page out in the order and from the date the row shows", () => {
+		openPlansPage();
+		// Nothing is subscribed here: what the reader is looking at is what the
+		// row would give them if they subscribed, not the plan's defaults.
+		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planOrderSelect']").select(
+			"chronological",
+		);
+		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planStartDate']")
+			.clear()
+			.type(daysAgo(15));
+		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planSeeEveryDay']").click();
+
+		cy.location("hash").should(
+			"eq",
+			"#plan/bible-1-year?order=chronological&start=" + daysAgo(15),
+		);
+		cy.get("#plan").should("contain", "Chronological");
+		cy.get("#plan").should("contain", "As you have it set");
+		cy.get("#plan").should("contain", "as chosen on the plans page");
+		cy.get("#plan").should("contain", dayLabel(15));
+		// Day 16 of a chronological plan is Genesis 49-50 and Job; a canonical
+		// one would be nowhere near Job on that day.
+		cy.get("#planDays [data-cy='planDay']").eq(15).should(
+			"contain",
+			"Genesis 49, 50",
+		);
+		cy.get("#planDays [data-cy='planDay']").eq(15).should("contain", "Job 1");
+		// Started in the past, so today falls inside it - and is on day 16.
+		cy.get("#planDays .plan-day-today").should("contain", "Day 16");
+	});
+
+	it("ignores an order or a start date the hash gets wrong", () => {
+		cy.visit(
+			base + "/#plan/bible-1-year?order=sideways&start=not-a-date",
+		);
+		waitForComponents();
+		cy.get("#plan").should("be.visible");
+		cy.get("#plan").should("contain", "Canonical");
+		cy.get("#plan").should("contain", "today, since you are not on this plan yet");
+		cy.get("#planDays [data-cy='planDay']").first().should("contain", "Genesis 1");
+		cy.get("#planDays .plan-day-today").should("contain", "Day 1");
+	});
+
+	it("lays a subscribed plan out from the day it was subscribed", () => {
+		openPlansPage();
+		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planStartDate']")
+			.clear()
+			.type(daysAgo(10));
+		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planSubscribe']").click();
+		// Straight to the plan's own hash, with nothing chosen for it: the page
+		// falls back to the reading under way.
+		cy.visit(base + "/#plan/bible-1-year");
+		waitForComponents();
+		cy.get("#plan").should("contain", "Subscribed");
+		cy.get("#plan").should("contain", "the day it was subscribed");
+		cy.get("#planDays .plan-day-today").should("contain", "Day 11");
 	});
 
 	it("says so when the hash names no plan", () => {

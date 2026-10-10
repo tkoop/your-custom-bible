@@ -326,6 +326,35 @@ function plansInlineField(label, control) {
 	return el;
 }
 
+// What the reader has set on a plan's row. The list is re-read whenever a
+// subscription changes, and a row rebuilt from the plan would put the order and
+// the date back to canonical and today - taking with them what the reader was
+// in the middle of choosing.
+var plansRowSettings = {};
+
+function plansRowSettingsFor(plan) {
+	var settings = plansRowSettings[plan.id];
+	if (!settings) {
+		settings = { order: planOrder(plan), start: todayDateString() };
+		plansRowSettings[plan.id] = settings;
+	}
+	return settings;
+}
+
+// The plan's own page, in the order and from the start date given. Both come
+// from controls the reader can be in the middle of setting, so this is worked
+// out from the controls rather than stored on the plan.
+function planPageHref(plan, order, start) {
+	return (
+		"#plan/" +
+		plan.id +
+		"?order=" +
+		encodeURIComponent(order || "canonical") +
+		"&start=" +
+		encodeURIComponent(start || todayDateString())
+	);
+}
+
 // ---------- The plans on offer ----------
 
 function plansRenderPlanRow(plan, extra) {
@@ -358,9 +387,13 @@ function plansRenderPlanRow(plan, extra) {
 	// subscription rather than to the plan - the same plan read canonically by
 	// one reader and chronologically by another stays right for both - and it
 	// starts at whatever order the plan itself was built with.
-	var order = plansSelect(plansOrderOptions, planOrder(plan));
+	var chosen = plansRowSettingsFor(plan);
+	var order = plansSelect(plansOrderOptions, chosen.order);
 	order.className = "plans-order-select";
 	order.setAttribute("data-cy", "planOrderSelect");
+	order.onchange = function () {
+		chosen.order = this.value;
+	};
 	actions.appendChild(plansInlineField("Order", order));
 
 	// The start date is picked here, once, and never touched again: a plan's
@@ -368,34 +401,43 @@ function plansRenderPlanRow(plan, extra) {
 	// would be a second reading of the plan rather than an edit to this one.
 	var start = document.createElement("input");
 	start.type = "date";
-	start.value = todayDateString();
+	start.value = chosen.start;
 	start.setAttribute("data-cy", "planStartDate");
+	start.oninput = start.onchange = function () {
+		if (/^\d{4}-\d{2}-\d{2}$/.test(this.value)) chosen.start = this.value;
+	};
 	actions.appendChild(plansInlineField("Start", start));
 
-		var subscribe = plansEl("button", "standardButton plans-primary", "Subscribe");
-		subscribe.setAttribute("data-cy", "planSubscribe");
-		subscribe.onclick = function () {
-			// An empty date means the reader has cleared it rather than chosen
-			// one, and a subscription starts on some day - today being it.
-			subscribeToPlan(plan, order.value, start.value || todayDateString());
-		};
-		actions.appendChild(subscribe);
+	var subscribe = plansEl("button", "standardButton plans-primary", "Subscribe");
+	subscribe.setAttribute("data-cy", "planSubscribe");
+	subscribe.onclick = function () {
+		// An empty date means the reader has cleared it rather than chosen
+		// one, and a subscription starts on some day - today being it.
+		subscribeToPlan(plan, order.value, start.value || todayDateString());
+	};
+	actions.appendChild(subscribe);
 
-		// The plan on its own page: every day of it with the date it falls on,
-		// which is the only way to see the shape of a plan before committing to it.
-		var see = plansEl("a", "plans-row-link", "See every day");
-		see.href = "#plan/" + plan.id;
-		see.setAttribute("data-cy", "planSeeEveryDay");
-		see.onclick = function () {
-			return true;
-		};
-		actions.appendChild(see);
+	// The plan on its own page: every day of it with the date it falls on,
+	// which is the only way to see the shape of a plan before committing to it.
+	// The order and the start date go with it, so the page shows what
+	// subscribing here would give rather than what the plan falls back to.
+	var see = plansEl("a", "plans-row-link", "See every day");
+	see.href = planPageHref(plan, order.value, start.value);
+	see.setAttribute("data-cy", "planSeeEveryDay");
+	see.onclick = function () {
+		// Written out again on the way: the reader may have set the order or the
+		// date since the row was built, and the page is worth what they are
+		// looking at now rather than what it was when the row was made.
+		location.hash = planPageHref(plan, order.value, start.value);
+		return false;
+	};
+	actions.appendChild(see);
 
-		if (extra) extra(actions, plan);
+	if (extra) extra(actions, plan);
 
-		row.appendChild(actions);
-		return row;
-	}
+	row.appendChild(actions);
+	return row;
+}
 
 	function plansRenderBuiltIns() {
 		var container = document.getElementById("plansBuiltInList");

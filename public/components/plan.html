@@ -18,13 +18,40 @@
 		return el;
 	}
 
-	// The plan a hash names, or null when it names nothing the app knows.
+	// The plan a hash names, and any order and start date it carries. A hash is
+// untrusted input - it can be typed, pasted or edited - so both are checked
+// against what the app offers rather than taken as they come, exactly as the
+// shared settings on a chapter hash are.
 	function planFromHash() {
 		var hash = location.hash || "";
 		if (!hash.startsWith("#plan/")) return null;
-		var id = decodeURIComponent(hash.slice("#plan/".length).split("?")[0]);
+		var rest = hash.slice("#plan/".length);
+		var at = rest.indexOf("?");
+		var id = decodeURIComponent((at == -1 ? rest : rest.slice(0, at)).trim());
 		var found = planById(id);
-		return found ? { plan: found, id: id } : null;
+		if (!found) return null;
+
+		var settings = { order: null, start: null };
+		if (at != -1) {
+			rest.slice(at + 1).split("&").forEach(function (pair) {
+				var eq = pair.indexOf("=");
+				if (eq == -1) return;
+				var key = decodeURIComponent(pair.slice(0, eq));
+				var value = decodeURIComponent(pair.slice(eq + 1));
+				if (key == "order" && ["canonical", "chronological"].includes(value))
+					settings.order = value;
+				if (key == "start" && planDateFromString(value)) settings.start = value;
+			});
+		}
+		return {
+			plan: found,
+			// Both of these are what the reader was looking at on the plans page.
+			// With neither, the page shows the reading under way: the order and
+			// start of the subscription, or the plan as it stands.
+			order: settings.order || planScheduleOrder(found),
+			start: settings.start || planScheduleStart(found),
+			chosen: !!(settings.order || settings.start),
+		};
 	}
 
 	function planPageReadings(plan, order, entry) {
@@ -111,8 +138,8 @@
 		// out the way they would meet it - and a chronological one cannot be laid
 		// out at all until the app's copy of that order has arrived.
 		whenPlanDataReady(function () {
-			var order = planScheduleOrder(plan);
-			var start = planScheduleStart(plan);
+			var order = found.order;
+			var start = found.start;
 			var schedule = planSchedule(plan, order, start);
 
 			var title = planPageEl("div", "plan-page-title");
@@ -135,6 +162,11 @@
 			if (planIsSubscribed(plan)) {
 				tags.appendChild(planPageEl("span", "plans-tag plans-tag-done", "Subscribed"));
 			}
+			// The hash was carrying an order and a start date, so this is the
+			// plan as the reader has it set on the list rather than as it stands.
+			if (found.chosen) {
+				tags.appendChild(planPageEl("span", "plans-tag", "As you have it set"));
+			}
 			title.appendChild(tags);
 
 			var back = planPageBackLink();
@@ -150,9 +182,11 @@
 					"plans-plan-length",
 					"Begins " +
 						planDayLabel(planDateFromString(start) || new Date()) +
-						(planIsSubscribed(plan)
-							? " \u00b7 the day it was subscribed"
-							: " \u00b7 today, since you are not on this plan yet"),
+						(found.chosen
+							? " \u00b7 as chosen on the plans page"
+							: planIsSubscribed(plan)
+								? " \u00b7 the day it was subscribed"
+								: " \u00b7 today, since you are not on this plan yet"),
 				),
 			);
 

@@ -190,6 +190,15 @@ subscription, which is the reading under way - and one they are not on is laid
 out from today, since a list of dates has to start somewhere. Each day is
 `planSchedule()`: the number, the date, and the chapters, each one a link.
 
+The link carries the order and the start date the row is showing now -
+`#plan/<id>?order=chronological&start=2026-09-30` - so the page shows what
+subscribing there would give rather than the plan's defaults. Both are checked
+against what the app offers on arrival, as untrusted input like any other part
+of a hash, and with neither present the page falls back to the subscription and
+then to today. The row keeps what the reader has set in `plansRowSettings`,
+because the list is re-read after every subscription and a row rebuilt from the
+plan would take their date and order back to today's and canonical.
+
 A chapter opened from a plan carries the day with it, so the arrows either side
 walk that day's reading rather than round the Bible - which matters on a
 chronological plan, where the next chapter is not the next one in the Bible.
