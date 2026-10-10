@@ -134,35 +134,78 @@ function allPlans() {
 
 // ---------- The chapters of a plan ----------
 
-// The chronological order the app already uses for its index is the order the
-// books appear in chronoChapters.json, which is a hand-kept copy (see
-// AGENTS.md). Only the book order is taken from it: the file's chapter
-// numbering is not a reading order - it is four chapters short of Leviticus,
-// nine long of 2 Kings, and the Psalms are renumbered into superscription
-// groups - and a plan that skipped chapters would be no plan at all. So both
-// orders take the chapters of each book from books.js and differ only in the
-// order the books come in, and the two are the same chapters either way.
-var planChronoBookSlugs = null;
+// The chronological order the app's index uses, flattened to one chapter per
+// entry - which is what a plan reads in. The index groups chapters by date and
+// superscription, so Psalm 51 stands on its own between 1 and 2 Samuel and the
+// Songs stand between Samuel and Kings, rather than the whole book sitting in
+// one block. That interleaving is the point of reading chronologically, and a
+// plan that lost it would be the same chapters in a different book order -
+// which is not the same thing to read.
+var planChronoChapters = null;
+
+function planChronoBuild(entries) {
+	var chapters = [];
+	var seen = {};
+
+	entries.forEach(function (entry) {
+		// The file spells the Psalms "Psalm" in the superscription groups.
+		var name = entry.book == "Psalm" ? "Psalms" : entry.book;
+		var book = books.find(function (candidate) {
+			return candidate.name == name;
+		});
+		if (!book) return;
+		entry.chapter.forEach(function (number) {
+			var key = book.slug + ":" + number;
+			// Twenty-one chapters are listed twice in that file - the tail of 2
+			// Kings and 2 Chronicles, and four of the Psalms - so the first
+			// mention is the one that counts, and a plan reads no chapter twice.
+			if (seen[key]) return;
+			seen[key] = true;
+			chapters.push({
+				name: book.name,
+				slug: book.slug,
+				chapter: number,
+			});
+		});
+	});
+
+	// Six chapters the file leaves out altogether - Leviticus 24-27 and
+	// Jeremiah 51-52 - go back in at the end of their book's run, so that a
+	// chronological plan reads the same 1189 chapters a canonical one does.
+	books.forEach(function (book) {
+		var missing = [];
+		for (var number = 1; number <= book.chapters; number++) {
+			if (!seen[book.slug + ":" + number]) missing.push(number);
+		}
+		if (missing.length == 0) return;
+		var last = -1;
+		chapters.forEach(function (chapter, index) {
+			if (chapter.slug == book.slug) last = index;
+		});
+		if (last == -1) return;
+		chapters = chapters.slice(0, last + 1).concat(
+			missing.map(function (number) {
+				return { name: book.name, slug: book.slug, chapter: number };
+			}),
+			chapters.slice(last + 1),
+		);
+	});
+
+	planChronoChapters = chapters;
+	return chapters;
+}
 
 var planChronoReady = fetch("chronoChapters.json?version=1")
-	.then((response) => response.json())
-	.then(function (entries) {
-		var slugs = [];
-		entries.forEach(function (entry) {
-			// The file spells the Psalms "Psalm" in the superscription groups.
-			var name = entry.book == "Psalm" ? "Psalms" : entry.book;
-			var book = books.find((candidate) => candidate.name == name);
-			if (book && slugs.indexOf(book.slug) == -1) slugs.push(book.slug);
-		});
-		planChronoBookSlugs = slugs;
-		return slugs;
-	});
+	.then(function (response) {
+		return response.json();
+	})
+	.then(planChronoBuild);
 
 // A chronological plan cannot be laid out until that copy of the order has
 // arrived. Rendering waits for it rather than guessing, and asking again after
 // it lands costs nothing.
 function whenPlanDataReady(render) {
-	if (planChronoBookSlugs) render();
+	if (planChronoChapters) render();
 	else planChronoReady.then(render);
 }
 
@@ -172,23 +215,6 @@ function planBookSlugs(plan) {
 
 function planOrder(plan, order) {
 	return order || plan.order || "canonical";
-}
-
-function planBookList(plan, order) {
-	var slugs = planBookSlugs(plan);
-	var wanted = {};
-	slugs.forEach((slug) => (wanted[slug] = true));
-	var inPlan = books.filter((book) => wanted[book.slug]);
-	if (planOrder(plan, order) != "chronological" || !planChronoBookSlugs) {
-		return inPlan;
-	}
-	var byslug = {};
-	inPlan.forEach((book) => (byslug[book.slug] = book));
-	var ordered = [];
-	planChronoBookSlugs.forEach((slug) => {
-		if (byslug[slug]) ordered.push(byslug[slug]);
-	});
-	return ordered;
 }
 
 // The reading list itself: every chapter of every book in the plan, in order.
@@ -208,23 +234,41 @@ function planChapterList(plan, order, fresh) {
 	var key = plan.id + "|" + planOrder(plan, order);
 	if (!fresh && planChapterLists[key]) return planChapterLists[key];
 
-	var chapters = [];
-	planBookList(plan, order).forEach(function (book) {
-		for (var chapter = 1; chapter <= book.chapters; chapter++) {
-			chapters.push({
-				name: book.name,
-				slug: book.slug,
-				chapter: chapter,
+	var chapters;
+	if (planOrder(plan, order) == "chronological" && planChronoChapters) {
+		// The index's order, kept as it is and cut down to this plan's books:
+		// filtering leaves the interleaving alone, so a plan over the whole Bible
+		// reads the Songs where the index puts them and a plan over the Psalms
+		// alone reads all 150 of them in the index's order.
+		var wanted = {};
+		planBookSlugs(plan).forEach(function (slug) {
+			wanted[slug] = true;
+		});
+		chapters = planChronoChapters.filter(function (chapter) {
+			return wanted[chapter.slug];
+		});
+	} else {
+		// Canonical: every chapter of every book in the plan, in the order the
+		// books stand in books.js.
+		chapters = [];
+		planBookSlugs(plan).forEach(function (slug) {
+			var book = books.find(function (candidate) {
+				return candidate.slug == slug;
 			});
-		}
-	});
+			if (!book) return;
+			for (var number = 1; number <= book.chapters; number++) {
+				chapters.push({
+					name: book.name,
+					slug: book.slug,
+					chapter: number,
+				});
+			}
+		});
+	}
 
 	// A chronological list is only worth keeping once the order it needs has
 	// arrived; before that it would be a canonical one filed under the wrong key.
-	if (
-		!fresh &&
-		(planOrder(plan, order) != "chronological" || planChronoBookSlugs)
-	) {
+	if (!fresh && (planOrder(plan, order) != "chronological" || planChronoChapters)) {
 		planChapterLists[key] = chapters;
 	}
 	return chapters;

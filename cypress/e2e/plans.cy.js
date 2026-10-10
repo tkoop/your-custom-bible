@@ -372,30 +372,25 @@ describe("reading plans", () => {
 		);
 		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planStartDate']")
 			.clear()
-			.type(daysAgo(15));
+			.type(daysAgo(3));
 		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planSubscribe']").click();
 		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planSeeEveryDay']").click();
 		cy.location("hash").should(
 			"eq",
-			"#plan/bible-1-year?order=chronological&start=" + daysAgo(15),
+			"#plan/bible-1-year?order=chronological&start=" + daysAgo(3),
 		);
 
-		// Job is dated early in the Bible, so the chronological plan has read all
-		// of Genesis by day 16. Canonical order would have reached Exodus by now.
+		// Job is dated early in the Bible, so day 4 runs off the end of Genesis
+		// and into Job. Canonical order would still be four chapters of Genesis.
 		cy.get("#planDays [data-cy='planDay']")
-			.eq(15)
-			.should("contain", "Genesis 49, 50")
-			.and("contain", "Job 1, 2");
-		cy.get("#planDays [data-cy='planDay']")
-			.eq(15)
-			.contains("Genesis 49")
-			.click();
-		cy.get("#chapter").should("contain", "Genesis 49");
-		cy.get("[data-cy='chapterRight']:first").click();
-		cy.get("#chapter").should("contain", "Genesis 50");
+			.eq(3)
+			.should("contain", "Genesis 10")
+			.and("contain", "Job 1");
+		cy.get("#planDays [data-cy='planDay']").eq(3).contains("Genesis 10").click();
+		cy.get("#chapter").should("contain", "Genesis 10");
 		cy.get("[data-cy='chapterRight']:first").click();
 		cy.get("#chapter").should("contain", "Job 1");
-		cy.get("[data-cy='planReadingNote']").should("contain", "chapter 3 of 4");
+		cy.get("[data-cy='planReadingNote']").should("contain", "chapter 2 of 4");
 	});
 
 	it("leaves the plan behind when a chapter is chosen some other way", () => {
@@ -422,26 +417,26 @@ describe("reading plans", () => {
 		);
 		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planStartDate']")
 			.clear()
-			.type(daysAgo(15));
+			.type(daysAgo(3));
 		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planSeeEveryDay']").click();
 
 		cy.location("hash").should(
 			"eq",
-			"#plan/bible-1-year?order=chronological&start=" + daysAgo(15),
+			"#plan/bible-1-year?order=chronological&start=" + daysAgo(3),
 		);
 		cy.get("#plan").should("contain", "Chronological");
 		cy.get("#plan").should("contain", "As you have it set");
 		cy.get("#plan").should("contain", "as chosen on the plans page");
-		cy.get("#plan").should("contain", dayLabel(15));
-		// Day 16 of a chronological plan is Genesis 49-50 and Job; a canonical
-		// one would be nowhere near Job on that day.
-		cy.get("#planDays [data-cy='planDay']").eq(15).should(
+		cy.get("#plan").should("contain", dayLabel(3));
+		// Day 4 of the chronological plan is Genesis 10 and then Job; a
+		// canonical one is four more chapters of Genesis.
+		cy.get("#planDays [data-cy='planDay']").eq(3).should(
 			"contain",
-			"Genesis 49, 50",
+			"Genesis 10",
 		);
-		cy.get("#planDays [data-cy='planDay']").eq(15).should("contain", "Job 1");
-		// Started in the past, so today falls inside it - and is on day 16.
-		cy.get("#planDays .plan-day-today").should("contain", "Day 16");
+		cy.get("#planDays [data-cy='planDay']").eq(3).should("contain", "Job 1");
+		// Started in the past, so today falls inside it - and is on day 4.
+		cy.get("#planDays .plan-day-today").should("contain", "Day 4");
 	});
 
 	it("ignores an order or a start date the hash gets wrong", () => {
@@ -702,7 +697,7 @@ describe("reading plans", () => {
 		});
 	});
 
-	it("a chronological plan reads the same chapters in the app's book order", () => {
+	it("a chronological plan reads the chapters in the index's order", () => {
 		cy.window().then((win) => {
 			const plan = win.planById("bible-1-year");
 			const canonical = win
@@ -711,15 +706,65 @@ describe("reading plans", () => {
 			const chronological = win
 				.planChapterList(plan, "chronological")
 				.map((c) => c.slug + ":" + c.chapter);
-			// Chronological changes the order of the books, never which chapters
-			// a plan covers, so a reader on either setting reads all 1189.
+			// The index's order covers every chapter once, so a chronological
+			// plan reads the same 1189 a canonical one does - the two differ only
+			// in when each chapter comes round.
 			expect(chronological.length).to.eq(1189);
+			expect(new Set(chronological).size).to.eq(1189);
 			expect([...canonical].sort()).to.deep.eq([...chronological].sort());
+			expect(win.planChronoChapters.length).to.eq(1189);
+
+			// And it is the index's order, not the order of the books: Psalm 51 is
+			// a superscription group of its own there, sitting between 2 Samuel 12
+			// and 13, and a plan that read whole books would clump all 150 Psalms
+			// together instead.
+			const at = win.planChronoChapters.findIndex(
+				(c) => c.slug == "psalm" && c.chapter == 51,
+			);
+			expect(at).to.be.greaterThan(0);
+			const around = win.planChronoChapters
+				.slice(at - 2, at + 3)
+				.map((c) => c.name + " " + c.chapter);
+			expect(around).to.deep.eq([
+				"2 Samuel 11",
+				"2 Samuel 12",
+				"Psalms 51",
+				"2 Samuel 13",
+				"2 Samuel 14",
+			]);
 			// Job is dated early in the Bible, so it comes before Exodus here.
 			const job = chronological.indexOf("job:1");
 			const exodus = chronological.indexOf("exodus:1");
 			expect(job).to.be.lessThan(exodus);
-			expect(win.planChronoBookSlugs).to.have.length(66);
+		});
+	});
+
+	it("a chronological plan of the Psalms alone reads all 150 of them", () => {
+		openPlansPage();
+		cy.get("#plansNameInput").type("Psalms, in date order");
+		cy.get("[data-cy='plansBook-psalm']").check();
+		cy.get("input[name=plansPace][value=perDay]").check();
+		cy.get("[data-cy='plansOrderChronological']").click();
+		cy.get("[data-cy='plansSaveButton']").click();
+		cy.get("#plansOwnList [data-cy='planSeeEveryDay']").click();
+		cy.get("#planDays [data-cy='planDay']").should("have.length", 150);
+		// The index's order for the Psalms is their date order, and the
+		// superscription groups come first in it - Psalm 90 is the one dated
+		// earliest, and Psalm 51 is a group of its own - so a plan of the Songs
+		// alone does not read 1 to 150.
+		cy.get("#planDays [data-cy='planDay']")
+			.first()
+			.should("contain", "Psalm 90");
+		cy.get("#planDays [data-cy='planDay']").eq(12).should("contain", "Psalm 51");
+		cy.window().then((win) => {
+			const plan = win.allPlans().find((candidate) => candidate.custom);
+			const chapters = win
+				.planChapterList(plan, "chronological")
+				.map((c) => c.chapter);
+			expect(chapters.length).to.eq(150);
+			expect([...new Set(chapters)].sort((a, b) => a - b)).to.deep.eq(
+				Array.from({ length: 150 }, (_, i) => i + 1),
+			);
 		});
 	});
 

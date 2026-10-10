@@ -230,14 +230,23 @@ A plan with more days than chapters - the Gospels spread over a year - has days
 with nothing in them, and the card has to be able to say so.
 
 `order` is the subscription's, not the plan's: the same plan read canonically by
-one reader and chronologically by another stays right for both. Both orders take
-the chapters of each book from `books.js` and differ only in the order the books
-come in, because `chronoChapters.json` is a reading order for the *index*, not
-for the chapter list: its numbering is four chapters short of Leviticus, nine
-long of 2 Kings, and the Psalms are renumbered into superscription groups, and a
-plan that skipped chapters would be no plan at all. `plans.js` fetches that file
-for the book order and waits for it (`whenPlanDataReady()`) before rendering,
-rather than depending on `chapter.html` having fetched it first.
+one reader and chronologically by another stays right for both. A chronological
+plan reads the **index's** sequence, chapter by chapter, not a book order with
+the chapters inside it: `plans.js` flattens `chronoChapters.json` the same way
+the index walks it, so Psalm 51 stands between 2 Samuel 12 and 13 and the Songs
+stand after Proverbs, as they do there. Reading whole books in that order would
+have been the same 1189 chapters in a different sequence, which is not the same
+thing to read.
+
+That file is hand-kept and has three faults, which `planChronoBuild()` repairs
+rather than passing on: twenty-one chapters are listed twice (the tail of 2
+Kings and 2 Chronicles, and Psalms 46-48 and 74), and six are missing (Leviticus
+24-27, Jeremiah 51-52). A repeat is dropped in favour of the first mention, and
+a missing chapter is put back at the end of its book's run, so a chronological
+plan reads the same 1189 chapters a canonical one does - once each, which is what
+a spec asserts. A plan over part of the Bible keeps the index's interleaving: the
+Psalms alone are read 90, 59, 52, 34, 56 ... because that is their date order,
+not 1 to 150.
 
 ## Cache-busting rule (IMPORTANT)
 
