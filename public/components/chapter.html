@@ -40,6 +40,11 @@
 	var chronoIconSvg =
 	'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
 
+	// The mark for a chapter being read through a plan. Drawn by plans.js and
+	// guarded here, because the chapter component does not otherwise depend on
+	// it being loaded.
+	var chapterPlanIcon = typeof planIconSvg != "undefined" ? planIconSvg : "";
+
 	function applySettings() {
 		// Words of Christ (red letter)
 		document.body.classList.toggle("woc-off", !settings.woc);
@@ -405,14 +410,16 @@
 			" (<span class='version'></span>)<span class='version-shared' title='These settings came from a shared link' style='display: none'> shared</span>";
 				chapter.innerHTML = addArrows(text, title);
 				// A chapter reached through a plan says which plan and which day
-				// of it, because the arrows either side are following the plan
-				// rather than the Bible.
-				if (typeof planReadingNote == "function") {
-					var planNote = planReadingNote();
-					var chapterText = document.getElementById("chapterText");
-					if (planNote && chapterText)
-						chapterText.parentNode.insertBefore(planNote, chapterText);
-				}
+				// of it, and marks the arrows with an open book, because they
+				// follow the plan rather than the Bible. The mark is set per
+				// chapter rather than by the settings, since the reading under
+				// way changes with every one of them.
+				var planNote =
+					typeof planReadingNote == "function" ? planReadingNote() : null;
+				var chapterText = document.getElementById("chapterText");
+				if (planNote && chapterText)
+					chapterText.parentNode.insertBefore(planNote, chapterText);
+				document.body.classList.toggle("plan-nav", !!planNote);
 				applySettings();
 				applyWordStudyLinks(book ? book.slug : null, chapterNum);
 				applyChapterHighlight(pendingHighlight);
@@ -500,6 +507,7 @@ fireEvent({
 					<path d="M15.41 16.58L10.83 12L15.41 7.41L14 6L8 12L14 18L15.41 16.58Z" fill="currentColor"/>
 				</svg>
 <span class="chrono-corner">${chronoIconSvg}</span>
+<span class="plan-corner">${chapterPlanIcon}</span>
 			</button>
 			<div id="chapterTitle"><span class="title-rule"></span><span class="title-text">${title}</span><span class="title-rule"></span></div>
 			<button data-cy="chapterRight" onclick="moveChapter(1)" aria-label="Next chapter">
@@ -507,6 +515,7 @@ fireEvent({
 					<path d="M8.59 16.58L13.17 12L8.59 7.41L10 6L16 12L10 18L8.59 16.58Z" fill="currentColor"/>
 				</svg>
 				<span class="chrono-corner">${chronoIconSvg}</span>
+<span class="plan-corner">${chapterPlanIcon}</span>
 			</button>
 		</div>`;
 

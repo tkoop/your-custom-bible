@@ -1809,6 +1809,26 @@ body.chrono-nav .chapter-nav button .chrono-corner {
 	display: flex;
 }
 
+/* The same corner, marking a chapter being read through a plan. Only one of
+   the two shows at a time: while a plan has the arrows, they follow the plan,
+   so the clock would be describing something else. */
+.chapter-nav button .plan-corner {
+	display: none;
+	position: absolute;
+	bottom: 3px;
+	right: 3px;
+	color: var(--gold);
+	pointer-events: none;
+}
+
+body.plan-nav .chapter-nav button .plan-corner {
+	display: flex;
+}
+
+body.chrono-nav.plan-nav .chapter-nav button .chrono-corner {
+	display: none;
+}
+
 .chapter-nav button:hover {
 	border-color: var(--primary);
 	color: var(--primary);

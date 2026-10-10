@@ -209,6 +209,13 @@ in `loadThisChapter()` does not throw it away. Any other way into a chapter is
 the reader choosing one, so it drops the plan: the note is what tells them why
 the arrows are behaving, and its absence is what tells them they have left.
 
+The arrows carry a mark for it, the way they do in chronological order: an open
+book in the corner of each, which is the Reading Plans page's own icon. It is
+`body.plan-nav`, set per chapter rather than by the settings, because the reading
+under way changes with every chapter and the clock's mark comes from the gear
+menu. Only one mark shows at a time - while a plan has the arrows they follow
+the plan, so a clock in the corner would be describing something else.
+
 **Non-ASCII in a `public/*.js` file reaches the browser mangled.** Those are
 `<script src>` tags, and `index.html` declares `<meta name="encoding">`, which is
 not the `charset` the spec wants, so the file is decoded with whatever the
@@ -245,7 +252,7 @@ Browsers cache this app's static assets aggressively:
 file under `public/` whose content changed.** Increment the number each time:
 
 - Start/raise any resource that has no version param yet (add `?version=1`).
-- `style.css` is currently at `?version=57`; leave it unless it changes.
+- `style.css` is currently at `?version=58`; leave it unless it changes.
 
 Files involved (all referenced from `public/index.html`):
 

@@ -438,6 +438,12 @@ function planIsSubscribed(plan) {
 
 // ---------- Reading a plan ----------
 
+// The mark in the corner of the chapter arrows, the same job the clock does in
+// chronological order: saying what the arrows are about to do rather than only
+// what they look like. An open book, which is the Reading Plans page's own icon.
+var planIconSvg =
+	'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5z"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5z"/></svg>';
+
 // The day a chapter was opened from, so the arrows either side of it carry on
 // through that day's reading rather than round the Bible. Only the day is
 // remembered: the reader opened a chapter, not a plan.

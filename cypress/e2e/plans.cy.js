@@ -308,6 +308,63 @@ describe("reading plans", () => {
 		cy.get("[data-cy='planReadingNote']").should("not.exist");
 	});
 
+	it("marks the arrows while the plan has them, and takes the mark off after", () => {
+		openPlansPage();
+		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planStartDate']")
+			.clear()
+			.type(daysAgo(10));
+		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planSubscribe']").click();
+		cy.get("#brand").click();
+		cy.get("#homePlans [data-cy='homePlanRead']").click();
+
+		// The open book sits in the corner of both arrows, as the clock does in
+		// chronological order, saying what the arrows are about to do.
+		cy.get("body").should("have.class", "plan-nav");
+		cy.get("[data-cy='chapterLeft'] .plan-corner").should("be.visible");
+		cy.get("[data-cy='chapterRight'] .plan-corner").should("be.visible");
+		cy.get("[data-cy='chapterLeft'] .plan-corner svg").should("exist");
+		cy.get("[data-cy='chapterRight'] .plan-corner svg").should("exist");
+
+		// Stepping off the end of the day gives the arrows back to the Bible, so
+		// the mark goes with them.
+		cy.get("[data-cy='chapterRight']:first").click();
+		cy.get("[data-cy='chapterRight']:first").click();
+		cy.get("[data-cy='chapterRight']:first").click();
+		cy.get("#chapter").should("contain", "Genesis 36");
+		cy.get("body").should("not.have.class", "plan-nav");
+		cy.get("[data-cy='chapterRight'] .plan-corner").should("not.be.visible");
+	});
+
+	it("shows the plan mark and not the clock while a plan has the arrows", () => {
+		openPlansPage();
+		cy.get("#brand").click();
+		cy.openChapter("Genesis", "1");
+		// The reader's own chronological setting, so the clock is on the arrows.
+		cy.get("#gearIcon").click();
+		cy.get("#settingsDropdown").should("be.visible");
+		cy.get("#settingsDropdown").contains("Advanced").click();
+		cy.get("#advancedDropdown").should("be.visible");
+		cy.get("#advancedDropdown input[data-value=order]").check();
+		cy.get("#chapter").should("be.visible");
+		cy.get("body").should("have.class", "chrono-nav");
+		cy.get("[data-cy='chapterRight'] .chrono-corner").should("be.visible");
+		cy.get("[data-cy='chapterRight'] .plan-corner").should("not.be.visible");
+
+		// Into a plan, and the clock gives way. Both marks would fit in the
+		// corner, but the arrows follow the plan now, so a clock there would be
+		// describing something else.
+		cy.get("#brand").click();
+		openPlansPage();
+		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planSubscribe']").click();
+		cy.get("#brand").click();
+		cy.get("#homePlans [data-cy='homePlanRead']").click();
+		cy.get("[data-cy='planReadingNote']").should("be.visible");
+		cy.get("body").should("have.class", "plan-nav");
+		cy.get("body").should("have.class", "chrono-nav");
+		cy.get("[data-cy='chapterRight'] .plan-corner").should("be.visible");
+		cy.get("[data-cy='chapterRight'] .chrono-corner").should("not.be.visible");
+	});
+
 	it("walks a chronological plan in the plan's order, not the Bible's", () => {
 		openPlansPage();
 		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planOrderSelect']").select(
