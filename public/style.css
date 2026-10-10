@@ -527,6 +527,32 @@ a:hover {
 	margin: 6px 4px;
 }
 
+/* The icon in front of each menu row. Fixed width so the labels line up with
+   each other however wide a name is, and stroke-only so it takes the row's
+   colour in both themes without a second set of paths. The rows carrying one
+   draw their contents together at the left rather than at either end, which is
+   what the menu's own rule does for the rows that hold a control. */
+#dropdown > div.menu-item {
+	justify-content: flex-start;
+	gap: 12px;
+}
+
+#dropdown .menu-icon {
+	flex: none;
+	width: 19px;
+	height: 19px;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 1.7;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	opacity: 0.8;
+}
+
+#dropdown > div.menu-item:hover .menu-icon {
+	opacity: 1;
+}
+
 #dropdown .buttonHolder,
 #settingsDropdown .buttonHolder,
 #advancedDropdown .buttonHolder {

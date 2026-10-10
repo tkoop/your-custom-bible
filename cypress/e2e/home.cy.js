@@ -28,6 +28,40 @@ describe("home page", () => {
 		cy.location("hash").should("eq", "#");
 	});
 
+	it("every menu row carries an icon and its name", () => {
+		cy.get("#menuIcon").click();
+		cy.get("#dropdown").should("be.visible");
+		cy.get("#dropdown .menu-item").should("have.length", 7);
+		cy.get("#dropdown .menu-item").each(($row) => {
+			// One icon, drawn rather than fetched, and out of the way of a
+			// screen reader - the name beside it is what is read.
+			cy.wrap($row).find("svg.menu-icon").should("have.length", 1);
+			cy.wrap($row).find("svg").should("have.attr", "aria-hidden", "true");
+			cy.wrap($row)
+				.find("span")
+				.should("have.length", 1)
+				.and("not.be.empty");
+			cy.wrap($row).find("span").invoke("text").should("match", /\S/);
+		});
+		// The icon adds nothing to the row's text, so the menu still reads as
+		// the list of pages it always was.
+		cy.get("#dropdown .menu-item span").then(($labels) => {
+			expect($labels.toArray().map((s) => s.textContent)).to.deep.eq([
+				"Home",
+				"Index",
+				"Chapter of the Day",
+				"Reading Plans",
+				"History",
+				"Search",
+				"About",
+			]);
+		});
+		// Each row still goes where its name says.
+		cy.get("#dropdown .menu-item").contains("Reading Plans").click();
+		cy.get("#plans").should("be.visible");
+		cy.location("hash").should("eq", "#plans");
+	});
+
 	it("logo goes home", () => {
 		cy.get("#menuIcon").click();
 		cy.get("#dropdown div").contains("Index").click();
