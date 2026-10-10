@@ -225,12 +225,19 @@
 		timeoutId = setTimeout(nextWord, delay);
 	}
 
+	// The menus are where the reader is opened from, so the click that opens it
+	// is also a click outside the reader: left in, it dismisses the reader the
+	// instant it appears. The advanced menu is listed alongside the gear menu
+	// because that is where the item lives.
 	document.addEventListener("click", () => {
 		if (event.target.closest("#dropdown")) {
 			return;
 		}
 
-		if (event.target.closest("#settingsDropdown")) {
+		if (
+			event.target.closest("#settingsDropdown") ||
+			event.target.closest("#advancedDropdown")
+		) {
 			return;
 		}
 
