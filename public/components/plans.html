@@ -305,7 +305,20 @@ if (state.startsIn) {
 			actions.appendChild(read);
 		}
 
-var drop = plansEl("button", "standardButton", "Unsubscribe");
+// The whole plan, laid out from this subscription's own day and order - which
+		// is not the plan's when a reader is on one plan from two different days,
+		// so the link carries them rather than leaving the page to work them out.
+		if (plan) {
+			actions.appendChild(
+				plansSeeEveryDayLink(
+					plan,
+					subscriptionOrder(subscription),
+					subscription.start,
+				),
+			);
+		}
+
+		var drop = plansEl("button", "standardButton", "Unsubscribe");
 		drop.setAttribute("data-cy", "planUnsubscribe");
 		drop.onclick = function () {
 			unsubscribeFromPlan(subscription.id);
@@ -353,6 +366,28 @@ function planPageHref(plan, order, start) {
 		"&start=" +
 		encodeURIComponent(start || todayDateString())
 	);
+}
+
+// "See every day", from a plan row or from a subscription to one. Both carry
+// the order and the start date they are standing at, so the page shows the
+// schedule as this reader would meet it rather than the plan's defaults: for a
+// subscription those are its own, which is not the same as the plan's when a
+// reader is on a plan twice from different days.
+//
+// The order and the start are read when the link is written and again on the
+// way through, so a row whose controls the reader has since changed still goes
+// to what they are looking at now.
+function plansSeeEveryDayLink(plan, order, start) {
+	var readOrder = typeof order == "function" ? order : function () { return order; };
+	var readStart = typeof start == "function" ? start : function () { return start; };
+	var see = plansEl("a", "plans-row-link", "See every day");
+	see.setAttribute("data-cy", "planSeeEveryDay");
+	see.href = planPageHref(plan, readOrder(), readStart());
+	see.onclick = function () {
+		location.hash = planPageHref(plan, readOrder(), readStart());
+		return false;
+	};
+	return see;
 }
 
 // ---------- The plans on offer ----------
@@ -421,17 +456,17 @@ function plansRenderPlanRow(plan, extra) {
 	// which is the only way to see the shape of a plan before committing to it.
 	// The order and the start date go with it, so the page shows what
 	// subscribing here would give rather than what the plan falls back to.
-	var see = plansEl("a", "plans-row-link", "See every day");
-	see.href = planPageHref(plan, order.value, start.value);
-	see.setAttribute("data-cy", "planSeeEveryDay");
-	see.onclick = function () {
-		// Written out again on the way: the reader may have set the order or the
-		// date since the row was built, and the page is worth what they are
-		// looking at now rather than what it was when the row was made.
-		location.hash = planPageHref(plan, order.value, start.value);
-		return false;
-	};
-	actions.appendChild(see);
+	actions.appendChild(
+		plansSeeEveryDayLink(
+			plan,
+			function () {
+				return order.value;
+			},
+			function () {
+				return start.value || todayDateString();
+			},
+		),
+	);
 
 	if (extra) extra(actions, plan);
 
@@ -522,9 +557,12 @@ function plansRenderPlanRow(plan, extra) {
 			["All", "None"].forEach(function (which) {
 				var button = plansEl("button", "plans-choice", which);
 				button.type = "button";
+				button.setAttribute("data-cy", "plansBooks-" + which);
 				button.onclick = function () {
+					// The boxes are marked with the group they belong to, so one
+					// testament can be set without touching the other.
 					container
-						.querySelectorAll("[data-group='" + index + "'] input")
+						.querySelectorAll("input[data-group='" + index + "']")
 						.forEach(function (checkbox) {
 							checkbox.checked = which == "All";
 						});

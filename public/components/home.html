@@ -121,7 +121,7 @@
 	// reader is today rather than keeping a log of what they have read: nothing
 	// to fall out of step with the date, and a day missed needs no catching up.
 	function homePlanCard(subscription) {
-		var plan = planSubscriptionName(subscription);
+		var plan = subscriptionPlan(subscription);
 		var state = subscriptionState(subscription);
 		var card = document.createElement("div");
 		card.className = "plan-card";
@@ -131,7 +131,7 @@
 		head.className = "plan-card-head";
 		var name = document.createElement("span");
 		name.className = "plan-card-name";
-		name.textContent = plan;
+		name.textContent = planSubscriptionName(subscription);
 		head.appendChild(name);
 		if (subscriptionOrder(subscription) == "chronological") {
 			var tag = document.createElement("span");
@@ -203,6 +203,28 @@
 			};
 			actions.appendChild(read);
 		}
+
+		// The whole plan, laid out from the day this subscription began in the
+		// order it is being read. A plan can be subscribed to more than once, so
+		// the link carries those rather than leaving the page to guess.
+		if (plan) {
+			var see = document.createElement("a");
+			see.className = "home-plan-link";
+			see.setAttribute("data-cy", "homePlanSeeEveryDay");
+			see.textContent = "See every day";
+			see.href =
+				"#plan/" +
+				plan.id +
+				"?order=" +
+				encodeURIComponent(subscriptionOrder(subscription)) +
+				"&start=" +
+				encodeURIComponent(subscription.start);
+			see.onclick = function () {
+				return true;
+			};
+			actions.appendChild(see);
+		}
+
 		if (actions.childNodes.length) card.appendChild(actions);
 
 		return card;

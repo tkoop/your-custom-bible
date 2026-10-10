@@ -198,6 +198,45 @@ describe("reading plans", () => {
 		);
 	});
 
+	it("offers every day of a plan the reader is subscribed to", () => {
+		openPlansPage();
+		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planStartDate']")
+			.clear()
+			.type(daysAgo(10));
+		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planSubscribe']").click();
+		// On the subscription row as well as the plan row, and carrying that
+		// subscription's own start date rather than the row's controls.
+		cy.get("#plansSubscriptionList [data-cy='planSeeEveryDay']")
+			.should("have.length", 1);
+		cy.get("#plansSubscriptionList [data-cy='planSeeEveryDay']").click();
+		cy.location("hash").should(
+			"eq",
+			"#plan/bible-1-year?order=canonical&start=" + daysAgo(10),
+		);
+		cy.get("#planDays [data-cy='planDay']").first().should("contain", dayLabel(10));
+		cy.get("#planDays .plan-day-today").should("contain", "Day 11");
+	});
+
+	it("offers every day of a subscribed plan from the home page too", () => {
+		openPlansPage();
+		cy.get("[data-cy='planRow-psalms-1-chapter-a-day'] [data-cy='planStartDate']")
+			.clear()
+			.type(daysAgo(4));
+		cy.get("[data-cy='planRow-psalms-1-chapter-a-day'] [data-cy='planSubscribe']").click();
+		cy.get("#brand").click();
+		cy.get("#homePlans [data-cy='homePlanSeeEveryDay']").click();
+		cy.location("hash").should(
+			"eq",
+			"#plan/psalms-1-chapter-a-day?order=canonical&start=" + daysAgo(4),
+		);
+		cy.get("#plan").should("contain", "Subscribed");
+		// Started four days ago, so the first day is Psalm 1 and today is Psalm 5.
+		cy.get("#planDays [data-cy='planDay']").first().should("contain", dayLabel(4));
+		cy.get("#planDays [data-cy='planDay']").first().should("contain", "Psalm 1");
+		cy.get("#planDays .plan-day-today").should("contain", "Day 5");
+		cy.get("#planDays .plan-day-today").should("contain", "Psalm 5");
+	});
+
 	it("lays out a plan nobody is on from today, rest days and all", () => {
 		openPlansPage();
 		cy.get("[data-cy='planRow-gospels-1-year'] [data-cy='planSeeEveryDay']").click();
@@ -480,6 +519,54 @@ describe("reading plans", () => {
 		// Chronological order puts Job second, so the first day of this plan
 		// still starts at Genesis 1.
 		cy.get("#plansSubscriptionList").should("contain", "Genesis 1-3");
+	});
+
+	it("checks and unchecks a whole testament at a time", () => {
+		openPlansPage();
+		cy.get("#plansCreateSection").scrollIntoView();
+		cy.get("[data-cy='plansFormError']").should("not.be.visible");
+		// The Old Testament is 39 books, the New Testament 27.
+		cy.get("#plansBookGroups [data-cy^='plansBook-']:checked").should(
+			"have.length",
+			0,
+		);
+		cy.get("#plansBookGroups .plans-book-group")
+			.first()
+			.contains("All")
+			.click();
+		cy.get("#plansBookGroups [data-cy^='plansBook-']:checked").should(
+			"have.length",
+			39,
+		);
+		cy.get("[data-cy='plansBook-genesis']").should("be.checked");
+		cy.get("[data-cy='plansBook-malachi']").should("be.checked");
+		cy.get("[data-cy='plansBook-matthew']").should("not.be.checked");
+		cy.get("[data-cy='plansSummary']").should(
+			"contain",
+			"39 books",
+		);
+		cy.get("[data-cy='plansFormError']").should("not.be.visible");
+
+		// The other testament is left alone, and can be added or cleared itself.
+		cy.get("#plansBookGroups .plans-book-group")
+			.last()
+			.contains("All")
+			.click();
+		cy.get("#plansBookGroups [data-cy^='plansBook-']:checked").should(
+			"have.length",
+			66,
+		);
+		cy.get("#plansBookGroups .plans-book-group")
+			.first()
+			.contains("None")
+			.click();
+		cy.get("#plansBookGroups [data-cy^='plansBook-']:checked").should(
+			"have.length",
+			27,
+		);
+		cy.get("[data-cy='plansBook-genesis']").should("not.be.checked");
+		cy.get("[data-cy='plansBook-revelation']").should("be.checked");
+		cy.get("[data-cy='plansSummary']").should("contain", "27 books");
 	});
 
 	it("asks for a name and at least one book before a plan can be saved", () => {

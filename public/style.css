@@ -1688,7 +1688,25 @@ div.index-chapters a:active {
 }
 
 .plan-card-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px;
 	margin-top: 10px;
+}
+
+/* The whole plan from this subscription, beside the button that opens today. */
+.home-plan-link {
+	font-family: var(--font-ui);
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: var(--primary);
+	text-decoration: none;
+	border-bottom: 1px solid var(--border);
+}
+
+.home-plan-link:hover {
+	border-color: var(--primary);
 }
 
 .plan-card-actions .home-button {
