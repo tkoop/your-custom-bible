@@ -238,15 +238,13 @@ stand after Proverbs, as they do there. Reading whole books in that order would
 have been the same 1189 chapters in a different sequence, which is not the same
 thing to read.
 
-That file is hand-kept and has three faults, which `planChronoBuild()` repairs
-rather than passing on: twenty-one chapters are listed twice (the tail of 2
-Kings and 2 Chronicles, and Psalms 46-48 and 74), and six are missing (Leviticus
-24-27, Jeremiah 51-52). A repeat is dropped in favour of the first mention, and
-a missing chapter is put back at the end of its book's run, so a chronological
-plan reads the same 1189 chapters a canonical one does - once each, which is what
-a spec asserts. A plan over part of the Bible keeps the index's interleaving: the
-Psalms alone are read 90, 59, 52, 34, 56 ... because that is their date order,
-not 1 to 150.
+That file is hand-kept and lists each of the 1189 chapters exactly once in
+chronological order, and it is the single source every chronological feature
+reads: `plans.js` flattens it for reading plans, `chapter.html` walks it for
+the index page's chronological view and for the chronological chapter arrows.
+A plan over the whole Bible reads the Songs where the index puts them, and a
+plan over the Psalms alone reads them in date order (90, 59, 52, 34, 56 …)
+rather than 1 to 150.
 
 ## Cache-busting rule (IMPORTANT)
 

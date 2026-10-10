@@ -156,9 +156,9 @@ function planChronoBuild(entries) {
 		if (!book) return;
 		entry.chapter.forEach(function (number) {
 			var key = book.slug + ":" + number;
-			// Twenty-one chapters are listed twice in that file - the tail of 2
-			// Kings and 2 Chronicles, and four of the Psalms - so the first
-			// mention is the one that counts, and a plan reads no chapter twice.
+			// The file is maintained to list each chapter once; this keeps the
+			// first mention if a chapter is ever listed twice, so a plan reads
+			// no chapter twice.
 			if (seen[key]) return;
 			seen[key] = true;
 			chapters.push({
@@ -169,33 +169,11 @@ function planChronoBuild(entries) {
 		});
 	});
 
-	// Six chapters the file leaves out altogether - Leviticus 24-27 and
-	// Jeremiah 51-52 - go back in at the end of their book's run, so that a
-	// chronological plan reads the same 1189 chapters a canonical one does.
-	books.forEach(function (book) {
-		var missing = [];
-		for (var number = 1; number <= book.chapters; number++) {
-			if (!seen[book.slug + ":" + number]) missing.push(number);
-		}
-		if (missing.length == 0) return;
-		var last = -1;
-		chapters.forEach(function (chapter, index) {
-			if (chapter.slug == book.slug) last = index;
-		});
-		if (last == -1) return;
-		chapters = chapters.slice(0, last + 1).concat(
-			missing.map(function (number) {
-				return { name: book.name, slug: book.slug, chapter: number };
-			}),
-			chapters.slice(last + 1),
-		);
-	});
-
 	planChronoChapters = chapters;
 	return chapters;
 }
 
-var planChronoReady = fetch("chronoChapters.json?version=1")
+var planChronoReady = fetch("chronoChapters.json?version=2")
 	.then(function (response) {
 		return response.json();
 	})
