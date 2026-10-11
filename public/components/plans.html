@@ -273,8 +273,17 @@ if (state.startsIn) {
 			};
 			actions.appendChild(again);
 		} else if (state.chapters.length) {
-			var read = plansEl("button", "standardButton plans-primary", "Read today");
+			var read = document.createElement("button");
 			read.setAttribute("data-cy", "planReadToday");
+			// Dark blue when today's chapters are unread, muted "Read again"
+			// once they have been, so a day still to read stands out.
+			if (planDayRead(state.chapters)) {
+				read.className = "standardButton plan-read-again";
+				read.textContent = "Read again";
+			} else {
+				read.className = "standardButton plans-primary";
+				read.textContent = "Read today";
+			}
 			read.onclick = function () {
 				readPlanDay(subscription);
 			};

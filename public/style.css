@@ -1059,8 +1059,8 @@ div.index-chapters a:active {
 	box-shadow: var(--shadow);
 }
 
-// A day that has already been read: the button steps back to a muted
-// outline so an unread day's blue button stands out.
+/* A day that has already been read: the button steps back to a muted
+   outline so an unread day's blue button stands out. */
 .home-button-secondary {
 	border-color: var(--border);
 	background-color: var(--surface);
@@ -1294,6 +1294,19 @@ div.index-chapters a:active {
 	border-color: var(--primary-dark);
 	background-color: var(--primary-dark);
 	color: var(--background);
+}
+
+/* A day that has already been read: the button steps back to a muted
+   outline so an unread day's blue button stands out. */
+.plan-read-again {
+	border-color: var(--border);
+	background-color: var(--surface);
+	color: var(--text-secondary);
+}
+
+.plan-read-again:hover {
+	border-color: var(--primary);
+	color: var(--primary);
 }
 
 .plans-order-select,
