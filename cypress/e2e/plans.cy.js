@@ -463,7 +463,6 @@ it("shows the plan mark and not the clock while a plan has the arrows", () => {
 			"#plan/bible-1-year?order=chronological&start=" + daysAgo(3),
 		);
 		cy.get("#plan").should("contain", "Chronological");
-		cy.get("#plan").should("contain", "As you have it set");
 		cy.get("#plan").should("contain", "as chosen on the plans page");
 		cy.get("#plan").should("contain", dayLabel(3));
 		// Day 4 of the chronological plan is Genesis 10 and then Job; a

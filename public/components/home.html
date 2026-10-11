@@ -195,9 +195,16 @@
 			actions.appendChild(again);
 		} else if (state.chapters.length) {
 			var read = document.createElement("button");
-			read.className = "home-button";
 			read.setAttribute("data-cy", "homePlanRead");
-			read.textContent = "Read";
+			// Today's chapters have already been read: the button says so and
+			// steps back to a secondary colour, so an unread day stands out.
+			if (planDayRead(state.chapters)) {
+				read.className = "home-button home-button-secondary";
+				read.textContent = "Read again";
+			} else {
+				read.className = "home-button";
+				read.textContent = "Read";
+			}
 			read.onclick = function () {
 				readPlanDay(subscription);
 			};
@@ -241,10 +248,13 @@
 		var subscriptions = planSubscriptions();
 		el.innerHTML = "";
 		if (subscriptions.length == 0) {
-			var empty = document.createElement("p");
-			empty.className = "home-empty";
-			empty.textContent = "No plans yet.";
-			el.appendChild(empty);
+			// A block wrapper, not a flex item: the link below sizes to its text
+			// rather than stretching across the column.
+			var empty = document.createElement("div");
+			var emptyText = document.createElement("p");
+			emptyText.className = "home-empty";
+			emptyText.textContent = "No plans yet.";
+			empty.appendChild(emptyText);
 
 			var subscribe = document.createElement("a");
 			subscribe.className = "home-history-link";
@@ -255,7 +265,8 @@
 				fireEvent({ name: "showPage", page: "plans" });
 				return false;
 			};
-			el.appendChild(subscribe);
+			empty.appendChild(subscribe);
+			el.appendChild(empty);
 			return;
 		}
 		// A chronological plan needs the app's copy of the book order, which

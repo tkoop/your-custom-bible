@@ -38,11 +38,12 @@ describe("activity types", () => {
 		openActivityMenu();
 		cy.get("#advancedDropdown select#activity")
 			.find("option")
-			.should("have.length", 8)
+			.should("have.length", 9)
 			.then(($options) => {
 				expect($options.toArray().map((o) => o.textContent)).to.deep.eq([
 					"Default",
 					"COTD",
+					"Plan",
 					"Devotions",
 					"Bible Study",
 					"Church",
@@ -300,7 +301,7 @@ describe("activity types", () => {
 			["", "dark"].forEach((mode) => {
 				win.document.body.classList.toggle("dark", mode === "dark");
 				const colours = probeColours();
-				expect(Object.keys(colours).length, mode || "light").to.eq(8);
+				expect(Object.keys(colours).length, mode || "light").to.eq(9);
 				const shared = Object.keys(colours).filter((c) => colours[c].length > 1);
 				expect(shared, "reused colours in " + (mode || "light")).to.deep.eq([]);
 			});

@@ -7,6 +7,7 @@
 var ACTIVITY_TYPES = [
 	{ id: "default", label: "Default" },
 	{ id: "cotd", label: "COTD" },
+	{ id: "plan", label: "Plan" },
 	{ id: "devotions", label: "Devotions" },
 	{ id: "biblestudy", label: "Bible Study" },
 	{ id: "church", label: "Church" },

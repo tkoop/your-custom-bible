@@ -645,6 +645,11 @@ a:hover {
 	--activity-tint: rgb(30 86 168 / 0.14);
 }
 
+.act-plan {
+	--activity-color: #0d9488;
+	--activity-tint: rgb(13 148 136 / 0.14);
+}
+
 .act-devotions {
 	--activity-color: #2e7d32;
 	--activity-tint: rgb(46 125 50 / 0.14);
@@ -1052,6 +1057,22 @@ div.index-chapters a:active {
 	background-color: var(--primary-dark);
 	transform: translateY(-1px);
 	box-shadow: var(--shadow);
+}
+
+// A day that has already been read: the button steps back to a muted
+// outline so an unread day's blue button stands out.
+.home-button-secondary {
+	border-color: var(--border);
+	background-color: var(--surface);
+	color: var(--text-secondary);
+	box-shadow: none;
+}
+
+.home-button-secondary:hover {
+	border-color: var(--primary);
+	color: var(--primary);
+	transform: translateY(-1px);
+	box-shadow: var(--shadow-sm);
 }
 
 .home-continue {

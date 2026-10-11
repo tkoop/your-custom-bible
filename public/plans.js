@@ -506,6 +506,10 @@ function loadPlanChapter(chapter) {
 // rendered afterwards and the note about the plan is written as it renders.
 function openPlanChapters(plan, order, chapters, day) {
 	if (!plan || !chapters || chapters.length == 0) return false;
+	// Reading from a plan is its own activity, recorded in the history so a
+	// session of following a plan can be told apart at a glance - the way COTD
+	// does from the Chapter of the Day button.
+	fireEvent({ name: "setSetting", setting: "activity", value: "plan" });
 	armPlanReading(plan, order, chapters, day);
 	loadPlanChapter(chapters[0]);
 	return true;
@@ -549,6 +553,33 @@ function followPlanChapter(delta) {
 	armPlanReading(context.plan, context.order, context.chapters, context.day);
 	loadPlanChapter(context.chapters[next]);
 	return true;
+}
+
+// Whether the chapters of a plan's day have already been read: every one of
+// them is in the browse history, so the reader has already been through today.
+function planDayRead(chapters) {
+	if (!chapters || !chapters.length) return false;
+	for (var i = 0; i < settings.browseHistory.length; i++) {
+		var entry = settings.browseHistory[i];
+		if (!entry || !entry.slug) continue;
+		for (var j = 0; j < chapters.length; j++) {
+			if (
+				entry.slug == chapters[j].slug &&
+				parseInt(entry.chapter) == parseInt(chapters[j].chapter)
+			) {
+				chapters[j]._read = true;
+				break;
+			}
+		}
+	}
+	var allRead = true;
+	for (var k = 0; k < chapters.length; k++) {
+		if (!chapters[k]._read) {
+			allRead = false;
+			break;
+		}
+	}
+	return allRead;
 }
 
 // Whether there is a step in this direction inside the plan's day: the left arrow

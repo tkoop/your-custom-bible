@@ -24,14 +24,14 @@
 
 	<section class="plans-section" id="plansOwnSection">
 		<div class="plans-section-head">
-			<h2>Your own plans</h2>
+			<h2>Your custom plans</h2>
 		</div>
 		<div id="plansOwnList" class="plans-list"></div>
 	</section>
 
 	<section class="plans-section" id="plansCreateSection">
 		<div class="plans-section-head">
-			<h2 id="plansCreateHeading">Create a plan</h2>
+			<h2 id="plansCreateHeading">Create a custom plan</h2>
 		</div>
 
 		<form id="plansForm" class="plans-form" onsubmit="return false;">
@@ -659,7 +659,7 @@ function plansResetForm() {
 		document.getElementById("plansDurationSelect").value = 365;
 		document.getElementById("plansPerDayInput").value = 1;
 		document.querySelector("input[name=plansPace][value=duration]").checked = true;
-		document.getElementById("plansCreateHeading").textContent = "Create a plan";
+		document.getElementById("plansCreateHeading").textContent = "Create a custom plan";
 		document.getElementById("plansSaveButton").textContent = "Save plan";
 		document.getElementById("plansCancelButton").style.display = "none";
 		plansFormError("");

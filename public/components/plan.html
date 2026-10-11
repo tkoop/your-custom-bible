@@ -162,11 +162,6 @@
 		if (planIsSubscribed(plan)) {
 			tags.appendChild(planPageEl("span", "plans-tag plans-tag-done", "Subscribed"));
 		}
-		// The hash was carrying an order and a start date, so this is the
-		// plan as the reader has it set on the list rather than as it stands.
-		if (found.chosen) {
-			tags.appendChild(planPageEl("span", "plans-tag", "As you have it set"));
-		}
 		title.appendChild(tags);
 
 		// Subscribe to the plan as it is laid out here - the order and the start
