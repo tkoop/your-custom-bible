@@ -10,7 +10,7 @@
 
 	<section class="plans-section" id="plansSubscriptionsSection">
 		<div class="plans-section-head">
-			<h2>Your plans</h2>
+			<h2>Your subscriptions</h2>
 		</div>
 		<div id="plansSubscriptionList" class="plans-list"></div>
 	</section>
@@ -44,30 +44,6 @@
 					maxlength="80"
 					autocomplete="off"
 				/>
-			</div>
-
-			<div class="plans-field">
-				<span class="plans-field-label">Order</span>
-				<div class="plans-order-choices" id="plansOrderChoices">
-					<button
-						type="button"
-						class="plans-choice selected"
-						data-order="canonical"
-						data-cy="plansOrderCanonical"
-						onclick="plansChooseOrder('canonical')"
-					>
-						Canonical
-					</button>
-					<button
-						type="button"
-						class="plans-choice"
-						data-order="chronological"
-						data-cy="plansOrderChronological"
-						onclick="plansChooseOrder('chronological')"
-					>
-						Chronological
-					</button>
-				</div>
 			</div>
 
 			<div class="plans-field">
@@ -368,7 +344,7 @@ function planPageHref(plan, order, start) {
 	);
 }
 
-// "See every day", from a plan row or from a subscription to one. Both carry
+// "View the plan", from a plan row or from a subscription to one. Both carry
 // the order and the start date they are standing at, so the page shows the
 // schedule as this reader would meet it rather than the plan's defaults: for a
 // subscription those are its own, which is not the same as the plan's when a
@@ -380,7 +356,7 @@ function planPageHref(plan, order, start) {
 function plansSeeEveryDayLink(plan, order, start) {
 	var readOrder = typeof order == "function" ? order : function () { return order; };
 	var readStart = typeof start == "function" ? start : function () { return start; };
-	var see = plansEl("a", "plans-row-link", "See every day");
+	var see = plansEl("a", "plans-row-link", "View the plan");
 	see.setAttribute("data-cy", "planSeeEveryDay");
 	see.href = planPageHref(plan, readOrder(), readStart());
 	see.onclick = function () {
@@ -447,8 +423,13 @@ function plansRenderPlanRow(plan, extra) {
 	subscribe.setAttribute("data-cy", "planSubscribe");
 	subscribe.onclick = function () {
 		// An empty date means the reader has cleared it rather than chosen
-		// one, and a subscription starts on some day - today being it.
-		subscribeToPlan(plan, order.value, start.value || todayDateString());
+		// one, and a subscription starts on some day - today being it. The list
+		// is re-read afterwards, so the new subscription is scrolled into view.
+		if (subscribeToPlan(plan, order.value, start.value || todayDateString())) {
+			var subs = document.getElementById("plansSubscriptionList");
+			if (subs && subs.lastChild)
+				subs.lastChild.scrollIntoView({ behavior: "smooth", block: "center" });
+		}
 	};
 	actions.appendChild(subscribe);
 
@@ -615,16 +596,12 @@ function plansRenderPlanRow(plan, extra) {
 	// one, so the summary can quote the same words the plan list will.
 	function plansDraftPlan() {
 		var slugs = plansSelectedBookSlugs();
-		var chosen = document.querySelector(
-			"#plansOrderChoices .plans-choice.selected",
-		);
 		var perDay = document.getElementById("plansPerDayInput");
 		var duration = document.getElementById("plansDurationSelect");
 		var draft = {
 			id: plansEditingId || "draft",
 			name: "",
 			books: slugs.length ? slugs : "all",
-			order: chosen ? chosen.dataset.order : "canonical",
 		};
 		if (plansPerDayChosen()) {
 			draft.pace = "perDay";
@@ -671,15 +648,6 @@ function plansRenderPlanRow(plan, extra) {
 		error.style.display = message ? "" : "none";
 	}
 
-	function plansChooseOrder(order) {
-		document
-			.querySelectorAll("#plansOrderChoices .plans-choice")
-			.forEach(function (button) {
-				button.classList.toggle("selected", button.dataset.order == order);
-			});
-		plansUpdateSummary();
-	}
-
 function plansResetForm() {
 		plansEditingId = null;
 		document.getElementById("plansNameInput").value = "";
@@ -691,7 +659,6 @@ function plansResetForm() {
 		document.getElementById("plansDurationSelect").value = 365;
 		document.getElementById("plansPerDayInput").value = 1;
 		document.querySelector("input[name=plansPace][value=duration]").checked = true;
-		plansChooseOrder("canonical");
 		document.getElementById("plansCreateHeading").textContent = "Create a plan";
 		document.getElementById("plansSaveButton").textContent = "Save plan";
 		document.getElementById("plansCancelButton").style.display = "none";
@@ -717,12 +684,11 @@ function plansResetForm() {
 			document.querySelector("input[name=plansPace][value=perDay]").checked = true;
 			document.getElementById("plansPerDayInput").value = plan.perDay;
 		} else {
-			document
-				.querySelector("input[name=plansPace][value=duration]")
-				.checked = true;
-			document.getElementById("plansDurationSelect").value = plan.days;
-		}
-		plansChooseOrder(planOrder(plan));
+		document
+			.querySelector("input[name=plansPace][value=duration]")
+			.checked = true;
+		document.getElementById("plansDurationSelect").value = plan.days;
+	}
 		document.getElementById("plansCreateHeading").textContent = "Edit plan";
 		document.getElementById("plansSaveButton").textContent = "Update plan";
 		document.getElementById("plansCancelButton").style.display = "";
@@ -744,16 +710,20 @@ function plansResetForm() {
 			return;
 		}
 		var draft = plansDraftPlan();
+		var newId = plansEditingId || nextCustomPlanId();
 		saveCustomPlan({
-			id: plansEditingId || nextCustomPlanId(),
+			id: newId,
 			name: name,
 			books: slugs,
-			order: draft.order,
 			pace: draft.pace,
 			days: draft.days,
 			perDay: draft.perDay,
 		});
 		plansResetForm();
+		// The list is re-read after the save, so the new plan is asked for by its
+		// id and scrolled into view in the list of the reader's own plans.
+		var newPlan = document.querySelector("[data-cy='planRow-" + newId + "']");
+		if (newPlan) newPlan.scrollIntoView({ behavior: "smooth", block: "center" });
 	}
 
 	// ---------- Rendering ----------

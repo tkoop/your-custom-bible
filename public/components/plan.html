@@ -159,18 +159,37 @@
 					schedule.length + (schedule.length == 1 ? " day" : " days"),
 				),
 			);
-			if (planIsSubscribed(plan)) {
-				tags.appendChild(planPageEl("span", "plans-tag plans-tag-done", "Subscribed"));
-			}
-			// The hash was carrying an order and a start date, so this is the
-			// plan as the reader has it set on the list rather than as it stands.
-			if (found.chosen) {
-				tags.appendChild(planPageEl("span", "plans-tag", "As you have it set"));
-			}
-			title.appendChild(tags);
+		if (planIsSubscribed(plan)) {
+			tags.appendChild(planPageEl("span", "plans-tag plans-tag-done", "Subscribed"));
+		}
+		// The hash was carrying an order and a start date, so this is the
+		// plan as the reader has it set on the list rather than as it stands.
+		if (found.chosen) {
+			tags.appendChild(planPageEl("span", "plans-tag", "As you have it set"));
+		}
+		title.appendChild(tags);
 
-			var back = planPageBackLink();
-			title.appendChild(back);
+		// Subscribe to the plan as it is laid out here - the order and the start
+		// date on display are the ones the subscription takes, so what the reader
+		// sees is what they get.
+		if (!planIsSubscribed(plan)) {
+			var subscribe = planPageEl("button", "standardButton plans-primary", "Subscribe");
+			subscribe.setAttribute("data-cy", "planPageSubscribe");
+			subscribe.onclick = function () {
+				if (subscribeToPlan(plan, found.order, found.start)) {
+					// The plans page is re-read on the way in, so the new
+					// subscription is scrolled into view there.
+					fireEvent({ name: "showPage", page: "plans" });
+					var subs = document.getElementById("plansSubscriptionList");
+					if (subs && subs.lastChild)
+						subs.lastChild.scrollIntoView({ behavior: "smooth", block: "center" });
+				}
+			};
+			title.appendChild(subscribe);
+		}
+
+		var back = planPageBackLink();
+		title.appendChild(back);
 
 			head.appendChild(title);
 			head.appendChild(

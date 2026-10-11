@@ -551,6 +551,17 @@ function followPlanChapter(delta) {
 	return true;
 }
 
+// Whether there is a step in this direction inside the plan's day: the left arrow
+// shows its mark only when the previous chapter is part of the reading, the right
+// only when the next one is - so an arrow does not promise a step it cannot take.
+function planHasStep(direction) {
+	if (!planReadingContext || !planReadingContext.chapters.length) return false;
+	var at = planReadingPosition(planReadingContext);
+	if (at == -1) return false;
+	var next = at + direction;
+	return next >= 0 && next < planReadingContext.chapters.length;
+}
+
 // What the chapter on screen is to the plan it was opened from. Without it the
 // arrows following the plan would look like a fault: on a chronological plan
 // the next chapter is not the next one in the Bible.

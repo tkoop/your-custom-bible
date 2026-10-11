@@ -1809,9 +1809,10 @@ body.chrono-nav .chapter-nav button .chrono-corner {
 	display: flex;
 }
 
-/* The same corner, marking a chapter being read through a plan. Only one of
-   the two shows at a time: while a plan has the arrows, they follow the plan,
-   so the clock would be describing something else. */
+/* The same corner, marking a chapter being read through a plan. It is shown
+   per arrow rather than for both at once: an arrow carries the mark only when
+   there is a step in that direction inside the plan's day, so it does not
+   promise a move the plan cannot make. */
 .chapter-nav button .plan-corner {
 	display: none;
 	position: absolute;
@@ -1821,11 +1822,16 @@ body.chrono-nav .chapter-nav button .chrono-corner {
 	pointer-events: none;
 }
 
-body.plan-nav .chapter-nav button .plan-corner {
+.chapter-nav button.plan-step-left .plan-corner,
+.chapter-nav button.plan-step-right .plan-corner {
 	display: flex;
 }
 
-body.chrono-nav.plan-nav .chapter-nav button .chrono-corner {
+/* A plan step in either direction hides the clock on that arrow, since the
+   arrows are following the plan and the clock would be describing something
+   else. Body prefixes the rule so it outranks the chrono-nav show rule below. */
+body .chapter-nav button.plan-step-left .chrono-corner,
+body .chapter-nav button.plan-step-right .chrono-corner {
 	display: none;
 }
 

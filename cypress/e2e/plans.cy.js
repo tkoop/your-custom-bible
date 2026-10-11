@@ -237,6 +237,32 @@ describe("reading plans", () => {
 		cy.get("#planDays .plan-day-today").should("contain", "Psalm 5");
 	});
 
+	it("offers a prominent Subscribe button on the plan page", () => {
+		openPlansPage();
+		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planSeeEveryDay']").click();
+		cy.get("#plan").should("be.visible");
+		// Not subscribed yet, so the button is there.
+		cy.get("[data-cy='planPageSubscribe']").should("be.visible");
+		cy.get("[data-cy='planPageSubscribe']").click();
+		// It subscribes with the order and start the page is showing, and takes
+		// the reader back to the list, where the plan is now on.
+		cy.get("#plans").should("be.visible");
+		cy.get("#plansSubscriptionList [data-cy='planSubscription']")
+			.should("have.length", 1)
+			.and("contain", "Read the whole Bible in a year");
+		cy.window().then((win) => {
+			expect(win.planSubscriptions()[0].start).to.eq(daysAgo(0));
+		});
+	});
+
+	it("hides the Subscribe button when the plan is already subscribed", () => {
+		openPlansPage();
+		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planSubscribe']").click();
+		cy.get("[data-cy='planRow-bible-1-year'] [data-cy='planSeeEveryDay']").click();
+		cy.get("#plan").should("contain", "Subscribed");
+		cy.get("[data-cy='planPageSubscribe']").should("not.exist");
+	});
+
 	it("lays out a plan nobody is on from today, rest days and all", () => {
 		openPlansPage();
 		cy.get("[data-cy='planRow-gospels-1-year'] [data-cy='planSeeEveryDay']").click();
@@ -317,25 +343,35 @@ describe("reading plans", () => {
 		cy.get("#brand").click();
 		cy.get("#homePlans [data-cy='homePlanRead']").click();
 
-		// The open book sits in the corner of both arrows, as the clock does in
-		// chronological order, saying what the arrows are about to do.
-		cy.get("body").should("have.class", "plan-nav");
-		cy.get("[data-cy='chapterLeft'] .plan-corner").should("be.visible");
-		cy.get("[data-cy='chapterRight'] .plan-corner").should("be.visible");
-		cy.get("[data-cy='chapterLeft'] .plan-corner svg").should("exist");
-		cy.get("[data-cy='chapterRight'] .plan-corner svg").should("exist");
+		// Day 11 is Genesis 33-35. On Genesis 33 the left arrow has no step
+		// (Genesis 32 is not in the day) but the right one does (Genesis 34 is),
+		// so the mark is on the right arrow alone.
+		cy.get("[data-cy='chapterLeft']").should("not.have.class", "plan-step-left");
+		cy.get("[data-cy='chapterRight']")
+			.should("have.class", "plan-step-right")
+			.find(".plan-corner")
+			.should("be.visible");
+
+		// On Genesis 34 both neighbours are in the day, so both arrows mark.
+		cy.get("[data-cy='chapterRight']:first").click();
+		cy.get("[data-cy='chapterLeft']").should("have.class", "plan-step-left");
+		cy.get("[data-cy='chapterRight']").should("have.class", "plan-step-right");
+
+		// On Genesis 35 only the step back remains.
+		cy.get("[data-cy='chapterRight']:first").click();
+		cy.get("[data-cy='chapterLeft']").should("have.class", "plan-step-left");
+		cy.get("[data-cy='chapterRight']").should("not.have.class", "plan-step-right");
 
 		// Stepping off the end of the day gives the arrows back to the Bible, so
-		// the mark goes with them.
-		cy.get("[data-cy='chapterRight']:first").click();
-		cy.get("[data-cy='chapterRight']:first").click();
+		// both marks go.
 		cy.get("[data-cy='chapterRight']:first").click();
 		cy.get("#chapter").should("contain", "Genesis 36");
-		cy.get("body").should("not.have.class", "plan-nav");
+		cy.get("[data-cy='chapterLeft']").should("not.have.class", "plan-step-left");
+		cy.get("[data-cy='chapterRight']").should("not.have.class", "plan-step-right");
 		cy.get("[data-cy='chapterRight'] .plan-corner").should("not.be.visible");
 	});
 
-	it("shows the plan mark and not the clock while a plan has the arrows", () => {
+it("shows the plan mark and not the clock while a plan has the arrows", () => {
 		openPlansPage();
 		cy.get("#brand").click();
 		cy.openChapter("Genesis", "1");
@@ -359,8 +395,10 @@ describe("reading plans", () => {
 		cy.get("#brand").click();
 		cy.get("#homePlans [data-cy='homePlanRead']").click();
 		cy.get("[data-cy='planReadingNote']").should("be.visible");
-		cy.get("body").should("have.class", "plan-nav");
 		cy.get("body").should("have.class", "chrono-nav");
+		// Day 1 is Genesis 1-3, so the right arrow has a step and wears the plan
+		// mark; the clock stands down on that arrow.
+		cy.get("[data-cy='chapterRight']").should("have.class", "plan-step-right");
 		cy.get("[data-cy='chapterRight'] .plan-corner").should("be.visible");
 		cy.get("[data-cy='chapterRight'] .chrono-corner").should("not.be.visible");
 	});
@@ -540,7 +578,7 @@ describe("reading plans", () => {
 		});
 	});
 
-	it("a custom plan keeps its books, pace and order, and can be subscribed to", () => {
+	it("a custom plan keeps its books and pace, and can be subscribed to", () => {
 		openPlansPage();
 		cy.get("#plansNameInput").type("Front Pages");
 		cy.get("[data-cy='plansBook-genesis']").check();
@@ -552,7 +590,7 @@ describe("reading plans", () => {
 			"contain",
 			"3-4 chapters a day over 30 days",
 		);
-		cy.get("[data-cy='plansOrderChronological']").click();
+		// The new plan is scrolled into view in the reader's own plans.
 		cy.get("[data-cy='plansSaveButton']").click();
 
 		cy.get("#plansOwnList .plans-row").should("have.length", 1);
@@ -562,7 +600,11 @@ describe("reading plans", () => {
 			.should("contain", "Genesis, Exodus and Matthew")
 			.and("contain", "118 chapters");
 
+		// The order is chosen when subscribing, not when the plan is made - here,
+		// chronological, from the row's control.
+		cy.get("#plansOwnList [data-cy='planOrderSelect']").select("chronological");
 		cy.get("#plansOwnList [data-cy='planSubscribe']").click();
+		// The new subscription is scrolled into view.
 		cy.get("#plansSubscriptionList [data-cy='planSubscription']")
 			.should("have.length", 1)
 			.and("contain", "Front Pages")
@@ -667,9 +709,14 @@ describe("reading plans", () => {
 			.click();
 		cy.get("#plansSubscriptionList [data-cy='planUnsubscribe']").click();
 		cy.get("#plansSubscriptionList").should("contain", "No plans yet");
-		cy.get("#brand").click();
-		cy.get("#homePlans").should("contain", "No plans yet");
+	cy.get("#brand").click();
+		cy.get("#homePlans").should("contain", "No plans yet.");
+		cy.get("#homePlans [data-cy='homePlanSubscribe']").should("be.visible");
 		cy.get("#homePlans [data-cy='homePlanCard']").should("not.exist");
+		// The link goes to the Reading Plans page.
+		cy.get("[data-cy='homePlanSubscribe']").click();
+		cy.get("#plans").should("be.visible");
+		cy.location("hash").should("eq", "#plans");
 	});
 
 	it("spreads a fractional pace so the plan lands on its last day", () => {
@@ -744,8 +791,9 @@ describe("reading plans", () => {
 		cy.get("#plansNameInput").type("Psalms, in date order");
 		cy.get("[data-cy='plansBook-psalm']").check();
 		cy.get("input[name=plansPace][value=perDay]").check();
-		cy.get("[data-cy='plansOrderChronological']").click();
 		cy.get("[data-cy='plansSaveButton']").click();
+		// The order is chosen when viewing, so pick chronological on the row.
+		cy.get("#plansOwnList [data-cy='planOrderSelect']").select("chronological");
 		cy.get("#plansOwnList [data-cy='planSeeEveryDay']").click();
 		cy.get("#planDays [data-cy='planDay']").should("have.length", 150);
 		// The index's order for the Psalms is their date order, and the

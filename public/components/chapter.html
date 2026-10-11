@@ -410,16 +410,30 @@
 			" (<span class='version'></span>)<span class='version-shared' title='These settings came from a shared link' style='display: none'> shared</span>";
 				chapter.innerHTML = addArrows(text, title);
 				// A chapter reached through a plan says which plan and which day
-				// of it, and marks the arrows with an open book, because they
-				// follow the plan rather than the Bible. The mark is set per
-				// chapter rather than by the settings, since the reading under
-				// way changes with every one of them.
+				// of it, and marks each arrow with an open book only when there is
+				// a step in that direction - so the icon does not promise a move
+				// the plan cannot make. The mark is set per chapter rather than
+				// by the settings, since the reading under way changes with every
+				// one of them.
 				var planNote =
 					typeof planReadingNote == "function" ? planReadingNote() : null;
 				var chapterText = document.getElementById("chapterText");
 				if (planNote && chapterText)
 					chapterText.parentNode.insertBefore(planNote, chapterText);
-				document.body.classList.toggle("plan-nav", !!planNote);
+				if (typeof planHasStep == "function") {
+					var hasPrev = planHasStep(-1);
+					var hasNext = planHasStep(1);
+					document
+						.querySelectorAll("[data-cy='chapterLeft']")
+						.forEach(function (button) {
+							button.classList.toggle("plan-step-left", hasPrev);
+						});
+					document
+						.querySelectorAll("[data-cy='chapterRight']")
+						.forEach(function (button) {
+							button.classList.toggle("plan-step-right", hasNext);
+						});
+				}
 				applySettings();
 				applyWordStudyLinks(book ? book.slug : null, chapterNum);
 				applyChapterHighlight(pendingHighlight);

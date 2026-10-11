@@ -211,7 +211,7 @@
 			var see = document.createElement("a");
 			see.className = "home-plan-link";
 			see.setAttribute("data-cy", "homePlanSeeEveryDay");
-			see.textContent = "See every day";
+			see.textContent = "View the plan";
 			see.href =
 				"#plan/" +
 				plan.id +
@@ -243,9 +243,19 @@
 		if (subscriptions.length == 0) {
 			var empty = document.createElement("p");
 			empty.className = "home-empty";
-			empty.textContent =
-				"No plans yet — subscribe to one and today's chapters turn up here.";
+			empty.textContent = "No plans yet.";
 			el.appendChild(empty);
+
+			var subscribe = document.createElement("a");
+			subscribe.className = "home-history-link";
+			subscribe.setAttribute("data-cy", "homePlanSubscribe");
+			subscribe.textContent = "Subscribe";
+			subscribe.href = "#";
+			subscribe.onclick = function () {
+				fireEvent({ name: "showPage", page: "plans" });
+				return false;
+			};
+			el.appendChild(subscribe);
 			return;
 		}
 		// A chronological plan needs the app's copy of the book order, which
