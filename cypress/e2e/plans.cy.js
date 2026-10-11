@@ -830,4 +830,57 @@ it("shows the plan mark and not the clock while a plan has the arrows", () => {
 			expect(win.planReadingsLabel([])).to.eq("");
 		});
 	});
+
+	it("schedules and cancels a daily notification for a subscription", () => {
+		cy.window().then((win) => {
+			expect(win.notifyTime).to.be.a("function");
+			expect(win.scheduleNotification).to.be.a("function");
+
+			var sub = {
+				id: "sub-test",
+				planId: "bible-1-chapter-a-day",
+				order: "canonical",
+				start: win.todayDateString(),
+				cycle: 1,
+			};
+			expect(win.notifyTime(sub)).to.eq("08:00");
+
+			win.savePlanSubscriptions([sub]);
+			win.setNotifyTime(sub, "07:30");
+			expect(win.notifyTime(win.planSubscriptions()[0])).to.eq("07:30");
+
+			var next = win.nextNotifyAt(win.planSubscriptions()[0]);
+			expect(next).to.be.greaterThan(Date.now());
+			expect(next).to.be.lessThan(Date.now() + 49 * 3600 * 1000);
+
+			var body = win.notifyBody(win.planSubscriptions()[0]);
+			expect(body).to.contain("one chapter a day");
+			expect(body).to.contain("Genesis 1");
+		});
+	});
+
+	it("toggles the notification bell on and off", () => {
+		openPlansPage();
+		// Headless Chromium leaves Notification.permission at 'default', and a
+		// real prompt would be auto-denied - so stub it to grant, the way a
+		// reader who has allowed notifications would arrive.
+		cy.window().then((win) => {
+			if (win.Notification) {
+				cy.stub(win.Notification, 'requestPermission').resolves('granted');
+			}
+		});
+		cy.get("[data-cy='planRow-psalms-1-chapter-a-day'] [data-cy='planSubscribe']").click();
+		cy.get("#plansSubscriptionList [data-cy='planNotify']").should("not.have.class", "plan-notify-on");
+		cy.get("[data-cy='planNotify']").click();
+		cy.get("[data-cy='planNotify']").should("have.class", "plan-notify-on");
+		cy.window().then((win) => {
+			expect(win.planSubscriptions()[0].notifyTime).to.eq("08:00");
+		});
+		cy.get("[data-cy='planNotify']").click();
+		cy.get("[data-cy='planNotify']").should("not.have.class", "plan-notify-on");
+		cy.window().then((win) => {
+			expect(win.planSubscriptions()[0].notifyTime || "").to.eq("");
+		});
+	});
+
 });

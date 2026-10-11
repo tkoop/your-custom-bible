@@ -1075,6 +1075,42 @@ div.index-chapters a:active {
 	box-shadow: var(--shadow-sm);
 }
 
+/* The daily-nudge toggle on a plan card or subscription row. A bell that glows
+   when reminders are on, so the reader can see at a glance which plans nudge
+   them. */
+.plan-notify-toggle {
+	flex: none;
+	width: 2.2rem;
+	height: 2.2rem;
+	padding: 0;
+	border: 1px solid var(--border);
+	border-radius: 999px;
+	background-color: var(--surface);
+	cursor: pointer;
+	font-size: 0.95rem;
+	line-height: 1;
+	color: var(--text-muted);
+	transition: all 0.2s ease;
+	box-shadow: var(--shadow-sm);
+}
+
+.plan-notify-toggle:hover {
+	border-color: var(--primary);
+	color: var(--primary);
+}
+
+.plan-notify-on {
+	border-color: var(--primary);
+	color: #fff;
+	background-color: var(--primary);
+}
+
+.plan-notify-on:hover {
+	background-color: var(--primary-dark);
+	border-color: var(--primary-dark);
+	color: #fff;
+}
+
 .home-continue {
 	line-height: 1.6;
 }

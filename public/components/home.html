@@ -232,6 +232,26 @@
 			actions.appendChild(see);
 		}
 
+		// A daily nudge: a bell the reader taps to be reminded at a chosen time.
+		if (plan) {
+			var notify = document.createElement("button");
+			notify.className = "plan-notify-toggle";
+			notify.setAttribute("data-cy", "homePlanNotify");
+			notify.setAttribute("aria-label", "Plan reminders");
+			if (notifyEnabled(subscription)) {
+				notify.classList.add("plan-notify-on");
+			}
+			notify.textContent = "\uD83D\uDD14"; // bell
+			notify.onclick = function () {
+				if (notifyEnabled(subscription)) {
+					disableNotification(subscription);
+				} else {
+					enableNotification(subscription, DEFAULT_NOTIFY_TIME);
+				}
+			};
+			actions.appendChild(notify);
+		}
+
 		if (actions.childNodes.length) card.appendChild(actions);
 
 		return card;

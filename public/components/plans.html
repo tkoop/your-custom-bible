@@ -303,6 +303,22 @@ if (state.startsIn) {
 			);
 		}
 
+		// A daily nudge for this subscription.
+		var notify = plansEl("button", "plan-notify-toggle", "\uD83D\uDD14");
+		notify.setAttribute("data-cy", "planNotify");
+		notify.setAttribute("aria-label", "Plan reminders");
+		if (notifyEnabled(subscription)) {
+			notify.classList.add("plan-notify-on");
+		}
+		notify.onclick = function () {
+			if (notifyEnabled(subscription)) {
+				disableNotification(subscription);
+			} else {
+				enableNotification(subscription, DEFAULT_NOTIFY_TIME);
+			}
+		};
+		actions.appendChild(notify);
+
 		var drop = plansEl("button", "standardButton", "Unsubscribe");
 		drop.setAttribute("data-cy", "planUnsubscribe");
 		drop.onclick = function () {

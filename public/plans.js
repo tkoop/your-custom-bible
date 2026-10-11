@@ -807,3 +807,141 @@ function saveCustomPlan(plan) {
 	fireEvent({ name: "plansUpdated" });
 	return stored;
 }
+
+// ---------- Notifications ----------
+
+// Each subscription can ask for a daily nudge at a reader's chosen hour. The
+// setting travels with the subscription - like the start date and order, it is
+// a property of this reading of the plan, not of the plan itself.
+var DEFAULT_NOTIFY_TIME = "08:00";
+
+function notifyTime(subscription) {
+	var time = subscription.notifyTime;
+	return time && /^\d{2}:\d{2}$/.test(time) ? time : DEFAULT_NOTIFY_TIME;
+}
+
+// Whether a subscription's notifications are turned on - the reader has chosen
+// a time. notifyTime falls back to the default for scheduling, so this is the
+// separate question the toggle switch answers.
+function notifyEnabled(subscription) {
+	return !!(subscription && subscription.notifyTime && /^\d{2}:\d{2}$/.test(subscription.notifyTime));
+}
+
+function setNotifyTime(subscription, time) {
+	if (!subscription) return;
+	updateSubscription(subscription.id, {
+		notifyTime: /^\d{2}:\d{2}$/.test(time) ? time : DEFAULT_NOTIFY_TIME,
+	});
+}
+
+// The next time a notification should fire for a subscription: today at the
+// reader's chosen time, unless it is already past, in which case it is tomorrow.
+// null when the subscription has no reading position or no chapters to nudge
+// about.
+function nextNotifyAt(subscription) {
+	var state = subscriptionState(subscription);
+	if (!state.chapters.length && !state.complete) return null;
+	var time = notifyTime(subscription);
+	var at = new Date();
+	at.setHours(parseInt(time.slice(0, 2), 10));
+	at.setMinutes(parseInt(time.slice(3, 5), 10));
+	at.setSeconds(0, 0);
+	if (at.getTime() <= Date.now()) {
+		at.setDate(at.getDate() + 1);
+	}
+	return at.getTime();
+}
+
+// The body of the notification is what the reader is asked to read - the plan's
+// name and today's chapters, so they can see at a glance whether it is worth
+// opening the app.
+function notifyBody(subscription) {
+	var plan = subscriptionPlan(subscription);
+	var state = subscriptionState(subscription);
+	var name = plan ? plan.name : "Plan";
+	if (state.complete) {
+		return name + " - finished. Ready to go round again?";
+	}
+	if (!state.chapters.length) {
+		return name + " - nothing scheduled today. A rest day.";
+	}
+	return name + " - today: " + planReadingsLabel(state.chapters);
+}
+
+// Asks the browser for notification permission if it has not already been given.
+// Resolves to the resulting permission string so callers can schedule or explain.
+function requestNotifyPermission() {
+	if (typeof Notification === "undefined") return Promise.resolve("denied");
+	if (Notification.permission === "granted") return Promise.resolve("granted");
+	if (Notification.permission === "denied") return Promise.resolve("denied");
+	return Notification.requestPermission();
+}
+
+// Schedules (or cancels) a subscription's daily notification. The service worker
+// fires it: the TimestampTrigger API lets a notification arrive at the set time
+// even when the app is closed, the way a reminder should. With no trigger support
+// we fall back to checking while the app is open.
+function scheduleNotification(subscription) {
+	if (!("serviceWorker" in navigator)) return;
+	var sw = navigator.serviceWorker;
+	if (!sw.controller && !sw.ready) return;
+	sw.ready.then(function (registration) {
+		var tag = "plan-" + subscription.id;
+		registration.getNotifications({ tag: tag }).then(function (existing) {
+			existing.forEach(function (n) {
+				n.close();
+			});
+		});
+		var at = nextNotifyAt(subscription);
+		if (at == null) return;
+		var options = {
+			body: notifyBody(subscription),
+			tag: tag,
+			renotify: true,
+			silent: false,
+			data: { subscriptionId: subscription.id },
+		};
+		if (registration.showNotification && "showTrigger" in Notification.prototype) {
+			options.showTrigger = new TimestampTrigger(at);
+		}
+		registration.showNotification(
+			"Reading plan reminder",
+			options
+		);
+	});
+}
+
+// A subscription's notification settings changed (turned on, or the time moved):
+// ask for permission first, then either schedule the nudge or, if permission was
+// refused, drop the setting so the UI does not promise what it cannot deliver.
+function enableNotification(subscription, time) {
+	setNotifyTime(subscription, time || DEFAULT_NOTIFY_TIME);
+	requestNotifyPermission().then(function (permission) {
+		if (permission === "granted") {
+			var updated = planSubscriptions().find(function (s) {
+				return s.id == subscription.id;
+			});
+			if (updated) scheduleNotification(updated);
+		} else {
+			// The reader said no: forget the time so the toggle shows off.
+			updateSubscription(subscription.id, { notifyTime: "" });
+			fireEvent({ name: "plansUpdated" });
+		}
+	});
+}
+
+function disableNotification(subscription) {
+	updateSubscription(subscription.id, { notifyTime: "" });
+	if ("serviceWorker" in navigator && navigator.serviceWorker.ready) {
+		navigator.serviceWorker.ready.then(function (registration) {
+			registration
+				.getNotifications({ tag: "plan-" + subscription.id })
+				.then(function (existing) {
+					existing.forEach(function (n) {
+						n.close();
+					});
+				});
+		});
+	}
+	fireEvent({ name: "plansUpdated"});
+}
