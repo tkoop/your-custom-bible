@@ -275,13 +275,13 @@ if (state.startsIn) {
 		} else if (state.chapters.length) {
 			var read = document.createElement("button");
 			read.setAttribute("data-cy", "planReadToday");
-			// Dark blue when today's chapters are unread, muted "Read again"
-			// once they have been, so a day still to read stands out.
+			// Today's chapters have already been read: the button says so and
+			// steps back to a secondary colour, so an unread day stands out.
 			if (planDayRead(state.chapters)) {
-				read.className = "standardButton plan-read-again";
+				read.className = "home-button home-button-secondary";
 				read.textContent = "Read again";
 			} else {
-				read.className = "standardButton plans-primary";
+				read.className = "home-button";
 				read.textContent = "Read today";
 			}
 			read.onclick = function () {
