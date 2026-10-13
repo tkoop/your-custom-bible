@@ -26,6 +26,14 @@ npm script; the rest are run by hand when their inputs or logic change.
 5. `tools/buildLexicon.mjs` reads that back, plus the Strong's dictionaries in
    `resources/`, and emits `public/lexicon/<Key>.json`, one file per Strong's
    number, for the word study page. Run it after step 4.
+6. `tools/buildBooksJson.mjs` emits `resources/books.json` from the book array
+   at the top of `public/books.js`, for the push server (see "Plan reminders").
+7. `tools/buildPlanFixture.mjs` runs `public/plans.js` itself and emits
+   `resources/planFixture.json`: the notification bodies the server has to be
+   able to reproduce. It exists to pin the port in `server/Schedule.php`, and
+   `server/ScheduleTest.php` fails if the two disagree.
+
+6 and 7 are run together by `npm run pushfixtures`.
 
 ## Chapter build, stage 1 and stage 2
 
@@ -246,6 +254,116 @@ A plan over the whole Bible reads the Songs where the index puts them, and a
 plan over the Psalms alone reads them in date order (90, 59, 52, 34, 56 …)
 rather than 1 to 150.
 
+## Plan reminders (the push server)
+
+A subscription can be given a **reminder**: a daily notification, at a time the
+reader picks, saying the plan's name and what is read that day. This was first
+built with the `TimestampTrigger` API, which fires from the browser - no server
+needed, but Chrome only, and it needs the browser to be running. It is now sent
+by the server, which arrives with the app closed and works on iOS.
+
+**The server is PHP, in `server/`, and it is not part of `public/`.** There is no
+reverse proxy and no separate service: Apache serves `public/` as static files
+and runs `server/push.php` directly. The deploy script needed no change at all.
+
+```
+server/
+├── push.php        GET ?action=key, PUT ?action=sync
+├── send.php        the cron entry point; also --dry-run
+├── Schedule.php    plans.js's arithmetic, ported
+├── Vapid.php       ES256 JWT
+├── Crypto.php      HKDF-SHA256 + aes128gcm
+├── lib.php         paths, keys, database, helpers
+├── *Test.php       run with `npm run testserver`
+└── tests/          a stand-in push service that decrypts what arrives
+```
+
+State lives in `/var/lib/yourcustombible/` - `vapid.json` and `push.db` - and
+**never inside the checkout**. The deploy script runs `git clean -f`, which
+deletes untracked files, so a key or database file in the repository would be
+removed on every deploy. `YCB_DATA_DIR` moves it, which is what the tests use.
+
+`tools/testPushUi.mjs` (`npm run testui`) drives headless Chromium over CDP,
+which is how the browser checks run here: Xvfb is not installed, so Cypress
+cannot start. `tools/cdp.mjs` is the small driver it uses.
+
+### Why there is a port, and what keeps it honest
+
+The server has to say the same thing the browser would, or a notification
+contradicts the card on the home page. PHP cannot run `plans.js`, so
+`server/Schedule.php` is a port of its arithmetic - and a port drifts. It is
+pinned instead: `tools/buildPlanFixture.mjs` runs the real `plans.js` and writes
+down every answer, and `server/ScheduleTest.php` asserts the PHP reproduces all
+of them. When `plans.js` changes, regenerate with `npm run pushfixtures`; if the
+output moves, `git status` shows it. That is the same signal the other pipelines
+give, and it is the reason the port is allowed to exist at all.
+
+Two things the port reads that are worth knowing:
+
+- `public/chronoChapters.json`, **not** `resources/ChronoChapters.json`. The two
+  are not the same file - the one in `resources/` still carries the repeated
+  superscript groups and lists 1204 chapters, the one the browser fetches lists
+  each of the 1189 once. Reading the wrong one gives a chronological plan a
+  different list.
+- `resources/books.json`, generated from `books.js`, so the book list is not
+  maintained twice.
+
+### The sync is a snapshot, not a diff
+
+Every sync `PUT`s the reader's whole set of reminders, and the server **deletes
+anything absent from it**. That is what makes it self-healing: unsubscribing,
+deleting the plan behind a reminder, or clearing the browser's storage all take
+effect on the next load, without the server being told which happened. It runs
+on `plansUpdated`, which also fires when a page re-reads the list, so
+`public/push.js` debounces it.
+
+A reader's own plans are sent with their reminder, which is how a plan that
+exists only in that browser can have a reminder at all.
+
+### Sending
+
+`send.php` runs once a minute. A reminder is due when it is past the reader's
+time **in the reader's own timezone** - which is why a reminder carries one -
+and has not been sent on that reader's local date. The date is stored as a date
+rather than a timestamp, which is what makes daylight saving harmless.
+
+`404`/`410` from a push service means the browser has gone: the endpoint and
+everything on it are removed rather than retried for ever. `429` leaves the
+reminder alone and unstamped, so it simply tries again.
+
+### The crypto is hand-rolled
+
+`web-push` is an npm package and this is PHP, so `Vapid.php` and `Crypto.php`
+implement it. That is the cost of choosing PHP over a Node service, and it is
+the part most worth reviewing. Two things about it are easy to get wrong and are
+tested because they were got wrong first:
+
+- `openssl_pkey_get_details()['key']` returns the **public** key PEM in PHP 8 on
+  OpenSSL 3. Signing needs `openssl_pkey_export()`.
+- `openssl_sign` returns ECDSA in **DER**; JWS and web push carry it raw
+  (`P1363`). Everything goes through `derToRaw()` on the way out.
+  `openssl_verify()` wants DER again, which is why the tests convert back.
+
+A public key is raw binary and therefore not valid UTF-8, so `json_encode()`
+returns `false` for it silently; the stored key is base64url for that reason.
+
+`npm run testserver` decrypts what the server sends, through a stand-in push
+service, rather than only checking that the server agrees with itself.
+
+### Setting the server up
+
+1. The vhost must run PHP. `server/probe.php` answers the question: load it and
+   a `ycb-php-ok` line means yes, while the source means no. Delete it after.
+2. If `public/` is the document root rather than the checkout, set
+   `window.YCB_PUSH_API = "/server/push.php"` in `index.html`.
+3. Make `/var/lib/yourcustombible/` and let it be writable by the web server.
+   The key pair is generated on first use.
+4. Add the cron line:
+   `* * * * * /usr/bin/php /var/www/bible.timkoop.com/server/send.php`
+
+The key pair is worth backing up: regenerating it invalidates every
+subscription, and every reader has to turn their reminders on again.
+
 ## Cache-busting rule (IMPORTANT)
 
 Browsers cache this app's static assets aggressively:
@@ -267,7 +385,7 @@ Files involved (all referenced from `public/index.html`):
 - `images/logo.png`, `images/banner.png`
 - `manifest.json`
 - `framework.js`, `activity.js`, `settings.js`, `books.js`,
-  `translations.js`, `plans.js`
+  `translations.js`, `plans.js`, `push.js`
 - Components fetched via `loadComponent()`: `components/menu.html`,
   `components/chapter.html`, `components/word.html`,
   `components/home.html`, `components/about.html`,

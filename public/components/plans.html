@@ -213,6 +213,10 @@ function plansProgressLine(state) {
 				"plans-row plans-row-subscription",
 			);
 			row.setAttribute("data-cy", "planSubscription");
+			// Which subscription a row is for. A reader can be on the same plan
+			// twice from two start dates, so the plan's id does not identify a
+			// row and neither does its position on the page.
+			row.setAttribute("data-subscription", subscription.id);
 
 			var head = plansEl("div", "plans-row-head");
 			head.appendChild(
@@ -303,7 +307,8 @@ if (state.startsIn) {
 			);
 		}
 
-		// A daily nudge for this subscription.
+		// A daily nudge for this subscription: a bell to turn it on or off, and
+		// the time it should arrive at.
 		var notify = plansEl("button", "plan-notify-toggle", "\uD83D\uDD14");
 		notify.setAttribute("data-cy", "planNotify");
 		notify.setAttribute("aria-label", "Plan reminders");
@@ -314,10 +319,31 @@ if (state.startsIn) {
 			if (notifyEnabled(subscription)) {
 				disableNotification(subscription);
 			} else {
-				enableNotification(subscription, DEFAULT_NOTIFY_TIME);
+				enableNotification(subscription, notifyTimeValue);
 			}
 		};
 		actions.appendChild(notify);
+
+		// The time, shown only once the bell is on - a time picker for a
+		// reminder nobody has asked for would be a control in search of a
+		// question.
+		if (notifyEnabled(subscription)) {
+			var when = plansEl("input", "plan-notify-time");
+			when.setAttribute("data-cy", "planNotifyTime");
+			when.type = "time";
+			when.value = notifyTime(subscription);
+			when.setAttribute("aria-label", "Reminder time");
+			when.title = "The reminder arrives at this time, where you are.";
+			when.onchange = function () {
+				// A time that is not a time falls back to the default, so the
+				// control cannot be left in a state the server would refuse.
+				setNotifyTime(subscription, when.value);
+				notifyTimeValue = notifyTime(subscription);
+				pushSync();
+				fireEvent({ name: "plansUpdated" });
+			};
+			actions.appendChild(when);
+		}
 
 		var drop = plansEl("button", "standardButton", "Unsubscribe");
 		drop.setAttribute("data-cy", "planUnsubscribe");
@@ -339,6 +365,18 @@ function plansInlineField(label, control) {
 	el.appendChild(control);
 	return el;
 }
+
+// The time a newly-turned-on reminder should use: whatever the reader last
+// chose on this page, so the bell does not spring back to 08:00 every time.
+// Seeded from an existing reminder if there is one, which is how a reader's
+// first choice becomes the default for the rest.
+var notifyTimeValue = DEFAULT_NOTIFY_TIME;
+
+(function seedNotifyTime() {
+	planSubscriptions().forEach(function (subscription) {
+		if (notifyEnabled(subscription)) notifyTimeValue = notifyTime(subscription);
+	});
+})();
 
 // What the reader has set on a plan's row. The list is re-read whenever a
 // subscription changes, and a row rebuilt from the plan would put the order and

@@ -1,0 +1,2823 @@
+{
+	"now": "2026-10-12T12:00:00Z",
+	"generatedFrom": "public/plans.js",
+	"cases": [
+		{
+			"note": "bible-1-year canonical day 1",
+			"plan": {
+				"id": "bible-1-year",
+				"name": "Read the whole Bible in a year",
+				"books": "all",
+				"label": "the whole Bible",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "canonical",
+			"start": "2026-10-12",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the whole Bible in a year - today: Genesis 1-3",
+				"day": 1,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "bible-1-year canonical day 2",
+			"plan": {
+				"id": "bible-1-year",
+				"name": "Read the whole Bible in a year",
+				"books": "all",
+				"label": "the whole Bible",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "canonical",
+			"start": "2026-10-11",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the whole Bible in a year - today: Genesis 4-6",
+				"day": 2,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "bible-1-year canonical day 3",
+			"plan": {
+				"id": "bible-1-year",
+				"name": "Read the whole Bible in a year",
+				"books": "all",
+				"label": "the whole Bible",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "canonical",
+			"start": "2026-10-10",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the whole Bible in a year - today: Genesis 7-9",
+				"day": 3,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "bible-1-year canonical day 7",
+			"plan": {
+				"id": "bible-1-year",
+				"name": "Read the whole Bible in a year",
+				"books": "all",
+				"label": "the whole Bible",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "canonical",
+			"start": "2026-10-06",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the whole Bible in a year - today: Genesis 20-22",
+				"day": 7,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "bible-1-year canonical day 30",
+			"plan": {
+				"id": "bible-1-year",
+				"name": "Read the whole Bible in a year",
+				"books": "all",
+				"label": "the whole Bible",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "canonical",
+			"start": "2026-09-13",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the whole Bible in a year - today: Leviticus 5-7",
+				"day": 30,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "bible-1-year canonical day 200",
+			"plan": {
+				"id": "bible-1-year",
+				"name": "Read the whole Bible in a year",
+				"books": "all",
+				"label": "the whole Bible",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "canonical",
+			"start": "2026-03-27",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the whole Bible in a year - today: Proverbs 21-23",
+				"day": 200,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "bible-1-year canonical day 100000",
+			"plan": {
+				"id": "bible-1-year",
+				"name": "Read the whole Bible in a year",
+				"books": "all",
+				"label": "the whole Bible",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "canonical",
+			"start": "1752-12-28",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the whole Bible in a year - finished. Ready to go round again?",
+				"day": 365,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "bible-1-year chronological day 1",
+			"plan": {
+				"id": "bible-1-year",
+				"name": "Read the whole Bible in a year",
+				"books": "all",
+				"label": "the whole Bible",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "chronological",
+			"start": "2026-10-12",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the whole Bible in a year - today: Genesis 1-3",
+				"day": 1,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "bible-1-year chronological day 2",
+			"plan": {
+				"id": "bible-1-year",
+				"name": "Read the whole Bible in a year",
+				"books": "all",
+				"label": "the whole Bible",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "chronological",
+			"start": "2026-10-11",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the whole Bible in a year - today: Genesis 4-6",
+				"day": 2,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "bible-1-year chronological day 3",
+			"plan": {
+				"id": "bible-1-year",
+				"name": "Read the whole Bible in a year",
+				"books": "all",
+				"label": "the whole Bible",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "chronological",
+			"start": "2026-10-10",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the whole Bible in a year - today: Genesis 7-9",
+				"day": 3,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "bible-1-year chronological day 7",
+			"plan": {
+				"id": "bible-1-year",
+				"name": "Read the whole Bible in a year",
+				"books": "all",
+				"label": "the whole Bible",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "chronological",
+			"start": "2026-10-06",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the whole Bible in a year - today: Job 10-12",
+				"day": 7,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "bible-1-year chronological day 30",
+			"plan": {
+				"id": "bible-1-year",
+				"name": "Read the whole Bible in a year",
+				"books": "all",
+				"label": "the whole Bible",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "chronological",
+			"start": "2026-09-13",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the whole Bible in a year - today: Exodus 3-5",
+				"day": 30,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "bible-1-year chronological day 200",
+			"plan": {
+				"id": "bible-1-year",
+				"name": "Read the whole Bible in a year",
+				"books": "all",
+				"label": "the whole Bible",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "chronological",
+			"start": "2026-03-27",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the whole Bible in a year - today: Hosea 7-9",
+				"day": 200,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "bible-1-year chronological day 100000",
+			"plan": {
+				"id": "bible-1-year",
+				"name": "Read the whole Bible in a year",
+				"books": "all",
+				"label": "the whole Bible",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "chronological",
+			"start": "1752-12-28",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the whole Bible in a year - finished. Ready to go round again?",
+				"day": 365,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "new-testament-1-year canonical day 1",
+			"plan": {
+				"id": "new-testament-1-year",
+				"name": "Read the New Testament in a year",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john",
+					"acts",
+					"romans",
+					"1-corinthians",
+					"2-corinthians",
+					"galatians",
+					"ephesians",
+					"philippians",
+					"colossians",
+					"1-thessalonians",
+					"2-thessalonians",
+					"1-timothy",
+					"2-timothy",
+					"titus",
+					"philemon",
+					"hebrews",
+					"james",
+					"1-peter",
+					"2-peter",
+					"1-john",
+					"2-john",
+					"3-john",
+					"jude",
+					"revelation"
+				],
+				"label": "the New Testament",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "canonical",
+			"start": "2026-10-12",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the New Testament in a year - nothing scheduled today. A rest day.",
+				"day": 1,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "new-testament-1-year canonical day 2",
+			"plan": {
+				"id": "new-testament-1-year",
+				"name": "Read the New Testament in a year",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john",
+					"acts",
+					"romans",
+					"1-corinthians",
+					"2-corinthians",
+					"galatians",
+					"ephesians",
+					"philippians",
+					"colossians",
+					"1-thessalonians",
+					"2-thessalonians",
+					"1-timothy",
+					"2-timothy",
+					"titus",
+					"philemon",
+					"hebrews",
+					"james",
+					"1-peter",
+					"2-peter",
+					"1-john",
+					"2-john",
+					"3-john",
+					"jude",
+					"revelation"
+				],
+				"label": "the New Testament",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "canonical",
+			"start": "2026-10-11",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the New Testament in a year - today: Matthew 1",
+				"day": 2,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "new-testament-1-year canonical day 3",
+			"plan": {
+				"id": "new-testament-1-year",
+				"name": "Read the New Testament in a year",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john",
+					"acts",
+					"romans",
+					"1-corinthians",
+					"2-corinthians",
+					"galatians",
+					"ephesians",
+					"philippians",
+					"colossians",
+					"1-thessalonians",
+					"2-thessalonians",
+					"1-timothy",
+					"2-timothy",
+					"titus",
+					"philemon",
+					"hebrews",
+					"james",
+					"1-peter",
+					"2-peter",
+					"1-john",
+					"2-john",
+					"3-john",
+					"jude",
+					"revelation"
+				],
+				"label": "the New Testament",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "canonical",
+			"start": "2026-10-10",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the New Testament in a year - today: Matthew 2",
+				"day": 3,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "new-testament-1-year canonical day 7",
+			"plan": {
+				"id": "new-testament-1-year",
+				"name": "Read the New Testament in a year",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john",
+					"acts",
+					"romans",
+					"1-corinthians",
+					"2-corinthians",
+					"galatians",
+					"ephesians",
+					"philippians",
+					"colossians",
+					"1-thessalonians",
+					"2-thessalonians",
+					"1-timothy",
+					"2-timothy",
+					"titus",
+					"philemon",
+					"hebrews",
+					"james",
+					"1-peter",
+					"2-peter",
+					"1-john",
+					"2-john",
+					"3-john",
+					"jude",
+					"revelation"
+				],
+				"label": "the New Testament",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "canonical",
+			"start": "2026-10-06",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the New Testament in a year - nothing scheduled today. A rest day.",
+				"day": 7,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "new-testament-1-year canonical day 30",
+			"plan": {
+				"id": "new-testament-1-year",
+				"name": "Read the New Testament in a year",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john",
+					"acts",
+					"romans",
+					"1-corinthians",
+					"2-corinthians",
+					"galatians",
+					"ephesians",
+					"philippians",
+					"colossians",
+					"1-thessalonians",
+					"2-thessalonians",
+					"1-timothy",
+					"2-timothy",
+					"titus",
+					"philemon",
+					"hebrews",
+					"james",
+					"1-peter",
+					"2-peter",
+					"1-john",
+					"2-john",
+					"3-john",
+					"jude",
+					"revelation"
+				],
+				"label": "the New Testament",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "canonical",
+			"start": "2026-09-13",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the New Testament in a year - today: Matthew 21",
+				"day": 30,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "new-testament-1-year canonical day 200",
+			"plan": {
+				"id": "new-testament-1-year",
+				"name": "Read the New Testament in a year",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john",
+					"acts",
+					"romans",
+					"1-corinthians",
+					"2-corinthians",
+					"galatians",
+					"ephesians",
+					"philippians",
+					"colossians",
+					"1-thessalonians",
+					"2-thessalonians",
+					"1-timothy",
+					"2-timothy",
+					"titus",
+					"philemon",
+					"hebrews",
+					"james",
+					"1-peter",
+					"2-peter",
+					"1-john",
+					"2-john",
+					"3-john",
+					"jude",
+					"revelation"
+				],
+				"label": "the New Testament",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "canonical",
+			"start": "2026-03-27",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the New Testament in a year - today: 1 Corinthians 9",
+				"day": 200,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "new-testament-1-year canonical day 100000",
+			"plan": {
+				"id": "new-testament-1-year",
+				"name": "Read the New Testament in a year",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john",
+					"acts",
+					"romans",
+					"1-corinthians",
+					"2-corinthians",
+					"galatians",
+					"ephesians",
+					"philippians",
+					"colossians",
+					"1-thessalonians",
+					"2-thessalonians",
+					"1-timothy",
+					"2-timothy",
+					"titus",
+					"philemon",
+					"hebrews",
+					"james",
+					"1-peter",
+					"2-peter",
+					"1-john",
+					"2-john",
+					"3-john",
+					"jude",
+					"revelation"
+				],
+				"label": "the New Testament",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "canonical",
+			"start": "1752-12-28",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the New Testament in a year - finished. Ready to go round again?",
+				"day": 365,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "new-testament-1-year chronological day 1",
+			"plan": {
+				"id": "new-testament-1-year",
+				"name": "Read the New Testament in a year",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john",
+					"acts",
+					"romans",
+					"1-corinthians",
+					"2-corinthians",
+					"galatians",
+					"ephesians",
+					"philippians",
+					"colossians",
+					"1-thessalonians",
+					"2-thessalonians",
+					"1-timothy",
+					"2-timothy",
+					"titus",
+					"philemon",
+					"hebrews",
+					"james",
+					"1-peter",
+					"2-peter",
+					"1-john",
+					"2-john",
+					"3-john",
+					"jude",
+					"revelation"
+				],
+				"label": "the New Testament",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "chronological",
+			"start": "2026-10-12",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the New Testament in a year - nothing scheduled today. A rest day.",
+				"day": 1,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "new-testament-1-year chronological day 2",
+			"plan": {
+				"id": "new-testament-1-year",
+				"name": "Read the New Testament in a year",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john",
+					"acts",
+					"romans",
+					"1-corinthians",
+					"2-corinthians",
+					"galatians",
+					"ephesians",
+					"philippians",
+					"colossians",
+					"1-thessalonians",
+					"2-thessalonians",
+					"1-timothy",
+					"2-timothy",
+					"titus",
+					"philemon",
+					"hebrews",
+					"james",
+					"1-peter",
+					"2-peter",
+					"1-john",
+					"2-john",
+					"3-john",
+					"jude",
+					"revelation"
+				],
+				"label": "the New Testament",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "chronological",
+			"start": "2026-10-11",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the New Testament in a year - today: Luke 1",
+				"day": 2,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "new-testament-1-year chronological day 3",
+			"plan": {
+				"id": "new-testament-1-year",
+				"name": "Read the New Testament in a year",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john",
+					"acts",
+					"romans",
+					"1-corinthians",
+					"2-corinthians",
+					"galatians",
+					"ephesians",
+					"philippians",
+					"colossians",
+					"1-thessalonians",
+					"2-thessalonians",
+					"1-timothy",
+					"2-timothy",
+					"titus",
+					"philemon",
+					"hebrews",
+					"james",
+					"1-peter",
+					"2-peter",
+					"1-john",
+					"2-john",
+					"3-john",
+					"jude",
+					"revelation"
+				],
+				"label": "the New Testament",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "chronological",
+			"start": "2026-10-10",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the New Testament in a year - today: Luke 2",
+				"day": 3,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "new-testament-1-year chronological day 7",
+			"plan": {
+				"id": "new-testament-1-year",
+				"name": "Read the New Testament in a year",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john",
+					"acts",
+					"romans",
+					"1-corinthians",
+					"2-corinthians",
+					"galatians",
+					"ephesians",
+					"philippians",
+					"colossians",
+					"1-thessalonians",
+					"2-thessalonians",
+					"1-timothy",
+					"2-timothy",
+					"titus",
+					"philemon",
+					"hebrews",
+					"james",
+					"1-peter",
+					"2-peter",
+					"1-john",
+					"2-john",
+					"3-john",
+					"jude",
+					"revelation"
+				],
+				"label": "the New Testament",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "chronological",
+			"start": "2026-10-06",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the New Testament in a year - nothing scheduled today. A rest day.",
+				"day": 7,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "new-testament-1-year chronological day 30",
+			"plan": {
+				"id": "new-testament-1-year",
+				"name": "Read the New Testament in a year",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john",
+					"acts",
+					"romans",
+					"1-corinthians",
+					"2-corinthians",
+					"galatians",
+					"ephesians",
+					"philippians",
+					"colossians",
+					"1-thessalonians",
+					"2-thessalonians",
+					"1-timothy",
+					"2-timothy",
+					"titus",
+					"philemon",
+					"hebrews",
+					"james",
+					"1-peter",
+					"2-peter",
+					"1-john",
+					"2-john",
+					"3-john",
+					"jude",
+					"revelation"
+				],
+				"label": "the New Testament",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "chronological",
+			"start": "2026-09-13",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the New Testament in a year - today: Matthew 12",
+				"day": 30,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "new-testament-1-year chronological day 200",
+			"plan": {
+				"id": "new-testament-1-year",
+				"name": "Read the New Testament in a year",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john",
+					"acts",
+					"romans",
+					"1-corinthians",
+					"2-corinthians",
+					"galatians",
+					"ephesians",
+					"philippians",
+					"colossians",
+					"1-thessalonians",
+					"2-thessalonians",
+					"1-timothy",
+					"2-timothy",
+					"titus",
+					"philemon",
+					"hebrews",
+					"james",
+					"1-peter",
+					"2-peter",
+					"1-john",
+					"2-john",
+					"3-john",
+					"jude",
+					"revelation"
+				],
+				"label": "the New Testament",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "chronological",
+			"start": "2026-03-27",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the New Testament in a year - today: Galatians 5",
+				"day": 200,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "new-testament-1-year chronological day 100000",
+			"plan": {
+				"id": "new-testament-1-year",
+				"name": "Read the New Testament in a year",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john",
+					"acts",
+					"romans",
+					"1-corinthians",
+					"2-corinthians",
+					"galatians",
+					"ephesians",
+					"philippians",
+					"colossians",
+					"1-thessalonians",
+					"2-thessalonians",
+					"1-timothy",
+					"2-timothy",
+					"titus",
+					"philemon",
+					"hebrews",
+					"james",
+					"1-peter",
+					"2-peter",
+					"1-john",
+					"2-john",
+					"3-john",
+					"jude",
+					"revelation"
+				],
+				"label": "the New Testament",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "chronological",
+			"start": "1752-12-28",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the New Testament in a year - finished. Ready to go round again?",
+				"day": 365,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "gospels-1-year canonical day 1",
+			"plan": {
+				"id": "gospels-1-year",
+				"name": "Read the Gospels in a year",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john"
+				],
+				"label": "the Gospels",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "canonical",
+			"start": "2026-10-12",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the Gospels in a year - nothing scheduled today. A rest day.",
+				"day": 1,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "gospels-1-year canonical day 2",
+			"plan": {
+				"id": "gospels-1-year",
+				"name": "Read the Gospels in a year",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john"
+				],
+				"label": "the Gospels",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "canonical",
+			"start": "2026-10-11",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the Gospels in a year - nothing scheduled today. A rest day.",
+				"day": 2,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "gospels-1-year canonical day 3",
+			"plan": {
+				"id": "gospels-1-year",
+				"name": "Read the Gospels in a year",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john"
+				],
+				"label": "the Gospels",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "canonical",
+			"start": "2026-10-10",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the Gospels in a year - nothing scheduled today. A rest day.",
+				"day": 3,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "gospels-1-year canonical day 7",
+			"plan": {
+				"id": "gospels-1-year",
+				"name": "Read the Gospels in a year",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john"
+				],
+				"label": "the Gospels",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "canonical",
+			"start": "2026-10-06",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the Gospels in a year - nothing scheduled today. A rest day.",
+				"day": 7,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "gospels-1-year canonical day 30",
+			"plan": {
+				"id": "gospels-1-year",
+				"name": "Read the Gospels in a year",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john"
+				],
+				"label": "the Gospels",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "canonical",
+			"start": "2026-09-13",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the Gospels in a year - nothing scheduled today. A rest day.",
+				"day": 30,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "gospels-1-year canonical day 200",
+			"plan": {
+				"id": "gospels-1-year",
+				"name": "Read the Gospels in a year",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john"
+				],
+				"label": "the Gospels",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "canonical",
+			"start": "2026-03-27",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the Gospels in a year - nothing scheduled today. A rest day.",
+				"day": 200,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "gospels-1-year canonical day 100000",
+			"plan": {
+				"id": "gospels-1-year",
+				"name": "Read the Gospels in a year",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john"
+				],
+				"label": "the Gospels",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "canonical",
+			"start": "1752-12-28",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the Gospels in a year - finished. Ready to go round again?",
+				"day": 365,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "gospels-1-year chronological day 1",
+			"plan": {
+				"id": "gospels-1-year",
+				"name": "Read the Gospels in a year",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john"
+				],
+				"label": "the Gospels",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "chronological",
+			"start": "2026-10-12",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the Gospels in a year - nothing scheduled today. A rest day.",
+				"day": 1,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "gospels-1-year chronological day 2",
+			"plan": {
+				"id": "gospels-1-year",
+				"name": "Read the Gospels in a year",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john"
+				],
+				"label": "the Gospels",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "chronological",
+			"start": "2026-10-11",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the Gospels in a year - nothing scheduled today. A rest day.",
+				"day": 2,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "gospels-1-year chronological day 3",
+			"plan": {
+				"id": "gospels-1-year",
+				"name": "Read the Gospels in a year",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john"
+				],
+				"label": "the Gospels",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "chronological",
+			"start": "2026-10-10",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the Gospels in a year - nothing scheduled today. A rest day.",
+				"day": 3,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "gospels-1-year chronological day 7",
+			"plan": {
+				"id": "gospels-1-year",
+				"name": "Read the Gospels in a year",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john"
+				],
+				"label": "the Gospels",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "chronological",
+			"start": "2026-10-06",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the Gospels in a year - nothing scheduled today. A rest day.",
+				"day": 7,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "gospels-1-year chronological day 30",
+			"plan": {
+				"id": "gospels-1-year",
+				"name": "Read the Gospels in a year",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john"
+				],
+				"label": "the Gospels",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "chronological",
+			"start": "2026-09-13",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the Gospels in a year - nothing scheduled today. A rest day.",
+				"day": 30,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "gospels-1-year chronological day 200",
+			"plan": {
+				"id": "gospels-1-year",
+				"name": "Read the Gospels in a year",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john"
+				],
+				"label": "the Gospels",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "chronological",
+			"start": "2026-03-27",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the Gospels in a year - nothing scheduled today. A rest day.",
+				"day": 200,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "gospels-1-year chronological day 100000",
+			"plan": {
+				"id": "gospels-1-year",
+				"name": "Read the Gospels in a year",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john"
+				],
+				"label": "the Gospels",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "chronological",
+			"start": "1752-12-28",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the Gospels in a year - finished. Ready to go round again?",
+				"day": 365,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "gospels-2-months canonical day 1",
+			"plan": {
+				"id": "gospels-2-months",
+				"name": "Read the Gospels in 2 months",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john"
+				],
+				"label": "the Gospels",
+				"pace": "duration",
+				"days": 60
+			},
+			"order": "canonical",
+			"start": "2026-10-12",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the Gospels in 2 months - today: Matthew 1",
+				"day": 1,
+				"totalDays": 60
+			}
+		},
+		{
+			"note": "gospels-2-months canonical day 2",
+			"plan": {
+				"id": "gospels-2-months",
+				"name": "Read the Gospels in 2 months",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john"
+				],
+				"label": "the Gospels",
+				"pace": "duration",
+				"days": 60
+			},
+			"order": "canonical",
+			"start": "2026-10-11",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the Gospels in 2 months - today: Matthew 2",
+				"day": 2,
+				"totalDays": 60
+			}
+		},
+		{
+			"note": "gospels-2-months canonical day 3",
+			"plan": {
+				"id": "gospels-2-months",
+				"name": "Read the Gospels in 2 months",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john"
+				],
+				"label": "the Gospels",
+				"pace": "duration",
+				"days": 60
+			},
+			"order": "canonical",
+			"start": "2026-10-10",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the Gospels in 2 months - today: Matthew 3-4",
+				"day": 3,
+				"totalDays": 60
+			}
+		},
+		{
+			"note": "gospels-2-months canonical day 7",
+			"plan": {
+				"id": "gospels-2-months",
+				"name": "Read the Gospels in 2 months",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john"
+				],
+				"label": "the Gospels",
+				"pace": "duration",
+				"days": 60
+			},
+			"order": "canonical",
+			"start": "2026-10-06",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the Gospels in 2 months - today: Matthew 9-10",
+				"day": 7,
+				"totalDays": 60
+			}
+		},
+		{
+			"note": "gospels-2-months canonical day 30",
+			"plan": {
+				"id": "gospels-2-months",
+				"name": "Read the Gospels in 2 months",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john"
+				],
+				"label": "the Gospels",
+				"pace": "duration",
+				"days": 60
+			},
+			"order": "canonical",
+			"start": "2026-09-13",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the Gospels in 2 months - today: Mark 16",
+				"day": 30,
+				"totalDays": 60
+			}
+		},
+		{
+			"note": "gospels-2-months canonical day 200",
+			"plan": {
+				"id": "gospels-2-months",
+				"name": "Read the Gospels in 2 months",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john"
+				],
+				"label": "the Gospels",
+				"pace": "duration",
+				"days": 60
+			},
+			"order": "canonical",
+			"start": "2026-03-27",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the Gospels in 2 months - finished. Ready to go round again?",
+				"day": 60,
+				"totalDays": 60
+			}
+		},
+		{
+			"note": "gospels-2-months canonical day 100000",
+			"plan": {
+				"id": "gospels-2-months",
+				"name": "Read the Gospels in 2 months",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john"
+				],
+				"label": "the Gospels",
+				"pace": "duration",
+				"days": 60
+			},
+			"order": "canonical",
+			"start": "1752-12-28",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the Gospels in 2 months - finished. Ready to go round again?",
+				"day": 60,
+				"totalDays": 60
+			}
+		},
+		{
+			"note": "gospels-2-months chronological day 1",
+			"plan": {
+				"id": "gospels-2-months",
+				"name": "Read the Gospels in 2 months",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john"
+				],
+				"label": "the Gospels",
+				"pace": "duration",
+				"days": 60
+			},
+			"order": "chronological",
+			"start": "2026-10-12",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the Gospels in 2 months - today: Luke 1",
+				"day": 1,
+				"totalDays": 60
+			}
+		},
+		{
+			"note": "gospels-2-months chronological day 2",
+			"plan": {
+				"id": "gospels-2-months",
+				"name": "Read the Gospels in 2 months",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john"
+				],
+				"label": "the Gospels",
+				"pace": "duration",
+				"days": 60
+			},
+			"order": "chronological",
+			"start": "2026-10-11",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the Gospels in 2 months - today: Luke 2",
+				"day": 2,
+				"totalDays": 60
+			}
+		},
+		{
+			"note": "gospels-2-months chronological day 3",
+			"plan": {
+				"id": "gospels-2-months",
+				"name": "Read the Gospels in 2 months",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john"
+				],
+				"label": "the Gospels",
+				"pace": "duration",
+				"days": 60
+			},
+			"order": "chronological",
+			"start": "2026-10-10",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the Gospels in 2 months - today: Matthew 1-2",
+				"day": 3,
+				"totalDays": 60
+			}
+		},
+		{
+			"note": "gospels-2-months chronological day 7",
+			"plan": {
+				"id": "gospels-2-months",
+				"name": "Read the Gospels in 2 months",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john"
+				],
+				"label": "the Gospels",
+				"pace": "duration",
+				"days": 60
+			},
+			"order": "chronological",
+			"start": "2026-10-06",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the Gospels in 2 months - today: Matthew 4, Luke 4",
+				"day": 7,
+				"totalDays": 60
+			}
+		},
+		{
+			"note": "gospels-2-months chronological day 30",
+			"plan": {
+				"id": "gospels-2-months",
+				"name": "Read the Gospels in 2 months",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john"
+				],
+				"label": "the Gospels",
+				"pace": "duration",
+				"days": 60
+			},
+			"order": "chronological",
+			"start": "2026-09-13",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the Gospels in 2 months - today: Luke 11",
+				"day": 30,
+				"totalDays": 60
+			}
+		},
+		{
+			"note": "gospels-2-months chronological day 200",
+			"plan": {
+				"id": "gospels-2-months",
+				"name": "Read the Gospels in 2 months",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john"
+				],
+				"label": "the Gospels",
+				"pace": "duration",
+				"days": 60
+			},
+			"order": "chronological",
+			"start": "2026-03-27",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the Gospels in 2 months - finished. Ready to go round again?",
+				"day": 60,
+				"totalDays": 60
+			}
+		},
+		{
+			"note": "gospels-2-months chronological day 100000",
+			"plan": {
+				"id": "gospels-2-months",
+				"name": "Read the Gospels in 2 months",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john"
+				],
+				"label": "the Gospels",
+				"pace": "duration",
+				"days": 60
+			},
+			"order": "chronological",
+			"start": "1752-12-28",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the Gospels in 2 months - finished. Ready to go round again?",
+				"day": 60,
+				"totalDays": 60
+			}
+		},
+		{
+			"note": "bible-1-chapter-a-day canonical day 1",
+			"plan": {
+				"id": "bible-1-chapter-a-day",
+				"name": "Read one chapter a day from the whole Bible",
+				"books": "all",
+				"label": "the whole Bible",
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "canonical",
+			"start": "2026-10-12",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one chapter a day from the whole Bible - today: Genesis 1",
+				"day": 1,
+				"totalDays": 1189
+			}
+		},
+		{
+			"note": "bible-1-chapter-a-day canonical day 2",
+			"plan": {
+				"id": "bible-1-chapter-a-day",
+				"name": "Read one chapter a day from the whole Bible",
+				"books": "all",
+				"label": "the whole Bible",
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "canonical",
+			"start": "2026-10-11",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one chapter a day from the whole Bible - today: Genesis 2",
+				"day": 2,
+				"totalDays": 1189
+			}
+		},
+		{
+			"note": "bible-1-chapter-a-day canonical day 3",
+			"plan": {
+				"id": "bible-1-chapter-a-day",
+				"name": "Read one chapter a day from the whole Bible",
+				"books": "all",
+				"label": "the whole Bible",
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "canonical",
+			"start": "2026-10-10",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one chapter a day from the whole Bible - today: Genesis 3",
+				"day": 3,
+				"totalDays": 1189
+			}
+		},
+		{
+			"note": "bible-1-chapter-a-day canonical day 7",
+			"plan": {
+				"id": "bible-1-chapter-a-day",
+				"name": "Read one chapter a day from the whole Bible",
+				"books": "all",
+				"label": "the whole Bible",
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "canonical",
+			"start": "2026-10-06",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one chapter a day from the whole Bible - today: Genesis 7",
+				"day": 7,
+				"totalDays": 1189
+			}
+		},
+		{
+			"note": "bible-1-chapter-a-day canonical day 30",
+			"plan": {
+				"id": "bible-1-chapter-a-day",
+				"name": "Read one chapter a day from the whole Bible",
+				"books": "all",
+				"label": "the whole Bible",
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "canonical",
+			"start": "2026-09-13",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one chapter a day from the whole Bible - today: Genesis 30",
+				"day": 30,
+				"totalDays": 1189
+			}
+		},
+		{
+			"note": "bible-1-chapter-a-day canonical day 200",
+			"plan": {
+				"id": "bible-1-chapter-a-day",
+				"name": "Read one chapter a day from the whole Bible",
+				"books": "all",
+				"label": "the whole Bible",
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "canonical",
+			"start": "2026-03-27",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one chapter a day from the whole Bible - today: Joshua 13",
+				"day": 200,
+				"totalDays": 1189
+			}
+		},
+		{
+			"note": "bible-1-chapter-a-day canonical day 100000",
+			"plan": {
+				"id": "bible-1-chapter-a-day",
+				"name": "Read one chapter a day from the whole Bible",
+				"books": "all",
+				"label": "the whole Bible",
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "canonical",
+			"start": "1752-12-28",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one chapter a day from the whole Bible - finished. Ready to go round again?",
+				"day": 1189,
+				"totalDays": 1189
+			}
+		},
+		{
+			"note": "bible-1-chapter-a-day chronological day 1",
+			"plan": {
+				"id": "bible-1-chapter-a-day",
+				"name": "Read one chapter a day from the whole Bible",
+				"books": "all",
+				"label": "the whole Bible",
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "chronological",
+			"start": "2026-10-12",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one chapter a day from the whole Bible - today: Genesis 1",
+				"day": 1,
+				"totalDays": 1189
+			}
+		},
+		{
+			"note": "bible-1-chapter-a-day chronological day 2",
+			"plan": {
+				"id": "bible-1-chapter-a-day",
+				"name": "Read one chapter a day from the whole Bible",
+				"books": "all",
+				"label": "the whole Bible",
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "chronological",
+			"start": "2026-10-11",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one chapter a day from the whole Bible - today: Genesis 2",
+				"day": 2,
+				"totalDays": 1189
+			}
+		},
+		{
+			"note": "bible-1-chapter-a-day chronological day 3",
+			"plan": {
+				"id": "bible-1-chapter-a-day",
+				"name": "Read one chapter a day from the whole Bible",
+				"books": "all",
+				"label": "the whole Bible",
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "chronological",
+			"start": "2026-10-10",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one chapter a day from the whole Bible - today: Genesis 3",
+				"day": 3,
+				"totalDays": 1189
+			}
+		},
+		{
+			"note": "bible-1-chapter-a-day chronological day 7",
+			"plan": {
+				"id": "bible-1-chapter-a-day",
+				"name": "Read one chapter a day from the whole Bible",
+				"books": "all",
+				"label": "the whole Bible",
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "chronological",
+			"start": "2026-10-06",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one chapter a day from the whole Bible - today: Genesis 7",
+				"day": 7,
+				"totalDays": 1189
+			}
+		},
+		{
+			"note": "bible-1-chapter-a-day chronological day 30",
+			"plan": {
+				"id": "bible-1-chapter-a-day",
+				"name": "Read one chapter a day from the whole Bible",
+				"books": "all",
+				"label": "the whole Bible",
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "chronological",
+			"start": "2026-09-13",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one chapter a day from the whole Bible - today: Job 20",
+				"day": 30,
+				"totalDays": 1189
+			}
+		},
+		{
+			"note": "bible-1-chapter-a-day chronological day 200",
+			"plan": {
+				"id": "bible-1-chapter-a-day",
+				"name": "Read one chapter a day from the whole Bible",
+				"books": "all",
+				"label": "the whole Bible",
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "chronological",
+			"start": "2026-03-27",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one chapter a day from the whole Bible - today: Deuteronomy 4",
+				"day": 200,
+				"totalDays": 1189
+			}
+		},
+		{
+			"note": "bible-1-chapter-a-day chronological day 100000",
+			"plan": {
+				"id": "bible-1-chapter-a-day",
+				"name": "Read one chapter a day from the whole Bible",
+				"books": "all",
+				"label": "the whole Bible",
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "chronological",
+			"start": "1752-12-28",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one chapter a day from the whole Bible - finished. Ready to go round again?",
+				"day": 1189,
+				"totalDays": 1189
+			}
+		},
+		{
+			"note": "psalms-1-chapter-a-day canonical day 1",
+			"plan": {
+				"id": "psalms-1-chapter-a-day",
+				"name": "Read one Psalm a day",
+				"books": [
+					"psalm"
+				],
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "canonical",
+			"start": "2026-10-12",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one Psalm a day - today: Psalm 1",
+				"day": 1,
+				"totalDays": 150
+			}
+		},
+		{
+			"note": "psalms-1-chapter-a-day canonical day 2",
+			"plan": {
+				"id": "psalms-1-chapter-a-day",
+				"name": "Read one Psalm a day",
+				"books": [
+					"psalm"
+				],
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "canonical",
+			"start": "2026-10-11",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one Psalm a day - today: Psalm 2",
+				"day": 2,
+				"totalDays": 150
+			}
+		},
+		{
+			"note": "psalms-1-chapter-a-day canonical day 3",
+			"plan": {
+				"id": "psalms-1-chapter-a-day",
+				"name": "Read one Psalm a day",
+				"books": [
+					"psalm"
+				],
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "canonical",
+			"start": "2026-10-10",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one Psalm a day - today: Psalm 3",
+				"day": 3,
+				"totalDays": 150
+			}
+		},
+		{
+			"note": "psalms-1-chapter-a-day canonical day 7",
+			"plan": {
+				"id": "psalms-1-chapter-a-day",
+				"name": "Read one Psalm a day",
+				"books": [
+					"psalm"
+				],
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "canonical",
+			"start": "2026-10-06",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one Psalm a day - today: Psalm 7",
+				"day": 7,
+				"totalDays": 150
+			}
+		},
+		{
+			"note": "psalms-1-chapter-a-day canonical day 30",
+			"plan": {
+				"id": "psalms-1-chapter-a-day",
+				"name": "Read one Psalm a day",
+				"books": [
+					"psalm"
+				],
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "canonical",
+			"start": "2026-09-13",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one Psalm a day - today: Psalm 30",
+				"day": 30,
+				"totalDays": 150
+			}
+		},
+		{
+			"note": "psalms-1-chapter-a-day canonical day 200",
+			"plan": {
+				"id": "psalms-1-chapter-a-day",
+				"name": "Read one Psalm a day",
+				"books": [
+					"psalm"
+				],
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "canonical",
+			"start": "2026-03-27",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one Psalm a day - finished. Ready to go round again?",
+				"day": 150,
+				"totalDays": 150
+			}
+		},
+		{
+			"note": "psalms-1-chapter-a-day canonical day 100000",
+			"plan": {
+				"id": "psalms-1-chapter-a-day",
+				"name": "Read one Psalm a day",
+				"books": [
+					"psalm"
+				],
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "canonical",
+			"start": "1752-12-28",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one Psalm a day - finished. Ready to go round again?",
+				"day": 150,
+				"totalDays": 150
+			}
+		},
+		{
+			"note": "psalms-1-chapter-a-day chronological day 1",
+			"plan": {
+				"id": "psalms-1-chapter-a-day",
+				"name": "Read one Psalm a day",
+				"books": [
+					"psalm"
+				],
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "chronological",
+			"start": "2026-10-12",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one Psalm a day - today: Psalm 90",
+				"day": 1,
+				"totalDays": 150
+			}
+		},
+		{
+			"note": "psalms-1-chapter-a-day chronological day 2",
+			"plan": {
+				"id": "psalms-1-chapter-a-day",
+				"name": "Read one Psalm a day",
+				"books": [
+					"psalm"
+				],
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "chronological",
+			"start": "2026-10-11",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one Psalm a day - today: Psalm 59",
+				"day": 2,
+				"totalDays": 150
+			}
+		},
+		{
+			"note": "psalms-1-chapter-a-day chronological day 3",
+			"plan": {
+				"id": "psalms-1-chapter-a-day",
+				"name": "Read one Psalm a day",
+				"books": [
+					"psalm"
+				],
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "chronological",
+			"start": "2026-10-10",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one Psalm a day - today: Psalm 52",
+				"day": 3,
+				"totalDays": 150
+			}
+		},
+		{
+			"note": "psalms-1-chapter-a-day chronological day 7",
+			"plan": {
+				"id": "psalms-1-chapter-a-day",
+				"name": "Read one Psalm a day",
+				"books": [
+					"psalm"
+				],
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "chronological",
+			"start": "2026-10-06",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one Psalm a day - today: Psalm 142",
+				"day": 7,
+				"totalDays": 150
+			}
+		},
+		{
+			"note": "psalms-1-chapter-a-day chronological day 30",
+			"plan": {
+				"id": "psalms-1-chapter-a-day",
+				"name": "Read one Psalm a day",
+				"books": [
+					"psalm"
+				],
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "chronological",
+			"start": "2026-09-13",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one Psalm a day - today: Psalm 8",
+				"day": 30,
+				"totalDays": 150
+			}
+		},
+		{
+			"note": "psalms-1-chapter-a-day chronological day 200",
+			"plan": {
+				"id": "psalms-1-chapter-a-day",
+				"name": "Read one Psalm a day",
+				"books": [
+					"psalm"
+				],
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "chronological",
+			"start": "2026-03-27",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one Psalm a day - finished. Ready to go round again?",
+				"day": 150,
+				"totalDays": 150
+			}
+		},
+		{
+			"note": "psalms-1-chapter-a-day chronological day 100000",
+			"plan": {
+				"id": "psalms-1-chapter-a-day",
+				"name": "Read one Psalm a day",
+				"books": [
+					"psalm"
+				],
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "chronological",
+			"start": "1752-12-28",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one Psalm a day - finished. Ready to go round again?",
+				"day": 150,
+				"totalDays": 150
+			}
+		},
+		{
+			"note": "proverbs-1-chapter-a-day canonical day 1",
+			"plan": {
+				"id": "proverbs-1-chapter-a-day",
+				"name": "Read one Proverb a day",
+				"books": [
+					"proverbs"
+				],
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "canonical",
+			"start": "2026-10-12",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one Proverb a day - today: Proverbs 1",
+				"day": 1,
+				"totalDays": 31
+			}
+		},
+		{
+			"note": "proverbs-1-chapter-a-day canonical day 2",
+			"plan": {
+				"id": "proverbs-1-chapter-a-day",
+				"name": "Read one Proverb a day",
+				"books": [
+					"proverbs"
+				],
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "canonical",
+			"start": "2026-10-11",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one Proverb a day - today: Proverbs 2",
+				"day": 2,
+				"totalDays": 31
+			}
+		},
+		{
+			"note": "proverbs-1-chapter-a-day canonical day 3",
+			"plan": {
+				"id": "proverbs-1-chapter-a-day",
+				"name": "Read one Proverb a day",
+				"books": [
+					"proverbs"
+				],
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "canonical",
+			"start": "2026-10-10",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one Proverb a day - today: Proverbs 3",
+				"day": 3,
+				"totalDays": 31
+			}
+		},
+		{
+			"note": "proverbs-1-chapter-a-day canonical day 7",
+			"plan": {
+				"id": "proverbs-1-chapter-a-day",
+				"name": "Read one Proverb a day",
+				"books": [
+					"proverbs"
+				],
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "canonical",
+			"start": "2026-10-06",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one Proverb a day - today: Proverbs 7",
+				"day": 7,
+				"totalDays": 31
+			}
+		},
+		{
+			"note": "proverbs-1-chapter-a-day canonical day 30",
+			"plan": {
+				"id": "proverbs-1-chapter-a-day",
+				"name": "Read one Proverb a day",
+				"books": [
+					"proverbs"
+				],
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "canonical",
+			"start": "2026-09-13",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one Proverb a day - today: Proverbs 30",
+				"day": 30,
+				"totalDays": 31
+			}
+		},
+		{
+			"note": "proverbs-1-chapter-a-day canonical day 200",
+			"plan": {
+				"id": "proverbs-1-chapter-a-day",
+				"name": "Read one Proverb a day",
+				"books": [
+					"proverbs"
+				],
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "canonical",
+			"start": "2026-03-27",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one Proverb a day - finished. Ready to go round again?",
+				"day": 31,
+				"totalDays": 31
+			}
+		},
+		{
+			"note": "proverbs-1-chapter-a-day canonical day 100000",
+			"plan": {
+				"id": "proverbs-1-chapter-a-day",
+				"name": "Read one Proverb a day",
+				"books": [
+					"proverbs"
+				],
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "canonical",
+			"start": "1752-12-28",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one Proverb a day - finished. Ready to go round again?",
+				"day": 31,
+				"totalDays": 31
+			}
+		},
+		{
+			"note": "proverbs-1-chapter-a-day chronological day 1",
+			"plan": {
+				"id": "proverbs-1-chapter-a-day",
+				"name": "Read one Proverb a day",
+				"books": [
+					"proverbs"
+				],
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "chronological",
+			"start": "2026-10-12",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one Proverb a day - today: Proverbs 1",
+				"day": 1,
+				"totalDays": 31
+			}
+		},
+		{
+			"note": "proverbs-1-chapter-a-day chronological day 2",
+			"plan": {
+				"id": "proverbs-1-chapter-a-day",
+				"name": "Read one Proverb a day",
+				"books": [
+					"proverbs"
+				],
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "chronological",
+			"start": "2026-10-11",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one Proverb a day - today: Proverbs 2",
+				"day": 2,
+				"totalDays": 31
+			}
+		},
+		{
+			"note": "proverbs-1-chapter-a-day chronological day 3",
+			"plan": {
+				"id": "proverbs-1-chapter-a-day",
+				"name": "Read one Proverb a day",
+				"books": [
+					"proverbs"
+				],
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "chronological",
+			"start": "2026-10-10",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one Proverb a day - today: Proverbs 3",
+				"day": 3,
+				"totalDays": 31
+			}
+		},
+		{
+			"note": "proverbs-1-chapter-a-day chronological day 7",
+			"plan": {
+				"id": "proverbs-1-chapter-a-day",
+				"name": "Read one Proverb a day",
+				"books": [
+					"proverbs"
+				],
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "chronological",
+			"start": "2026-10-06",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one Proverb a day - today: Proverbs 7",
+				"day": 7,
+				"totalDays": 31
+			}
+		},
+		{
+			"note": "proverbs-1-chapter-a-day chronological day 30",
+			"plan": {
+				"id": "proverbs-1-chapter-a-day",
+				"name": "Read one Proverb a day",
+				"books": [
+					"proverbs"
+				],
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "chronological",
+			"start": "2026-09-13",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one Proverb a day - today: Proverbs 30",
+				"day": 30,
+				"totalDays": 31
+			}
+		},
+		{
+			"note": "proverbs-1-chapter-a-day chronological day 200",
+			"plan": {
+				"id": "proverbs-1-chapter-a-day",
+				"name": "Read one Proverb a day",
+				"books": [
+					"proverbs"
+				],
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "chronological",
+			"start": "2026-03-27",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one Proverb a day - finished. Ready to go round again?",
+				"day": 31,
+				"totalDays": 31
+			}
+		},
+		{
+			"note": "proverbs-1-chapter-a-day chronological day 100000",
+			"plan": {
+				"id": "proverbs-1-chapter-a-day",
+				"name": "Read one Proverb a day",
+				"books": [
+					"proverbs"
+				],
+				"pace": "perDay",
+				"perDay": 1
+			},
+			"order": "chronological",
+			"start": "1752-12-28",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read one Proverb a day - finished. Ready to go round again?",
+				"day": 31,
+				"totalDays": 31
+			}
+		},
+		{
+			"note": "custom plan canonical",
+			"plan": {
+				"id": "custom-fixture-plan",
+				"name": "Ruth and Psalms",
+				"books": [
+					"ruth",
+					"psalm"
+				],
+				"pace": "perDay",
+				"perDay": 3,
+				"custom": true
+			},
+			"order": "canonical",
+			"start": "2026-10-03",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "Europe/London",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Ruth and Psalms - today: Psalm 23-25",
+				"day": 10,
+				"totalDays": 52
+			}
+		},
+		{
+			"note": "custom plan chronological",
+			"plan": {
+				"id": "custom-fixture-plan",
+				"name": "Ruth and Psalms",
+				"books": [
+					"ruth",
+					"psalm"
+				],
+				"pace": "perDay",
+				"perDay": 3,
+				"custom": true
+			},
+			"order": "chronological",
+			"start": "2026-10-03",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "Europe/London",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Ruth and Psalms - today: Psalm 1-3",
+				"day": 10,
+				"totalDays": 52
+			}
+		},
+		{
+			"note": "starts in three days",
+			"plan": {
+				"id": "bible-1-year",
+				"name": "Read the whole Bible in a year",
+				"books": "all",
+				"label": "the whole Bible",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "canonical",
+			"start": "2026-10-15",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the whole Bible in a year - nothing scheduled today. A rest day.",
+				"day": 1,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "Pacific/Auckland at 2026-10-12T02:00:00Z",
+			"plan": {
+				"id": "gospels-1-year",
+				"name": "Read the Gospels in a year",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john"
+				],
+				"label": "the Gospels",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "canonical",
+			"start": "2026-10-08",
+			"now": "2026-10-12T02:00:00Z",
+			"timeZone": "Pacific/Auckland",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the Gospels in a year - today: Matthew 1",
+				"day": 5,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "Pacific/Honolulu at 2026-10-12T12:00:00Z",
+			"plan": {
+				"id": "gospels-1-year",
+				"name": "Read the Gospels in a year",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john"
+				],
+				"label": "the Gospels",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "canonical",
+			"start": "2026-10-08",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "Pacific/Honolulu",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the Gospels in a year - today: Matthew 1",
+				"day": 5,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "America/Chicago at 2026-10-12T02:00:00Z",
+			"plan": {
+				"id": "gospels-1-year",
+				"name": "Read the Gospels in a year",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john"
+				],
+				"label": "the Gospels",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "canonical",
+			"start": "2026-10-07",
+			"now": "2026-10-12T02:00:00Z",
+			"timeZone": "America/Chicago",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the Gospels in a year - today: Matthew 1",
+				"day": 5,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "Europe/London at 2026-10-12T02:00:00Z",
+			"plan": {
+				"id": "gospels-1-year",
+				"name": "Read the Gospels in a year",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john"
+				],
+				"label": "the Gospels",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "canonical",
+			"start": "2026-10-08",
+			"now": "2026-10-12T02:00:00Z",
+			"timeZone": "Europe/London",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the Gospels in a year - today: Matthew 1",
+				"day": 5,
+				"totalDays": 365
+			}
+		},
+		{
+			"note": "Pacific/Kiritimati at 2026-10-12T12:00:00Z",
+			"plan": {
+				"id": "gospels-1-year",
+				"name": "Read the Gospels in a year",
+				"books": [
+					"matthew",
+					"mark",
+					"luke",
+					"john"
+				],
+				"label": "the Gospels",
+				"pace": "duration",
+				"days": 365
+			},
+			"order": "canonical",
+			"start": "2026-10-09",
+			"now": "2026-10-12T12:00:00Z",
+			"timeZone": "Pacific/Kiritimati",
+			"expect": {
+				"title": "Reading plan reminder",
+				"body": "Read the Gospels in a year - today: Matthew 1",
+				"day": 5,
+				"totalDays": 365
+			}
+		}
+	]
+}

@@ -831,43 +831,81 @@ it("shows the plan mark and not the clock while a plan has the arrows", () => {
 		});
 	});
 
-	it("schedules and cancels a daily notification for a subscription", () => {
+	it("keeps a chosen reminder time with the subscription", () => {
 		cy.window().then((win) => {
 			expect(win.notifyTime).to.be.a("function");
-			expect(win.scheduleNotification).to.be.a("function");
+			expect(win.notifyEnabled).to.be.a("function");
 
 			var sub = {
 				id: "sub-test",
 				planId: "bible-1-chapter-a-day",
 				order: "canonical",
 				start: win.todayDateString(),
-				cycle: 1,
+				passes: 1,
 			};
 			expect(win.notifyTime(sub)).to.eq("08:00");
+			expect(win.notifyEnabled(sub)).to.eq(false);
 
 			win.savePlanSubscriptions([sub]);
 			win.setNotifyTime(sub, "07:30");
 			expect(win.notifyTime(win.planSubscriptions()[0])).to.eq("07:30");
+			expect(win.notifyEnabled(win.planSubscriptions()[0])).to.eq(true);
 
-			var next = win.nextNotifyAt(win.planSubscriptions()[0]);
-			expect(next).to.be.greaterThan(Date.now());
-			expect(next).to.be.lessThan(Date.now() + 49 * 3600 * 1000);
-
+			// What the reminder would say. The server works this out too, from
+			// the same subscription - server/Schedule.php against
+			// resources/planFixture.json - so it is checked here as well.
 			var body = win.notifyBody(win.planSubscriptions()[0]);
 			expect(body).to.contain("one chapter a day");
 			expect(body).to.contain("Genesis 1");
 		});
 	});
 
+	it("builds the payload the server is sent", () => {
+		cy.window().then((win) => {
+			expect(win.pushReminders).to.be.a("function");
+			expect(win.pushSupported).to.be.a("function");
+			expect(win.pushApi).to.be.a("function");
+
+			expect(win.pushApi("key")).to.contain("action=key");
+
+			win.savePlanSubscriptions([
+				{ id: "sub-a", planId: "bible-1-chapter-a-day", order: "canonical", start: win.todayDateString(), passes: 1, notifyTime: "07:15" },
+				{ id: "sub-b", planId: "psalms-1-chapter-a-day", order: "chronological", start: win.todayDateString(), passes: 1 },
+			]);
+
+			// Only the subscription that has a time is a reminder; the other is
+			// simply a plan the reader is reading.
+			var reminders = win.pushReminders();
+			expect(reminders).to.have.length(1);
+			expect(reminders[0].subscriptionId).to.eq("sub-a");
+			expect(reminders[0].notifyTime).to.eq("07:15");
+			expect(reminders[0].order).to.eq("canonical");
+			expect(reminders[0].plan.id).to.eq("bible-1-chapter-a-day");
+			// A timezone is always sent, even when the browser cannot name its
+			// own, because the server would otherwise use its own idea of the
+			// reader's morning.
+			expect(reminders[0].timezone).to.be.a("string");
+			expect(reminders[0].timezone.length).to.be.greaterThan(0);
+		});
+	});
+
+	// Granting a subscription is something the browser decides, and there is no
+	// service worker registered on localhost (index.html skips registering
+	// there), so pushSubscribe can only ever say no under Cypress. Stubbing it
+	// is what lets these tests cover the logic rather than the browser.
+	function stubPush(win, resolvesTo) {
+		cy.stub(win, 'pushSubscribe').callsFake(() => Promise.resolve(resolvesTo));
+		cy.stub(win, 'pushSync').callsFake(() => Promise.resolve());
+		cy.stub(win, 'pushSyncNow').callsFake(() => Promise.resolve());
+		if (win.Notification) {
+			cy.stub(win.Notification, 'requestPermission').resolves('granted');
+		}
+	}
+
 	it("toggles the notification bell on and off", () => {
 		openPlansPage();
-		// Headless Chromium leaves Notification.permission at 'default', and a
-		// real prompt would be auto-denied - so stub it to grant, the way a
-		// reader who has allowed notifications would arrive.
 		cy.window().then((win) => {
-			if (win.Notification) {
-				cy.stub(win.Notification, 'requestPermission').resolves('granted');
-			}
+			stubPush(win, { endpoint: "https://example.test/push", keys: {} });
 		});
 		cy.get("[data-cy='planRow-psalms-1-chapter-a-day'] [data-cy='planSubscribe']").click();
 		cy.get("#plansSubscriptionList [data-cy='planNotify']").should("not.have.class", "plan-notify-on");
@@ -876,6 +914,40 @@ it("shows the plan mark and not the clock while a plan has the arrows", () => {
 		cy.window().then((win) => {
 			expect(win.planSubscriptions()[0].notifyTime).to.eq("08:00");
 		});
+		cy.get("[data-cy='planNotify']").click();
+		cy.get("[data-cy='planNotify']").should("not.have.class", "plan-notify-on");
+		cy.window().then((win) => {
+			expect(win.planSubscriptions()[0].notifyTime || "").to.eq("");
+		});
+	});
+
+	it("shows the reminder time once the bell is on, and takes a new one", () => {
+		openPlansPage();
+		cy.window().then((win) => {
+			stubPush(win, { endpoint: "https://example.test/push", keys: {} });
+		});
+		cy.get("[data-cy='planRow-psalms-1-chapter-a-day'] [data-cy='planSubscribe']").click();
+		// No time picker until there is a reminder to set a time for.
+		cy.get("[data-cy='planNotifyTime']").should("not.exist");
+		cy.get("[data-cy='planNotify']").click();
+		cy.get("[data-cy='planNotifyTime']").should("have.value", "08:00");
+		cy.get("[data-cy='planNotifyTime']").clear().type("06:45");
+		cy.get("[data-cy='planNotifyTime']").blur();
+		cy.window().then((win) => {
+			expect(win.planSubscriptions()[0].notifyTime).to.eq("06:45");
+			expect(win.pushReminders()[0].notifyTime).to.eq("06:45");
+		});
+	});
+
+	it("turns the bell back off when the browser will not subscribe", () => {
+		openPlansPage();
+		cy.window().then((win) => {
+			// Permission granted, but no push subscription could be made - the
+			// case on a browser without push support, or one where the service
+			// worker is not registered.
+			stubPush(win, null);
+		});
+		cy.get("[data-cy='planRow-psalms-1-chapter-a-day'] [data-cy='planSubscribe']").click();
 		cy.get("[data-cy='planNotify']").click();
 		cy.get("[data-cy='planNotify']").should("not.have.class", "plan-notify-on");
 		cy.window().then((win) => {

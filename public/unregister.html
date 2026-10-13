@@ -4,6 +4,30 @@
   </body>
 
   <script>
+    // This page is reached by hand to clear a browser that has got itself
+    // wedged. It is not the About page's "Check for Updates" - see that for
+    // why a service worker is not the only thing that has to go.
+
+    // Reminders first. Unregistering tells the browser to stop listening, but
+    // it tells the server nothing: only a push service reports a dead
+    // subscription, and only when something is next sent to it. So without
+    // this, a browser that has been cleared this way keeps being reminded at
+    // 8am by a server that has no way to know.
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+      navigator.serviceWorker.getRegistration().then(function (registration) {
+        if (!registration) return null;
+        return registration.pushManager.getSubscription().then(function (subscription) {
+          return subscription ? subscription.unsubscribe() : null;
+        }).catch(function () { return null; });
+      }).catch(function () {}).then(function () {
+        return fetch('server/push.php?action=sync', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reminders: [] }),
+        }).catch(function () {});
+      });
+    }
+
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(function(registrations) {
         for(let registration of registrations) {

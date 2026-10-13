@@ -7,7 +7,11 @@
 		"compile": "node compile.mjs",
 		"serve": "node node_modules/simplehttpserver/cli.js public",
 		"tests": "npx cypress open -b chrome --e2e",
-		"testscli": "npx cypress run -b chrome --e2e"
+		"testscli": "npx cypress run -b chrome --e2e",
+		"testserver": "php server/CryptoTest.php && php server/ScheduleTest.php && php server/SendTest.php",
+		"testui": "node tools/testPushUi.mjs",
+		"test": "npm run testserver && npm run testui",
+		"pushfixtures": "node tools/buildBooksJson.mjs && node tools/buildPlanFixture.mjs"
 	},
 	"dependencies": {
 		"csv-parse": "^5.5.2",

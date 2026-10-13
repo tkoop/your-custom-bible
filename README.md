@@ -69,6 +69,30 @@ get their definitions, lemmas and pronunciations. The BSB tables hold no
 dictionary, so every other number on those pages is counted out of the BSB's own
 use of the word.
 
+## Plan reminders
+
+A reading plan subscription can be reminded daily, at a time the reader picks,
+by a notification saying the plan's name and what is read that day. The
+notification is sent by a small PHP server in `server/`, which Apache runs
+directly - there is no separate service and the deploy script is unchanged.
+
+To run it:
+
+```
+npm run pushfixtures   # once, and again after any change to plans.js
+npm test               # the server tests and the browser tests
+```
+
+On the server it needs:
+
+- a vhost that runs PHP (`server/probe.php` checks this)
+- a writable `/var/lib/yourcustombible/`, where the VAPID key pair and the
+  database are created
+- one cron entry: `* * * * * /usr/bin/php /var/www/bible.timkoop.com/server/send.php`
+
+`AGENTS.md` has the section "Plan reminders" covering how it works and why the
+schedule arithmetic is ported rather than shared.
+
 ## License
 
 + The code is licensed under the MIT license (see `LICENSE`).

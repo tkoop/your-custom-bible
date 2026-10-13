@@ -27,6 +27,12 @@
 
 <script>
 	function checkUpdates() {
+		// Reminders go first: this button clears everything this browser has
+		// registered for, and a reminder the server still sends to an
+		// unsubscribed browser is the one thing it could not clean up on its
+		// own. Unregistering does not tell the server - only a push service
+		// does that, and only when something is next sent.
+		if (typeof pushForget === "function") pushForget();
 		// Check if service workers are supported in the browser
 		if ("serviceWorker" in navigator) {
 			navigator.serviceWorker.getRegistrations().then(function (registrations) {

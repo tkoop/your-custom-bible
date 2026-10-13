@@ -1,1 +1,9 @@
 /node_modules
+/server/node_modules
+
+# A secret never belongs in the checkout. The push server's VAPID key pair and
+# its database are written to /var/lib/yourcustombible rather than here,
+# because the deploy script runs "git clean -f", which deletes untracked files
+# - including anything named here that is not ignored. Listing .env is the
+# second line of defence, not the first.
+.env

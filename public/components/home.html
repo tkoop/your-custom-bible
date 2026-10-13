@@ -232,7 +232,8 @@
 			actions.appendChild(see);
 		}
 
-		// A daily nudge: a bell the reader taps to be reminded at a chosen time.
+		// A daily nudge: a bell the reader taps to be reminded, and the time it
+		// should arrive at. The time is only there once the bell is on.
 		if (plan) {
 			var notify = document.createElement("button");
 			notify.className = "plan-notify-toggle";
@@ -246,10 +247,32 @@
 				if (notifyEnabled(subscription)) {
 					disableNotification(subscription);
 				} else {
-					enableNotification(subscription, DEFAULT_NOTIFY_TIME);
+					// The time this reminder already had if it has ever been
+					// set, and the default otherwise - so turning it back on
+					// does not quietly move it to 08:00.
+					enableNotification(
+						subscription,
+						subscription.notifyTime || DEFAULT_NOTIFY_TIME,
+					);
 				}
 			};
 			actions.appendChild(notify);
+
+			if (notifyEnabled(subscription)) {
+				var when = document.createElement("input");
+				when.className = "plan-notify-time";
+				when.setAttribute("data-cy", "homePlanNotifyTime");
+				when.type = "time";
+				when.value = notifyTime(subscription);
+				when.setAttribute("aria-label", "Reminder time");
+				when.title = "The reminder arrives at this time, where you are.";
+				when.onchange = function () {
+					setNotifyTime(subscription, when.value);
+					pushSync();
+					fireEvent({ name: "plansUpdated" });
+				};
+				actions.appendChild(when);
+			}
 		}
 
 		if (actions.childNodes.length) card.appendChild(actions);

@@ -1111,6 +1111,33 @@ div.index-chapters a:active {
 	color: #fff;
 }
 
+/* When the reminder should arrive. Sits beside the bell and only appears once
+   it is on, so it is quiet until there is a reminder to set a time for. The
+   browser's own time control is used rather than a built one, so it follows the
+   reader's locale and picks up their own formatting. */
+.plan-notify-time {
+	flex: none;
+	height: 2.2rem;
+	padding: 0 0.45rem;
+	border: 1px solid var(--border);
+	border-radius: 999px;
+	background-color: var(--surface);
+	color: var(--text-muted);
+	font-size: 0.85rem;
+	font-family: inherit;
+	line-height: 1;
+	box-shadow: var(--shadow-sm);
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.plan-notify-time:hover,
+.plan-notify-time:focus {
+	border-color: var(--primary);
+	color: var(--primary);
+	outline: none;
+}
+
 .home-continue {
 	line-height: 1.6;
 }
