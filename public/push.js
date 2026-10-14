@@ -44,9 +44,10 @@ function pushSupported() {
 
 // The server's VAPID public key, kept in localStorage because it cannot change
 // without invalidating every subscription.
-function pushPublicKey() {
+function pushPublicKey(force) {
 	var cached = null;
 	try {
+		if (force) localStorage.removeItem("pushPublicKey");
 		cached = localStorage.pushPublicKey;
 	} catch (e) {}
 	if (cached) return Promise.resolve(cached);
@@ -93,16 +94,39 @@ function pushRegistration() {
 		});
 }
 
+// If a fresh service worker is still installing, a PushManager subscribe can
+// come back as a transient InvalidStateError even though permission was
+// granted. Give it the moment it needs to activate before trying.
+function pushActiveRegistration() {
+	return pushRegistration().then(function (registration) {
+		if (!registration || registration.active) return registration;
+		var worker = registration.installing || registration.waiting;
+		if (!worker) return registration;
+		return new Promise(function (resolve) {
+			var settled = false;
+			var finish = function () {
+				if (settled) return;
+				settled = true;
+				resolve(registration);
+			};
+			worker.addEventListener("statechange", function () {
+				if (worker.state == "activated" || worker.state == "redundant") finish();
+			});
+			setTimeout(finish, 5000);
+		});
+	});
+}
+
 // Asks for permission and subscribes, returning the browser's push
 // subscription or null. A refusal is not an error: the caller drops the
 // setting so the bell shows off rather than promising a nudge that cannot
 // arrive.
 function pushSubscribe() {
 	if (!pushSupported()) return Promise.resolve(null);
-	return pushRegistration()
+	return pushActiveRegistration()
 		.then(function (registration) {
 			if (!registration) return null;
-			return pushPublicKey().then(function (key) {
+			return pushPublicKey(true).then(function (key) {
 				return registration.pushManager.subscribe({
 					userVisibleOnly: true,
 					applicationServerKey: pushKeyBytes(key),
