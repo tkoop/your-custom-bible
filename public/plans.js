@@ -744,9 +744,19 @@ function subscribeToPlan(plan, order, start) {
 }
 
 function unsubscribeFromPlan(id) {
+	// A reader who has asked to be reminded wants the nudge to stop as soon
+	// as they unsubscribe. A debounced snapshot would otherwise leave the
+	// server sending it until something else happens.
+	var wasReminding = planSubscriptions().some(function (subscription) {
+		return subscription.id == id && notifyEnabled(subscription);
+	});
 	savePlanSubscriptions(
 		planSubscriptions().filter((subscription) => subscription.id != id),
 	);
+	if (wasReminding && typeof pushSync === "function") {
+		pushSync();
+		if (typeof pushSyncNow === "function") pushSyncNow();
+	}
 	fireEvent({ name: "plansUpdated" });
 }
 
