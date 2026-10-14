@@ -12,6 +12,7 @@
 		<div class="plans-section-head">
 			<h2>Your subscriptions</h2>
 		</div>
+		<p id="plansPushStatus" class="push-status" data-cy="pushStatus"></p>
 		<div id="plansSubscriptionList" class="plans-list"></div>
 	</section>
 
@@ -191,6 +192,7 @@ function plansProgressLine(state) {
 	function plansRenderSubscriptions() {
 		var container = document.getElementById("plansSubscriptionList");
 		if (!container) return;
+		renderPushStatus(document.getElementById("plansPushStatus"));
 		container.innerHTML = "";
 		var subscriptions = planSubscriptions();
 

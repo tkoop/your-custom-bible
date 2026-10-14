@@ -4030,3 +4030,12 @@ body.share-open {
 	font-size: 0.9rem;
 	text-align: center;
 }
+
+/* Whether this browser is listening for plan reminders at all. Deliberately
+   quiet: it is a note for when the bells do not behave, not a badge shouting
+   at a reader who has not asked anything. */
+.push-status {
+	margin: 0.25rem 0 0.75rem;
+	color: var(--text-muted);
+	font-size: 0.85rem;
+}

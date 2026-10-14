@@ -36,6 +36,7 @@
 				All plans
 			</a>
 		</div>
+		<div id="homePushStatus" class="push-status" data-cy="pushStatus"></div>
 		<div id="homePlans" class="home-plans"></div>
 	</section>
 
@@ -288,6 +289,7 @@
 	function renderHomePlans() {
 		var el = document.getElementById("homePlans");
 		if (!el) return;
+		renderPushStatus(document.getElementById("homePushStatus"));
 		var subscriptions = planSubscriptions();
 		el.innerHTML = "";
 		if (subscriptions.length == 0) {

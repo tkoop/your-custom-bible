@@ -235,6 +235,36 @@ function pushSubscribed() {
 			return false;
 		});
 }
+
+// A short, plain statement of whether this browser can receive plan reminders.
+// The bell says whether a particular plan is nudged; this says whether the
+// browser underneath it is listening at all - the two are different questions,
+// and only the second one explains a bell that will not stay on.
+function pushStatusText() {
+	if (!pushSupported()) {
+		return Promise.resolve("This browser cannot receive plan reminders.");
+	}
+	if (Notification.permission === "denied") {
+		return Promise.resolve(
+			"Notifications are blocked for this site. Turn them on in the browser's site settings, then tap a bell again.",
+		);
+	}
+	return pushSubscribed().then(function (subscribed) {
+		return subscribed
+			? "This browser is subscribed to plan reminders."
+			: "This browser is not subscribed to plan reminders yet.";
+	});
+}
+
+// Puts that statement on the page. Safe to call more than once: a re-render of
+// the plans list should not leave an old answer behind.
+function renderPushStatus(container) {
+	if (!container) return;
+	container.textContent = "Checking plan reminders…";
+	pushStatusText().then(function (text) {
+		container.textContent = text;
+	});
+}
 // Turns reminders off from this browser: the push subscription is dropped and
 // the server is told to forget everything, in that order.
 //
