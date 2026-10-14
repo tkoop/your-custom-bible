@@ -20,8 +20,63 @@ class Push
     /** Where the key pair and the database live. */
     public static function dataDir()
     {
-        return getenv('YCB_DATA_DIR') ?: '/var/lib/yourcustombible';
+        return getenv('YCB_DATA_DIR') ?: dirname(__DIR__);
     }
+    public static function envFile()
+    {
+        if (getenv('YCB_ENV_FILE')) {
+            return getenv('YCB_ENV_FILE');
+        }
+        // The deployed app sits at /var/www/bible.timkoop.com.
+        return dirname(__DIR__) . "/.env";
+    }
+
+    public static function readEnv($key)
+    {
+        $path = self::envFile();
+        if (!is_file($path)) {
+            return null;
+        }
+        foreach (file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
+            $line = trim($line);
+            if ($line === "" || str_starts_with($line, "#")) {
+                continue;
+            }
+            $equals = strpos($line, "=");
+            if ($equals === false) {
+                continue;
+            }
+            $name = trim(substr($line, 0, $equals));
+            if ($name !== $key) {
+                continue;
+            }
+            $value = trim(substr($line, $equals + 1));
+            if ($value !== "" && ($value[0] === chr(34) || $value[0] === chr(39))) {
+                $quote = $value[0];
+                $end = strrpos($value, $quote, 1);
+                if ($end !== false && $end > 0) {
+                    $value = substr($value, 1, $end - 1);
+                }
+            } elseif (($hash = strpos($value, " #")) !== false) {
+                $value = trim(substr($value, 0, $hash));
+            }
+            return $value;
+        }
+        return null;
+    }
+    public static function writeEnv($key, $value)
+    {
+        $path = self::envFile();
+        $lines = is_file($path) ? file($path) : array();
+        $lines[] = "$key=$value";
+        $dir = dirname($path);
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0755, true);
+        }
+        $raw = implode("\n", array_map("rtrim", $lines)) . "\n";
+        file_put_contents($path, $raw, LOCK_EX);
+    }
+
 
     public static function dbPath()
     {
@@ -54,51 +109,60 @@ class Push
      */
     public static function keys()
     {
+        // First, the .env file, which is where the key pair now lives. That is
+        // what Deployable's Environment tab edits, and unlike /var/lib it does
+        // not need to be backed up separately.
+        $privateRaw = self::readEnv('YCB_VAPID_PRIVATE_PEM_B64');
+        $publicKey = self::readEnv('YCB_VAPID_PUBLIC_KEY');
+        if (is_string($privateRaw) && is_string($publicKey)) {
+            $private = base64_decode($privateRaw, true);
+            if ($private !== false) {
+                return ['privateKey' => $private, 'publicKey' => Crypto::fromBase64Url($publicKey)];
+            }
+        }
+
+        // A .env written before the move had no .et prefix keys. Fall back to a
+        // PEM stored under YCB_VAPID_PRIVATE_KEY, in case the user still holds
+        // an older file. This is only here for backwards compatibility.
+        $privatePem = self::readEnv('YCB_VAPID_PRIVATE_KEY');
+        if (is_string($privatePem) && is_string($publicKey)) {
+            $private = @openssl_pkey_get_private($privatePem);
+            if ($private) {
+                $details = openssl_pkey_get_details($private);
+                $pem = '';
+                if (openssl_pkey_export($private, $pem)) {
+                    return ['privateKey' => $pem, 'publicKey' => Crypto::fromBase64Url($publicKey)];
+                }
+            }
+        }
+
+        // An installation that has not moved its keys yet, or the tests
+        // pointing at YCB_DATA_DIR, keep the JSON file. They will be moved the
+        // next time the generation path runs, or never if the file stays.
         $path = self::keysPath();
         if (is_file($path)) {
             $stored = json_decode(file_get_contents($path), true);
             if (is_array($stored) && isset($stored['privateKey'], $stored['publicKey'])) {
                 return $stored;
             }
-            throw new RuntimeException('vapid.json is unreadable: ' . $path);
         }
 
+        // Generate, and write to the .env where deployable and the administrator
+        // can both see them. The same generation runs once on first use.
         $keys = Vapid::generateKeys();
         $stored = [
             'privateKey' => $keys['privateKey'],
-            // base64url, not the raw point: 65 bytes of a P-256 public key are
-            // not valid UTF-8, so json_encode() refuses them and writes "false".
-            // That is silent - the file looks written and comes back unreadable
-            // on the next request - which is exactly what happened the first
-            // time this ran.
-            'publicKey' => Vapid::publicKeyBase64($keys['publicKey']),
-            'createdAt' => gmdate('c'),
+            'publicKey' => $keys['publicKey'],
         ];
-
-        self::ensureDir();
-        // Written to a temporary file and moved into place, so a failure part
-        // way through cannot leave a half-written key file behind - which would
-        // be worse than none at all, because it would read as corrupt.
-        $temporary = $path . '.tmp';
-        $encoded = json_encode($stored, JSON_PRETTY_PRINT);
-        if ($encoded === false) {
-            throw new RuntimeException('could not encode the key pair: ' . json_last_error_msg());
-        }
-        file_put_contents($temporary, $encoded . "\n");
-        chmod($temporary, 0600);
-        if (!rename($temporary, $path)) {
-            @unlink($temporary);
-            throw new RuntimeException('could not write the key pair to ' . $path);
-        }
-
-        self::log('generated a new VAPID key pair at ' . $path);
-        return $stored;
+        self::writeEnv('YCB_VAPID_PRIVATE_PEM_B64', base64_encode($stored['privateKey']));
+        self::writeEnv('YCB_VAPID_PUBLIC_KEY', Vapid::publicKeyBase64($stored['publicKey']));
+        self::log('generated a new VAPID key pair and wrote it to ' . self::envFile());
+        return ['privateKey' => $stored['privateKey'], 'publicKey' => $stored['publicKey']];
     }
-
     public static function publicKeyBase64()
     {
         $keys = self::keys();
-        return $keys['publicKey'];
+        return Vapid::publicKeyBase64($keys['publicKey']);
     }
 
     // ---------- the database ----------

@@ -15,6 +15,7 @@ require_once __DIR__ . '/lib.php';
 
 $dataDir = sys_get_temp_dir() . '/ycb-sendtest-' . random_int(1000, 9999);
 putenv('YCB_DATA_DIR=' . $dataDir);
+putenv('YCB_ENV_FILE=' . $dataDir . '/.env');
 putenv('MOCK_STATE=' . $dataDir . '/mock.json');
 
 $root = dirname(__DIR__);

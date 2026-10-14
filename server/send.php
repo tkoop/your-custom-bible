@@ -1,7 +1,7 @@
 <?php
 // Sends the day's reminders. Run once a minute by cron:
 //
-//   * * * * * /usr/bin/php /var/www/bible.timkoop.com/server/send.php >> /var/lib/yourcustombible/push.log 2>&1
+//   * * * * * /usr/bin/php /var/www/bible.timkoop.com/server/send.php >> /var/www/bible.timkoop.com/push.log 2>&1
 //
 // A reminder is due when it is past the reader's chosen time *in the reader's
 // own timezone*, and has not already been sent on that reader's local date.
