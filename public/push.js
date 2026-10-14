@@ -75,16 +75,20 @@ function pushKeyBytes(base64) {
 
 function pushRegistration() {
 	// getRegistration rather than navigator.serviceWorker.ready: ready never
-	// settles when there is no registration at all, which is the case on
-	// localhost (the app skips registering there) and whenever registration has
-	// failed. A promise that never settles would leave a reader's reminder
-	// half-turned-on.
+	// settles when there is no registration at all. If the reader taps the bell
+	// while the page's own registration is still in flight, though, returning
+	// null there would silently leave the bell off. Registering the same
+	// service worker as a fallback keeps the click working even that early.
 	return navigator.serviceWorker
 		.getRegistration()
 		.then(function (registration) {
-			return registration || null;
+			if (registration) return registration;
+			return navigator.serviceWorker.register("./serviceWorker.js?version=3", {
+				scope: "./",
+			});
 		})
-		.catch(function () {
+		.catch(function (error) {
+			console.warn("service worker registration failed:", error);
 			return null;
 		});
 }

@@ -4012,3 +4012,21 @@ body.share-open {
 		padding: 18px 18px calc(18px + env(safe-area-inset-bottom, 0px));
 	}
 }
+/* Why a reminder did not switch on. The bell used to flicker back off with
+   no explanation; this is the small, temporary explanation in its place. */
+.plan-notify-error {
+	position: fixed;
+	left: 50%;
+	bottom: 1.5rem;
+	transform: translateX(-50%);
+	z-index: 1000;
+	max-width: min(28rem, calc(100vw - 2rem));
+	padding: 0.8rem 1rem;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-md, 0.5rem);
+	background: var(--surface);
+	box-shadow: var(--shadow-md, 0 8px 24px rgba(0, 0, 0, 0.18));
+	color: var(--text);
+	font-size: 0.9rem;
+	text-align: center;
+}

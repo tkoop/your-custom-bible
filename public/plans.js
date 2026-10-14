@@ -886,21 +886,46 @@ function requestNotifyPermission() {
 // ask for permission, then subscribe to pushes and tell the server. If either
 // is refused the time is dropped again, so the UI never promises a nudge that
 // cannot arrive - a bell that is lit but silent is worse than one that is off.
+function notifyError(message) {
+	var notice = document.createElement("div");
+	notice.className = "plan-notify-error";
+	notice.setAttribute("role", "status");
+	notice.textContent = message;
+	document.body.appendChild(notice);
+	setTimeout(function () {
+		if (notice.parentNode) notice.parentNode.removeChild(notice);
+	}, 6000);
+}
+
 function enableNotification(subscription, time) {
-	setNotifyTime(subscription, time || DEFAULT_NOTIFY_TIME);
+	// Do not turn the bell on first and try to prove it later. A failed
+	// permission or subscription used to flip it on and then straight back off,
+	// which looked like a flicker and told the reader nothing about why. The
+	// bell only lights once the browser has actually agreed to deliver a push.
+	if (!pushSupported()) {
+		notifyError("This browser cannot send plan reminders.");
+		return;
+	}
 	requestNotifyPermission().then(function (permission) {
 		if (permission !== "granted") {
-			updateSubscription(subscription.id, { notifyTime: "" });
-			fireEvent({ name: "plansUpdated" });
+			notifyError(
+				"Notifications are not allowed for this site. Turn them on in the browser's site settings, then tap the bell again.",
+			);
 			return;
 		}
 		pushSubscribe().then(function (push) {
 			if (!push) {
-				updateSubscription(subscription.id, { notifyTime: "" });
-				fireEvent({ name: "plansUpdated" });
+				notifyError(
+					"This browser could not subscribe to plan reminders. If you are on iPhone or iPad, open the installed app from your Home Screen and try again.",
+				);
 				return;
 			}
+			setNotifyTime(subscription, time || DEFAULT_NOTIFY_TIME);
+			// updateSubscription has already fired plansUpdated, which marked a
+			// sync as pending. Send it now rather than waiting out the debounce:
+			// the reader has just asked to be reminded.
 			pushSync();
+			pushSyncNow();
 		});
 	});
 }
