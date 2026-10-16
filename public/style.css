@@ -2168,7 +2168,7 @@ body .chapter-nav button.plan-step-right .chrono-corner {
 
 span.fn {
 	font-family: 'sourceSansPro', sans-serif;
-	font-size: 0.7em;
+	font-size: 0.85em;
 	vertical-align: super;
 	margin-left: 2px;
 	margin-right: 1px;
@@ -2179,10 +2179,29 @@ span.fn {
 
 /* A letter in the text opens its note, but only while the notes are on screen.
    They are hidden together, so a pointer cursor on a marker the reader cannot
-   click would be promising something that is not there. */
+   click would be promising something that is not there.
+
+   They also have to be findable. A superscript is a small thing in the middle
+   of a line of text, and a finger cannot be asked to hit one at reading size,
+   so the target is widened with the space the line leaves above and below it.
+   Padding on an inline box is not part of the line it sits in, so nothing in
+   the text moves; it is only claimed where there was already nothing to read.
+
+   Nothing else marks these out the way a word link or a search highlight does.
+   A note is an aside to the reading, and the letter only needs to be as
+   prominent as being tappable, not as prominent as being important. */
 body.fn-on span.fn {
 	cursor: pointer;
+	padding-top: 0.3em;
+	padding-bottom: 0.3em;
 }
+
+/* Nothing is claimed either side of the letter. The width a reader could have
+   here belongs to the words: the next word starts about 6px away, so any reach
+   worth the name takes the last letter of the word in front of it out of the
+   word lookup. The height is the half that is free, and it is the half a
+   fingertip runs out of first on a superscript, so that is where this spends
+   itself. */
 
 .fnverse {
 	font-family: 'sourceSansPro', sans-serif;

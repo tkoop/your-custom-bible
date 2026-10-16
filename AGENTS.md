@@ -161,6 +161,16 @@ no verse number before it.
 The markers are hidden with the notes, so they only take a click, and only take
 a pointer cursor (`body.fn-on`), while `settings.footnotes` is on.
 
+**The width a marker may claim belongs to the word popup.** A superscript is a
+small target, and the obvious fix is an overlay either side of the letter. There
+is not room: the next word starts about 6px away, and a reach worth the name
+takes the last letter of the word in front of the marker out of the word
+lookup (measured at 5% of the word's box at a quarter of an em). The padding
+goes above and below instead, into the space the line leaves free - vertical
+padding on an inline box is not part of the line, so nothing reflows - and that
+is the half a fingertip runs out of first on a superscript anyway. 0.85em with
+`0.3em` of it gives a 9x32px target against the 7x18px the marker had.
+
 ## Shared links (chapter URL)
 
 A chapter hash may carry the four settings the `YCB-` version tag is built
@@ -398,7 +408,7 @@ Browsers cache this app's static assets aggressively:
 file under `public/` whose content changed.** Increment the number each time:
 
 - Start/raise any resource that has no version param yet (add `?version=1`).
-- `style.css` is currently at `?version=65`; leave it unless it changes.
+- `style.css` is currently at `?version=66`; leave it unless it changes.
 
 Files involved (all referenced from `public/index.html`):
 
