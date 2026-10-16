@@ -2177,6 +2177,13 @@ span.fn {
 	cursor: default;
 }
 
+/* A letter in the text opens its note, but only while the notes are on screen.
+   They are hidden together, so a pointer cursor on a marker the reader cannot
+   click would be promising something that is not there. */
+body.fn-on span.fn {
+	cursor: pointer;
+}
+
 .fnverse {
 	font-family: 'sourceSansPro', sans-serif;
 	vertical-align: super;
@@ -3190,6 +3197,36 @@ body.rtm-open #chapter.page-turn {
 .word-popup-study:hover {
 	background: var(--accent-soft);
 	border-color: var(--primary);
+}
+
+/* ---------- Footnote popup ---------- */
+/* The word popup's card again, with the note where the gloss is: a letter and
+   a reference above, the text below. The shell and the close button and the
+   ref line are the .word-popup classes and are not restated here. */
+.footnote-popup {
+	width: 340px;
+}
+
+.footnote-popup-verse {
+	color: var(--primary);
+	font-size: 0.85rem;
+	margin-top: 6px;
+}
+
+.footnote-popup-text {
+	font-family: var(--font-scripture);
+	font-size: 1.05rem;
+	line-height: 1.45;
+	margin-top: 8px;
+	border-top: 1px solid var(--border-light);
+	padding-top: 8px;
+}
+
+/* The alternative readings the BSB italicises come across as the markup they
+   were, so they read as the block at the foot of the chapter reads rather
+   than as a run of emphasis. */
+.footnote-popup-text i {
+	color: var(--text-secondary);
 }
 
 /* ---------- Word study page ---------- */

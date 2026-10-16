@@ -88,7 +88,10 @@
 				.forEach((el) => (el.style.display = "none"));
 		}
 
-		// Footnotes
+		// Footnotes. The class on the body is what makes a marker in the text
+		// look tappable, which it is - it opens its note - but only while the
+		// notes themselves are on screen.
+		document.body.classList.toggle("fn-on", !!settings.footnotes);
 		if (settings.footnotes) {
 			document
 				.querySelectorAll(".fn")
@@ -375,6 +378,10 @@
 	function loadURL(url, skipHistory) {
 		var chapter = document.getElementById("chapter");
 		chapter.innerHTML = "";
+
+		// The footnotes belong to the chapter that has just been cleared, so the
+		// notes read out of the last one go with it.
+		footnoteEntries = null;
 
 		// Whoever asked for these words asked before the fetch started, and only
 		// one chapter is ever in flight, so they are taken here: a chapter that
@@ -1700,7 +1707,48 @@ fireEvent({
 		return "";
 	}
 
+	// A popup goes beside the click and turns above it when there is no room
+	// below, clamped to the viewport either way. The word popup and the
+	// footnote popup are the same card and are placed the same way.
+	function positionPopup(popup, x, y) {
+		var rect = popup.getBoundingClientRect();
+		var left = Math.max(
+			8,
+			Math.min(x + 10, window.innerWidth - rect.width - 8),
+		);
+		var top = y + 12;
+		if (top + rect.height > window.innerHeight - 8) {
+			top = Math.max(8, y - rect.height - 12);
+		}
+		popup.style.left = left + "px";
+		popup.style.top = top + "px";
+	}
+
+	// Only one popup is on screen at a time - a word and a footnote are never
+	// both being asked about - so opening one puts the other away rather than
+	// leaving two cards and two scroll guards on the page.
+	function closeOtherPopup(openingId) {
+		if (openingId == "wordPopup") closeFootnotePopup();
+		else closeWordPopup();
+	}
+
+	// Whichever popup is on screen, or null when neither is.
+	function openPopup() {
+		var ids = ["wordPopup", "footnotePopup"];
+		for (var i = 0; i < ids.length; i++) {
+			var popup = document.getElementById(ids[i]);
+			if (popup && popup.style.display != "none") return popup;
+		}
+		return null;
+	}
+
+	function closePopups() {
+		closeWordPopup();
+		closeFootnotePopup();
+	}
+
 	function openWordPopup(entry, ref, x, y, context) {
+		closeOtherPopup("wordPopup");
 		window.__popupOpenScrollY = window.scrollY;
 		var popup = document.getElementById("wordPopup");
 		if (!popup) {
@@ -1791,23 +1839,13 @@ fireEvent({
 		}
 
 		popup.style.display = "block";
-		var rect = popup.getBoundingClientRect();
-		var left = Math.max(
-			8,
-			Math.min(x + 10, window.innerWidth - rect.width - 8),
-		);
-		var top = y + 12;
-		if (top + rect.height > window.innerHeight - 8) {
-			top = Math.max(8, y - rect.height - 12);
-		}
-		popup.style.left = left + "px";
-		popup.style.top = top + "px";
+		positionPopup(popup, x, y);
 	}
 
 	function closeWordPopup() {
 		var popup = document.getElementById("wordPopup");
 		if (popup) popup.style.display = "none";
-		window.__popupOpenScrollY = null;
+		if (!openPopup()) window.__popupOpenScrollY = null;
 	}
 
 	function loadWordData(slug) {
@@ -1890,6 +1928,11 @@ fireEvent({
 	document
 		.getElementById("chapter")
 		.addEventListener("click", function (ev) {
+			// A marker in the text is a footnote, not a word, so it is answered
+			// before anything else is considered and regardless of the word
+			// study links - the notes are on screen, so their letters work.
+			if (footnoteMarkerClicked(ev)) return;
+
 			// The links are what tells the reader a word is tappable, so with
 			// them off the text is not tappable and a click is just a click. The
 			// lookup below is the same one they make on a linked word; there is
@@ -1954,14 +1997,14 @@ fireEvent({
 	// Close popup on outside pointerdown, Escape, scroll, or page change
 	window.__popupOpenScrollY = null;
 	document.addEventListener("pointerdown", function (ev) {
-		var popup = document.getElementById("wordPopup");
-		if (!popup || popup.style.display == "none") return;
+		var popup = openPopup();
+		if (!popup) return;
 		if (popup.contains(ev.target)) return;
-		closeWordPopup();
+		closePopups();
 	});
 
 	document.addEventListener("keydown", function (ev) {
-		if (ev.key == "Escape") closeWordPopup();
+		if (ev.key == "Escape") closePopups();
 	});
 
 	window.addEventListener(
@@ -1974,7 +2017,7 @@ fireEvent({
 			if (window.__popupOpenScrollY !== null) {
 				if (Math.abs(window.scrollY - window.__popupOpenScrollY) < 4) return;
 				window.__popupOpenScrollY = null;
-				closeWordPopup();
+				closePopups();
 			}
 		},
 		{ capture: true },
@@ -1983,9 +2026,201 @@ fireEvent({
 	registerEventListener(
 		(e) => e.name == "showPage",
 		function () {
-			closeWordPopup();
+			closePopups();
 		},
 	);
+
+	// ---------- Footnote popup ----------
+	//
+	// A footnote is a note about a verse, and the note is already in the page:
+	// the block at the foot of the chapter holds every one of them. What was
+	// missing was the way in - a reader had to scroll down to the block and
+	// find the letter among the others. Clicking the letter in the text opens
+	// the note itself, in the same card the word popup uses.
+
+	// The block is a flat run of nodes: a verse number, a letter, then the
+	// note, then the next verse number. Nothing wraps a note, so it is read
+	// back out of the DOM once per chapter and kept as the nodes it was, since
+	// the note is written as a run of elements - alternative readings in
+	// italics among them - rather than as a string.
+	var footnoteEntries = null;
+
+	function isFootnoteSpacer(node) {
+		// The epub separates the notes with empty spacer paragraphs of its own,
+		// which say nothing and would otherwise open a blank line in the popup.
+		return (
+			node.nodeType == 1 &&
+			node.classList.contains("calibre2") &&
+			!node.textContent.trim()
+		);
+	}
+
+	function footnoteIndex() {
+		if (footnoteEntries) return footnoteEntries;
+		footnoteEntries = [];
+		var block = document.querySelector("#chapter div.fn");
+		if (!block) return footnoteEntries;
+
+		var verse = "";
+		var entry = null;
+		var nodes = block.childNodes;
+		for (var i = 0; i < nodes.length; i++) {
+			var node = nodes[i];
+			if (node.nodeType == 1 && node.classList.contains("fnverse")) {
+				verse = node.textContent.trim();
+				continue;
+			}
+			if (node.nodeType == 1 && node.classList.contains("footnotesbot")) {
+				entry = { verse: verse, letter: node.textContent.trim(), nodes: [] };
+				footnoteEntries.push(entry);
+				continue;
+			}
+			// Everything before the first letter is the heading and the anchor
+			// it hangs from, and a spacer between two notes is the epub's, not
+			// the note's. Everything else - the words of the note, and the
+			// italics among them - belongs to the letter above it.
+			if (!entry || isFootnoteSpacer(node)) continue;
+			entry.nodes.push(node);
+		}
+
+		// A note opens with its alternative reading ("Or tabernacled...") and
+		// closes at the end of the run of text before the next letter, so the
+		// whitespace at either edge is the block's spacing rather than the
+		// note's words.
+		for (var j = 0; j < footnoteEntries.length; j++) {
+			var held = footnoteEntries[j].nodes;
+			while (
+				held.length &&
+				held[0].nodeType == 3 &&
+				!held[0].nodeValue.trim()
+			)
+				held.shift();
+			while (
+				held.length &&
+				held[held.length - 1].nodeType == 3 &&
+				!held[held.length - 1].nodeValue.trim()
+			)
+				held.pop();
+		}
+
+		return footnoteEntries;
+	}
+
+	function findFootnote(verse, letter) {
+		var list = footnoteIndex();
+		var i;
+		for (i = 0; i < list.length; i++) {
+			if (list[i].letter == letter && (!verse || list[i].verse == verse))
+				return list[i];
+		}
+		// A letter is only ever used once in a chapter, so a marker whose verse
+		// is not the one the note is filed under still finds its note - a
+		// psalm's superscription carries one with no verse of its own before it.
+		for (i = 0; i < list.length; i++) {
+			if (list[i].letter == letter) return list[i];
+		}
+		return null;
+	}
+
+	// The marker in the verse text, or null. The letter in the block at the
+	// foot of the chapter carries the same class but is the note itself, so it
+	// is not something to click.
+	function footnoteMarkerAt(el) {
+		while (el && el != document.body) {
+			if (el.classList && el.classList.contains("fn")) {
+				return el.tagName == "SPAN" ? el : null;
+			}
+			el = el.parentNode;
+		}
+		return null;
+	}
+
+	// Answers a click on a footnote letter. Returns true when the click was one,
+	// so the caller knows there is nothing else to do with it.
+	function footnoteMarkerClicked(ev) {
+		if (!settings.footnotes) return false;
+		var marker = footnoteMarkerAt(ev.target);
+		if (!marker) return false;
+		var letter = marker.textContent.trim();
+		if (!letter) return false;
+
+		// The verse the marker stands in, for the popup's own line. A psalm's
+		// superscription has no verse number before it, and its note belongs to
+		// no verse, so the popup names the chapter alone.
+		var refEl = nearestPrecedingReftext(marker);
+		var verseNum = refEl ? parseInt(refEl.id.substr(1), 10) : NaN;
+
+		var entry = findFootnote(isNaN(verseNum) ? "" : verseNum, letter);
+		if (!entry) return false;
+
+		var book = currentBook();
+		if (!book) return false;
+		var label = chapterRefName(book.name) + " " + currentBookChapter();
+		if (!isNaN(verseNum)) label += ":" + verseNum;
+
+		openFootnotePopup(entry, label, ev.clientX, ev.clientY);
+		return true;
+	}
+
+	function openFootnotePopup(entry, ref, x, y) {
+		closeOtherPopup("footnotePopup");
+		window.__popupOpenScrollY = window.scrollY;
+
+		var popup = document.getElementById("footnotePopup");
+		if (!popup) {
+			// The word popup's own class, so the two read as one kind of card:
+			// same shell, same close button, same ref line.
+			popup = document.createElement("div");
+			popup.id = "footnotePopup";
+			popup.className = "word-popup footnote-popup";
+			popup.setAttribute("data-cy", "footnotePopup");
+
+			var close = document.createElement("button");
+			close.className = "word-popup-close";
+			close.setAttribute("data-cy", "footnotePopupClose");
+			close.innerHTML = "&times;";
+			close.addEventListener("click", function (e) {
+				e.stopPropagation();
+				closeFootnotePopup();
+			});
+			popup.appendChild(close);
+
+			var refEl = document.createElement("div");
+			refEl.className = "word-popup-ref";
+			popup.appendChild(refEl);
+
+			var verse = document.createElement("div");
+			verse.className = "footnote-popup-verse";
+			popup.appendChild(verse);
+
+			var text = document.createElement("div");
+			text.className = "footnote-popup-text";
+			popup.appendChild(text);
+
+			document.body.appendChild(popup);
+		}
+
+		popup.querySelector(".word-popup-ref").textContent =
+			"Footnote " + entry.letter;
+		popup.querySelector(".footnote-popup-verse").textContent = ref;
+
+		// The note is copied across as the nodes it was rather than as its
+		// text, so the alternative readings the BSB italicises stay italicised.
+		var body = popup.querySelector(".footnote-popup-text");
+		body.innerHTML = "";
+		for (var i = 0; i < entry.nodes.length; i++) {
+			body.appendChild(entry.nodes[i].cloneNode(true));
+		}
+
+		popup.style.display = "block";
+		positionPopup(popup, x, y);
+	}
+
+	function closeFootnotePopup() {
+		var popup = document.getElementById("footnotePopup");
+		if (popup) popup.style.display = "none";
+		if (!openPopup()) window.__popupOpenScrollY = null;
+	}
 
 	// ---------- Highlights ----------
 	//
@@ -2221,6 +2456,23 @@ fireEvent({
 		}
 		return ranges;
 	}
+
+	// For the specs: the note a marker in the text would open, given the letter
+	// it carries and the verse it stands in.
+	window.testFootnote = function (letter, verse) {
+		var found = findFootnote(verse || "", letter);
+		if (!found) return null;
+		return {
+			letter: found.letter,
+			verse: found.verse,
+			text: found.nodes
+				.map(function (node) {
+					return node.textContent;
+				})
+				.join("")
+				.trim(),
+		};
+	};
 
 	window.testLookup = function (slug, chapter, verse, word) {
 		return loadWordData(slug).then(function () {

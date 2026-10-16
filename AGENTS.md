@@ -140,6 +140,27 @@ carries the punctuation of the sentence it sits in, so "Jesus", "Jesus," and
 "Jesus." are one rendering - and are shown under the spelling the BSB used most,
 so a name keeps its capitals.
 
+## Footnotes (`div.fn` at the foot of the chapter)
+
+The notes are part of the chapter file - stage 1 writes them and
+`CHAPTER_HTML_FORMAT.md` is the contract - and there is no separate data for
+them, unlike the word popup's `wordData/`. They are a flat run of nodes at the
+foot of the chapter: a `.fnverse` number, a `.footnotesbot` letter, then the
+words of the note, then the next verse number. Nothing wraps a note, so
+`footnoteIndex()` in `chapter.html` reads them back out of the DOM once per
+chapter and keeps them as the nodes they were - the alternative readings the
+BSB italicises are `<i>` elements in the note, and the popup shows the note as
+it is written rather than as a flattened string.
+
+A marker in the text is `<span class="fn">` carrying the letter, and a click on
+one opens its note in the same card the word popup uses. A letter only happens
+once in a chapter, so `findFootnote()` matches on the verse and the letter and
+falls back to the letter alone - a psalm's superscription carries a marker with
+no verse number before it.
+
+The markers are hidden with the notes, so they only take a click, and only take
+a pointer cursor (`body.fn-on`), while `settings.footnotes` is on.
+
 ## Shared links (chapter URL)
 
 A chapter hash may carry the four settings the `YCB-` version tag is built
@@ -377,7 +398,7 @@ Browsers cache this app's static assets aggressively:
 file under `public/` whose content changed.** Increment the number each time:
 
 - Start/raise any resource that has no version param yet (add `?version=1`).
-- `style.css` is currently at `?version=58`; leave it unless it changes.
+- `style.css` is currently at `?version=65`; leave it unless it changes.
 
 Files involved (all referenced from `public/index.html`):
 
