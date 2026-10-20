@@ -2341,9 +2341,7 @@ fireEvent({
 			chapterHighlight.terms.length;
 		var hasResults =
 			Array.isArray(window.searchResults) &&
-			window.searchResults.length > 0 &&
-			typeof window.currentSearchResultIndex === "number" &&
-			window.currentSearchResultIndex >= 0;
+			window.searchResults.length > 0;
 		if (prevBtn) prevBtn.style.display = isSearch && hasResults ? "" : "none";
 		if (nextBtn) nextBtn.style.display = isSearch && hasResults ? "" : "none";
 		nav.style.display = "";
