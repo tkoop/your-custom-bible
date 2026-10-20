@@ -292,7 +292,7 @@ await loadComponent("speedReader", "components/speedReader.html?version=10");
 			if ("serviceWorker" in navigator) {
 				window.addEventListener("load", function () {
 					navigator.serviceWorker
-						.register("./serviceWorker.js?version=3", {
+						.register("./serviceWorker.js?version=4", {
 							scope: "./",
 						})
 						.then(
