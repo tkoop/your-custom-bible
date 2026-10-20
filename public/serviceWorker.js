@@ -2,6 +2,9 @@ importScripts(
 	"https://storage.googleapis.com/workbox-cdn/releases/6.4.1/workbox-sw.js"
 );
 
+self.addEventListener("install", function () { self.skipWaiting(); });
+self.addEventListener("activate", function (event) { event.waitUntil(clients.claim()); });
+
 workbox.routing.registerRoute(
 	new RegExp("/.*"),
 	new workbox.strategies.NetworkFirst()
