@@ -2359,20 +2359,42 @@ fireEvent({
 			}
 		}
 
-		// Mark the matches in the currently selected verse differently.
+		// The match the reader is on is marked differently from the others in
+		// the chapter, so it is clear which one Next and Prev are moving
+		// between.
 		if (isSearch && window.currentSearchResultVerse) {
-			var verseEl = document.getElementById("v" + window.currentSearchResultVerse);
-			if (verseEl) {
-				var container = verseEl.closest("p") || verseEl.parentNode;
-				if (container) {
-					container.querySelectorAll("mark.chapter-hl").forEach(function (m) {
-						m.classList.add("chapter-hl-current");
-					});
-				}
-			}
+			markCurrentVerseMatches(window.currentSearchResultVerse);
 		}
 
 		nav.style.display = "flex";
+	}
+
+	// A verse runs from its own marker to the next one, so the matches that
+	// belong to it are the ones between the two markers - not everything in
+	// the paragraph, which can hold several verses.
+	function markCurrentVerseMatches(verseNum) {
+		var text = document.getElementById("chapterText");
+		var marker = document.getElementById("v" + verseNum);
+		if (!text || !marker) return;
+		var markers = [].slice.call(text.querySelectorAll(".reftext"));
+		var next = markers[markers.indexOf(marker) + 1] || null;
+		Array.prototype.slice
+			.call(text.querySelectorAll("mark.chapter-hl"))
+			.forEach(function (mark) {
+				if (
+					!(
+						marker.compareDocumentPosition(mark) &
+						Node.DOCUMENT_POSITION_FOLLOWING
+					)
+				)
+					return;
+				if (
+					next &&
+					!(next.compareDocumentPosition(mark) & Node.DOCUMENT_POSITION_PRECEDING)
+				)
+					return;
+				mark.classList.add("chapter-hl-current");
+			});
 	}
 
 	function markWords(terms, partial) {
