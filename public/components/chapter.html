@@ -550,9 +550,11 @@ fireEvent({
 			// than to the chapter, because in page turning mode the chapter does
 			// not scroll at all, and it sits outside #chapterText so the page
 			// turn's transform does not carry it away with the columns.
-			"<button id='clearHighlights' data-cy='clearHighlights' type='button' " +
-			"style='display: none' onclick='clearChapterHighlight()'>" +
-			"Clear highlights</button>"
+			"<div id='highlightNav' style='display: none; position: fixed; right: 14px; bottom: 14px; z-index: 60; gap: 8px; align-items: center;'>" +
+			"<button id='prevSearchResult' data-cy='prevSearchResult' type='button' onclick='goPrevSearchResult()'>Prev</button>" +
+			"<button id='clearHighlights' data-cy='clearHighlights' type='button' onclick='clearChapterHighlight()'>Clear highlights</button>" +
+			"<button id='nextSearchResult' data-cy='nextSearchResult' type='button' onclick='goNextSearchResult()'>Next</button>" +
+			"</div>"
 		);
 	}
 
@@ -2251,6 +2253,38 @@ fireEvent({
 		applyChapterHighlight(null);
 	}
 
+	function goPrevSearchResult() {
+		goSearchResult(-1);
+	}
+
+	function goNextSearchResult() {
+		goSearchResult(1);
+	}
+
+	function goSearchResult(delta) {
+		var results = window.searchResults;
+		if (!Array.isArray(results) || !results.length) return;
+		var idx = window.currentSearchResultIndex;
+		if (typeof idx !== "number" || idx < 0) idx = 0;
+		idx += delta;
+		if (idx < 0 || idx >= results.length) return;
+		window.currentSearchResultIndex = idx;
+		var rec = results[idx];
+		var book = books.find(function (b) {
+			return b.slug === rec[0];
+		});
+		if (!book) return;
+		window.scrollVerse = rec[2];
+		if (chapterHighlight && chapterHighlight.terms) {
+			window.pendingHighlight = {
+				terms: chapterHighlight.terms,
+				partial: chapterHighlight.partial,
+				label: chapterHighlight.label,
+			};
+		}
+		loadThisChapter(book.name, book.slug, rec[1]);
+	}
+
 	// The marks belonged to the words the reader was looking for, so any other
 	// page takes them away. Another chapter does it the same way, by arriving
 	// without any.
@@ -2262,11 +2296,14 @@ fireEvent({
 	);
 
 	function renderHighlights() {
+		var nav = document.getElementById("highlightNav");
 		var button = document.getElementById("clearHighlights");
+		var prevBtn = document.getElementById("prevSearchResult");
+		var nextBtn = document.getElementById("nextSearchResult");
 		unwrapHighlights();
 
 		if (!chapterHighlight) {
-			if (button) button.style.display = "none";
+			if (nav) nav.style.display = "none";
 			return;
 		}
 
@@ -2274,24 +2311,42 @@ fireEvent({
 			? markVerse(chapterHighlight.verse)
 			: markWords(chapterHighlight.terms, chapterHighlight.partial);
 
-		if (!button) return;
+		if (!nav) return;
 
 		if (chapterHighlight.verse) {
 			// A verse the chapter does not have - the reader typed a number out of
 			// range - leaves nothing to take away, so no button either.
 			if (!count) {
-				button.style.display = "none";
+				nav.style.display = "none";
 				return;
 			}
-			button.textContent = "Hide highlight";
-			button.title = "Hide the highlight on " + (chapterHighlight.label || "this verse");
+			if (button) button.textContent = "Hide highlight";
+			if (button)
+				button.title =
+					"Hide the highlight on " + (chapterHighlight.label || "this verse");
 		} else {
-			button.textContent = "Clear highlights (" + count + ")";
-			button.title = chapterHighlight.label
-				? "Clear the highlights for " + chapterHighlight.label
-				: "Clear the highlights";
+			if (button)
+				button.textContent = "Clear highlights (" + count + ")";
+			if (button)
+				button.title = chapterHighlight.label
+					? "Clear the highlights for " + chapterHighlight.label
+					: "Clear the highlights";
 		}
-		button.style.display = "";
+
+		// Next/prev only make sense for a search result's highlights, and only
+		// when there is a recorded list of results to move through.
+		var isSearch =
+			!chapterHighlight.verse &&
+			chapterHighlight.terms &&
+			chapterHighlight.terms.length;
+		var hasResults =
+			Array.isArray(window.searchResults) &&
+			window.searchResults.length > 0 &&
+			typeof window.currentSearchResultIndex === "number" &&
+			window.currentSearchResultIndex >= 0;
+		if (prevBtn) prevBtn.style.display = isSearch && hasResults ? "" : "none";
+		if (nextBtn) nextBtn.style.display = isSearch && hasResults ? "" : "none";
+		nav.style.display = "";
 	}
 
 	function markWords(terms, partial) {

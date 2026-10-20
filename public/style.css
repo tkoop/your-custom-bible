@@ -4155,3 +4155,25 @@ body.share-open {
 	color: var(--primary, #2a6fdb);
 	min-height: 1.2em;
 }
+
+#highlightNav button {
+	padding: 8px 14px;
+	border: 1px solid var(--border);
+	border-radius: 999px;
+	background-color: var(--surface);
+	color: var(--text-secondary);
+	font-family: 'sourceSansPro', sans-serif;
+	font-size: 0.82rem;
+	font-weight: 600;
+	box-shadow: var(--shadow);
+	cursor: pointer;
+}
+
+#highlightNav button:hover {
+	border-color: var(--primary);
+	color: var(--primary);
+}
+
+body.rtm-open #highlightNav {
+	bottom: calc(var(--rtm-panel-h, 0px) + 14px);
+}

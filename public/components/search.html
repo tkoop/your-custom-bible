@@ -284,8 +284,8 @@
 			frag.appendChild(row);
 		}
 
+		window.searchResults = hits.slice(0, MAX_RESULTS);
 		box.appendChild(frag);
-
 		if (hits.length > MAX_RESULTS) {
 			var status = document.getElementById("searchStatus");
 			var more = document.createElement("span");
@@ -423,6 +423,22 @@
 		var book = books.find((b) => b.slug === rec[0]);
 		if (!book) return;
 		if (lastSearch) recordSearch(lastSearch);
+		var results = window.searchResults || [];
+		var idx = results.indexOf(rec);
+		if (idx < 0) {
+			// Fall back to a matching entry if the reference is not the same object.
+			for (var i = 0; i < results.length; i++) {
+				if (
+					results[i][0] === rec[0] &&
+					results[i][1] === rec[1] &&
+					results[i][2] === rec[2]
+				) {
+					idx = i;
+					break;
+				}
+			}
+		}
+		window.currentSearchResultIndex = idx;
 		window.scrollVerse = rec[2];
 		window.pendingHighlight = searchHighlight(lastSearch);
 		loadThisChapter(book.name, book.slug, rec[1]);
