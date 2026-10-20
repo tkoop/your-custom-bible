@@ -2344,7 +2344,7 @@ fireEvent({
 			window.searchResults.length > 0;
 		if (prevBtn) prevBtn.style.display = isSearch && hasResults ? "" : "none";
 		if (nextBtn) nextBtn.style.display = isSearch && hasResults ? "" : "none";
-		nav.style.display = "";
+		nav.style.display = "flex";
 	}
 
 	function markWords(terms, partial) {

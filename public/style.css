@@ -4177,3 +4177,13 @@ body.share-open {
 body.rtm-open #highlightNav {
 	bottom: calc(var(--rtm-panel-h, 0px) + 14px);
 }
+
+#highlightNav {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+#highlightNav #clearHighlights {
+	position: static;
+}
