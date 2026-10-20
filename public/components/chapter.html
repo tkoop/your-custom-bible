@@ -551,7 +551,7 @@ fireEvent({
 			// not scroll at all, and it sits outside #chapterText so the page
 			// turn's transform does not carry it away with the columns.
 			"<div id='highlightNav' style='display: none; position: fixed; right: 14px; bottom: 70px; z-index: 60; gap: 8px; align-items: center;'>" +
-			"<span id='searchMatchPosition' class='search-match-position'></span>" +
+			"<button id='backToSearchResults' data-cy='backToSearchResults' class='search-match-position' type='button' onclick='goBackToSearchResults()'></button>" +
 			"<button id='prevSearchResult' data-cy='prevSearchResult' type='button' onclick='goPrevSearchResult()'>Prev</button>" +
 			"<button id='clearHighlights' data-cy='clearHighlights' type='button' onclick='clearChapterHighlight()'>Clear</button>" +
 			"<button id='nextSearchResult' data-cy='nextSearchResult' type='button' onclick='goNextSearchResult()'>Next</button>" +
@@ -2258,6 +2258,14 @@ fireEvent({
 		goSearchResult(-1);
 	}
 
+	// Back to the search that brought the reader here, with the results still
+	// listed, so another of them can be picked.
+	function goBackToSearchResults() {
+		var q = window.lastSearch && window.lastSearch.q;
+		if (q) window.pendingSearchQuery = q;
+		fireEvent({ name: "showPage", page: "search" });
+	}
+
 	function goNextSearchResult() {
 		goSearchResult(1);
 	}
@@ -2381,7 +2389,7 @@ fireEvent({
 		if (prevBtn) prevBtn.style.display = isSearch && hasResults ? "" : "none";
 		if (nextBtn) nextBtn.style.display = isSearch && hasResults ? "" : "none";
 
-		var posEl = document.getElementById("searchMatchPosition");
+		var posEl = document.getElementById("backToSearchResults");
 		if (posEl) {
 			if (isSearch && hasResults) {
 				var ci = window.currentSearchResultIndex;
