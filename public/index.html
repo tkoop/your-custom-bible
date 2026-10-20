@@ -326,6 +326,7 @@ await loadComponent("speedReader", "components/speedReader.html?version=10");
 				spellcheck="false"
 			/>
 			<p class="slash-jump-hint">Type a Bible reference (e.g. John 3:16) or any word to search.</p>
+			<p id="slashJumpStatus" class="slash-jump-status"></p>
 		</div>
 	</div>
 
@@ -334,9 +335,27 @@ await loadComponent("speedReader", "components/speedReader.html?version=10");
 			var overlay = document.getElementById("slashJump");
 			var input = document.getElementById("slashJumpInput");
 			var backdrop = document.getElementById("slashJumpBackdrop");
+			var status = document.getElementById("slashJumpStatus");
+			function updateSlashStatus() {
+				var value = (input.value || "").trim();
+				if (!value) {
+					status.textContent = "";
+					return;
+				}
+				var suggestions =
+					typeof refSuggestions === "function"
+						? refSuggestions(value, 1)
+						: [];
+				if (suggestions && suggestions.length) {
+					status.textContent = "Reference: " + suggestions[0].label;
+				} else {
+					status.textContent = "Text search: " + value;
+				}
+			}
 			function openSlashJump() {
 				overlay.hidden = false;
 				input.value = "";
+				status.textContent = "";
 				setTimeout(function () {
 					input.focus();
 				}, 0);
@@ -346,6 +365,7 @@ await loadComponent("speedReader", "components/speedReader.html?version=10");
 			}
 			if (backdrop)
 				backdrop.addEventListener("click", closeSlashJump);
+			input.addEventListener("input", updateSlashStatus);
 			input.addEventListener("keydown", function (event) {
 				if (event.key === "Enter") {
 					var value = input.value.trim();

@@ -4147,3 +4147,11 @@ body.share-open {
 	font-size: 0.85rem;
 	color: var(--text-muted, #666);
 }
+
+.slash-jump-status {
+	margin: 10px 0 0;
+	font-size: 0.9rem;
+	font-weight: 600;
+	color: var(--primary, #2a6fdb);
+	min-height: 1.2em;
+}
