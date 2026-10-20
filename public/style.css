@@ -4203,7 +4203,7 @@ mark.chapter-hl-current {
 }
 
 #backToSearchResults {
-	background: none;
+	background-color: var(--surface);
 	border: none;
 	box-shadow: none;
 	padding: 4px 6px;
@@ -4213,6 +4213,6 @@ mark.chapter-hl-current {
 }
 
 #backToSearchResults:hover {
-	background: none;
+	background-color: var(--surface);
 	color: var(--primary);
 }
