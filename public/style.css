@@ -4197,6 +4197,6 @@ body.rtm-open #highlightNav {
 }
 
 mark.chapter-hl-current {
-	background-color: var(--primary, #facc15);
-	color: #000;
+	background-color: #dbeafe;
+	color: #1e3a8a;
 }
