@@ -552,7 +552,8 @@ fireEvent({
 			// turn's transform does not carry it away with the columns.
 			"<div id='highlightNav' style='display: none; position: fixed; right: 14px; bottom: 14px; z-index: 60; gap: 8px; align-items: center;'>" +
 			"<button id='prevSearchResult' data-cy='prevSearchResult' type='button' onclick='goPrevSearchResult()'>Prev</button>" +
-			"<button id='clearHighlights' data-cy='clearHighlights' type='button' onclick='clearChapterHighlight()'>Clear highlights</button>" +
+			"<span id='searchMatchPosition' class='search-match-position'></span>" +
+			"<button id='clearHighlights' data-cy='clearHighlights' type='button' onclick='clearChapterHighlight()'>Clear</button>" +
 			"<button id='nextSearchResult' data-cy='nextSearchResult' type='button' onclick='goNextSearchResult()'>Next</button>" +
 			"</div>"
 		);
@@ -2270,6 +2271,7 @@ fireEvent({
 		if (idx < 0 || idx >= results.length) return;
 		window.currentSearchResultIndex = idx;
 		var rec = results[idx];
+		window.currentSearchResultVerse = rec[2];
 		var book = books.find(function (b) {
 			return b.slug === rec[0];
 		});
@@ -2344,6 +2346,33 @@ fireEvent({
 			window.searchResults.length > 0;
 		if (prevBtn) prevBtn.style.display = isSearch && hasResults ? "" : "none";
 		if (nextBtn) nextBtn.style.display = isSearch && hasResults ? "" : "none";
+
+		var posEl = document.getElementById("searchMatchPosition");
+		if (posEl) {
+			if (isSearch && hasResults) {
+				var ci = window.currentSearchResultIndex;
+				if (typeof ci !== "number" || ci < 0) ci = 0;
+				var total = (window.searchResults || []).length;
+				posEl.textContent = (ci + 1) + "/" + total;
+				posEl.style.display = "";
+			} else {
+				posEl.style.display = "none";
+			}
+		}
+
+		// Mark the matches in the currently selected verse differently.
+		if (isSearch && window.currentSearchResultVerse) {
+			var verseEl = document.getElementById("v" + window.currentSearchResultVerse);
+			if (verseEl) {
+				var container = verseEl.closest("p") || verseEl.parentNode;
+				if (container) {
+					container.querySelectorAll("mark.chapter-hl").forEach(function (m) {
+						m.classList.add("chapter-hl-current");
+					});
+				}
+			}
+		}
+
 		nav.style.display = "flex";
 	}
 

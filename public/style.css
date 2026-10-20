@@ -4187,3 +4187,16 @@ body.rtm-open #highlightNav {
 #highlightNav #clearHighlights {
 	position: static;
 }
+
+.search-match-position {
+	font-size: 0.82rem;
+	font-weight: 600;
+	color: var(--text-secondary);
+	min-width: 2.5em;
+	text-align: center;
+}
+
+mark.chapter-hl-current {
+	background-color: var(--primary, #facc15);
+	color: #000;
+}
