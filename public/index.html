@@ -316,6 +316,7 @@ await loadComponent("speedReader", "components/speedReader.html?version=10");
 	<div id="slashJump" class="slash-jump" hidden>
 		<div class="slash-jump-backdrop" id="slashJumpBackdrop"></div>
 		<div class="slash-jump-dialog" role="dialog" aria-modal="true">
+			<h2 class="slash-jump-title">Quick jump</h2>
 			<input
 				id="slashJumpInput"
 				type="text"
@@ -324,6 +325,7 @@ await loadComponent("speedReader", "components/speedReader.html?version=10");
 				autocomplete="off"
 				spellcheck="false"
 			/>
+			<p class="slash-jump-hint">Type a Bible reference (e.g. John 3:16) or any word to search.</p>
 		</div>
 	</div>
 

@@ -4102,9 +4102,9 @@ body.share-open {
 	inset: 0;
 	z-index: 9999;
 	display: flex;
-	align-items: flex-start;
+	align-items: center;
 	justify-content: center;
-	padding-top: 15vh;
+	padding: 24px;
 }
 
 .slash-jump[hidden] {
@@ -4114,21 +4114,36 @@ body.share-open {
 .slash-jump-backdrop {
 	position: absolute;
 	inset: 0;
-	background: rgba(0, 0, 0, 0.4);
+	background: rgba(0, 0, 0, 0.5);
 }
 
 .slash-jump-dialog {
 	position: relative;
-	width: min(90vw, 480px);
+	width: min(90vw, 560px);
 	background-color: var(--surface, #fff);
-	border-radius: var(--radius, 8px);
-	padding: 12px;
-	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+	border: 1px solid var(--border, #ccc);
+	border-radius: 12px;
+	padding: 20px 22px 18px;
+	box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+
+.slash-jump-title {
+	margin: 0 0 12px;
+	font-size: 1.15rem;
+	font-weight: 600;
 }
 
 .slash-jump-input {
 	width: 100%;
 	font-size: 1.1rem;
-	padding: 8px 10px;
+	padding: 10px 12px;
 	box-sizing: border-box;
+	border: 1px solid var(--border, #ccc);
+	border-radius: 8px;
+}
+
+.slash-jump-hint {
+	margin: 10px 0 0;
+	font-size: 0.85rem;
+	color: var(--text-muted, #666);
 }
