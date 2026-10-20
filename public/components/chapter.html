@@ -2276,6 +2276,25 @@ fireEvent({
 			return b.slug === rec[0];
 		});
 		if (!book) return;
+
+		// A match in the chapter already on screen needs no fetch: the text is
+		// there, so the marks are redone and the reader is taken to the verse.
+		var sameChapter =
+			books[currentBookIndex] &&
+			books[currentBookIndex].slug === book.slug &&
+			rec[1] === currentChapter;
+		if (sameChapter) {
+			if (chapterHighlight && chapterHighlight.terms) {
+				applyChapterHighlight({
+					terms: chapterHighlight.terms,
+					partial: chapterHighlight.partial,
+					label: chapterHighlight.label,
+				});
+			}
+			scrollToVerse(rec[2]);
+			return;
+		}
+
 		window.scrollVerse = rec[2];
 		if (chapterHighlight && chapterHighlight.terms) {
 			window.pendingHighlight = {
@@ -2285,6 +2304,22 @@ fireEvent({
 			};
 		}
 		loadThisChapter(book.name, book.slug, rec[1]);
+	}
+
+	// Takes the reader to a verse in the chapter already on screen, the same
+	// way arriving at a chapter does.
+	function scrollToVerse(verseNum) {
+		if (!verseNum) return;
+		if (pageTurning.enabled) {
+			setTimeout(function () {
+				jumpToPageWithVerse(verseNum);
+			}, 0);
+			return;
+		}
+		var verseEl = document.getElementById("v" + verseNum);
+		var scrollTarget = (verseEl && verseEl.closest("p")) || verseEl;
+		if (!scrollTarget) return;
+		scrollTarget.scrollIntoView({ block: "center" });
 	}
 
 	// The marks belonged to the words the reader was looking for, so any other
