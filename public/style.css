@@ -4095,3 +4095,40 @@ body.share-open {
 	color: var(--text-muted);
 	font-size: 0.85rem;
 }
+
+/* ---------- Slash jump (global quick open) ---------- */
+.slash-jump {
+	position: fixed;
+	inset: 0;
+	z-index: 9999;
+	display: flex;
+	align-items: flex-start;
+	justify-content: center;
+	padding-top: 15vh;
+}
+
+.slash-jump[hidden] {
+	display: none;
+}
+
+.slash-jump-backdrop {
+	position: absolute;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.4);
+}
+
+.slash-jump-dialog {
+	position: relative;
+	width: min(90vw, 480px);
+	background-color: var(--surface, #fff);
+	border-radius: var(--radius, 8px);
+	padding: 12px;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.slash-jump-input {
+	width: 100%;
+	font-size: 1.1rem;
+	padding: 8px 10px;
+	box-sizing: border-box;
+}

@@ -313,4 +313,84 @@ await loadComponent("speedReader", "components/speedReader.html?version=10");
 			}
 		}
 	</script>
+	<div id="slashJump" class="slash-jump" hidden>
+		<div class="slash-jump-backdrop" id="slashJumpBackdrop"></div>
+		<div class="slash-jump-dialog" role="dialog" aria-modal="true">
+			<input
+				id="slashJumpInput"
+				type="text"
+				class="slash-jump-input"
+				placeholder="Go to a chapter or search..."
+				autocomplete="off"
+				spellcheck="false"
+			/>
+		</div>
+	</div>
+
+	<script>
+		(function () {
+			var overlay = document.getElementById("slashJump");
+			var input = document.getElementById("slashJumpInput");
+			var backdrop = document.getElementById("slashJumpBackdrop");
+			function openSlashJump() {
+				overlay.hidden = false;
+				input.value = "";
+				setTimeout(function () {
+					input.focus();
+				}, 0);
+			}
+			function closeSlashJump() {
+				overlay.hidden = true;
+			}
+			if (backdrop)
+				backdrop.addEventListener("click", closeSlashJump);
+			input.addEventListener("keydown", function (event) {
+				if (event.key === "Enter") {
+					var value = input.value.trim();
+					closeSlashJump();
+					if (!value) return;
+					var suggestions =
+						typeof refSuggestions === "function"
+							? refSuggestions(value, 1)
+							: [];
+					if (suggestions && suggestions.length) {
+						var ref = suggestions[0];
+						if (ref.verse) {
+							window.scrollVerse = ref.verse;
+							window.pendingHighlight = {
+								verse: ref.verse,
+								label: ref.label,
+							};
+						}
+						if (typeof loadThisChapter === "function") {
+							loadThisChapter(ref.book.name, ref.book.slug, ref.chapter);
+						}
+					} else {
+						window.pendingSearchQuery = value;
+						fireEvent({ name: "showPage", page: "search" });
+					}
+				} else if (event.key === "Escape") {
+					closeSlashJump();
+				}
+			});
+			document.addEventListener("keydown", function (event) {
+				if (
+					event.key === "/" &&
+					!event.ctrlKey &&
+					!event.metaKey &&
+					!event.altKey
+				) {
+					var tag = event.target && event.target.tagName;
+					if (
+						tag === "INPUT" ||
+						tag === "TEXTAREA" ||
+						(event.target && event.target.isContentEditable)
+					)
+						return;
+					event.preventDefault();
+					openSlashJump();
+				}
+			});
+		})();
+	</script>
 </html>
