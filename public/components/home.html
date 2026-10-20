@@ -41,7 +41,17 @@
 	</section>
 
 	<section class="home-card" data-cy="homeSearch">
-		<h2>Search</h2>
+		<div class="home-card-head">
+			<h2>Search</h2>
+			<a
+				href="#"
+				class="home-history-link plans-card-link"
+				data-cy="homeSearchLink"
+				onclick="fireEvent({name:'showPage', page:'search'}); return false;"
+			>
+				Advanced
+			</a>
+		</div>
 		<div class="home-search-row">
 			<input
 				id="homeSearchInput"
