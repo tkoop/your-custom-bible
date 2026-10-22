@@ -202,6 +202,9 @@
 	// marks the words a result is opened for, and the two have to agree about
 	// what a search matched.
 
+	// The search itself, as a promise of the matches it found. The results page
+	// shows them, and the quick jump takes the reader straight to the first
+	// one, so both go through here and agree about what was found.
 	function runSearch(query, record) {
 		query = (query || "").trim().toLowerCase();
 		var mode = currentMode();
@@ -217,16 +220,16 @@
 		status.textContent = "";
 
 		if (record && query) recordSearch(lastSearch);
-		if (!query) return;
+		if (!query) return Promise.resolve([]);
 
 		status.textContent = "Searching...";
-		loadSearchIndex()
+		return loadSearchIndex()
 			.then(function () {
 				var terms =
 					mode === "words"
 						? query.split(/\s+/).filter(Boolean)
 						: [query];
-				if (!terms.length) return;
+				if (!terms.length) return [];
 				var t0 = performance.now();
 				var hits = [];
 				for (var i = 0; i < searchIndex.length; i++) {
@@ -250,10 +253,16 @@
 					" \u00b7 " +
 					ms +
 					" ms";
+				// Every match is kept, so the count and the stepping through them
+				// are the whole search rather than only what fits on the page.
+				window.searchResults = hits;
+				window.searchResultsTotal = hits.length;
 				renderResults(box, hits, terms, partial);
+				return hits;
 			})
 			.catch(function () {
 				status.textContent = "Could not load the search index.";
+				return [];
 			});
 	}
 
@@ -285,7 +294,6 @@
 			frag.appendChild(row);
 		}
 
-		window.searchResults = hits.slice(0, MAX_RESULTS);
 		box.appendChild(frag);
 		if (hits.length > MAX_RESULTS) {
 			var status = document.getElementById("searchStatus");
